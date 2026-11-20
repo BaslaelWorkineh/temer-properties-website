@@ -68,7 +68,7 @@ export default async function ForSaleTypePage({ params }: PageProps<"/for-sale/[
                 <li key={a.locationSlug}>
                   <Link
                     href={`/for-sale/${meta.slug}/${a.locationSlug}`}
-                    className="inline-block rounded-full bg-brand-50 px-4 py-2 text-sm font-semibold text-brand-800 ring-1 ring-brand-200 hover:bg-brand-100"
+                    className="inline-block rounded-none bg-brand-50 px-4 py-2 text-sm font-semibold text-brand-800 ring-1 ring-brand-200 hover:bg-brand-100"
                   >
                     {a.locationName} ({a.count})
                   </Link>
@@ -104,7 +104,7 @@ export default async function ForSaleTypePage({ params }: PageProps<"/for-sale/[
               <li key={t}>
                 <Link
                   href={`/for-sale/${propertyTypes[t].slug}`}
-                  className="inline-block rounded-full bg-soft px-4 py-2 text-sm font-medium ring-1 ring-line hover:ring-brand-400"
+                  className="inline-block rounded-none bg-soft px-4 py-2 text-sm font-medium ring-1 ring-line hover:ring-brand-400"
                 >
                   {propertyTypes[t].plural} for sale
                 </Link>

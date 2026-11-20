@@ -5,14 +5,12 @@ export function Container({ className, children }: { className?: string; childre
 }
 
 export function SectionHeading({
-  eyebrow,
   title,
   description,
   action,
   as: Tag = "h2",
   className,
 }: {
-  eyebrow?: string;
   title: React.ReactNode;
   description?: React.ReactNode;
   action?: React.ReactNode;
@@ -22,8 +20,7 @@ export function SectionHeading({
   return (
     <div className={cn("flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between", className)}>
       <div className="max-w-3xl">
-        {eyebrow ? <p className="text-sm font-semibold uppercase tracking-[0.2em] text-gold-600">{eyebrow}</p> : null}
-        <Tag className="mt-2 text-3xl font-bold text-ink sm:text-4xl">{title}</Tag>
+        <Tag className="text-3xl font-bold text-ink sm:text-4xl">{title}</Tag>
         {description ? <div className="mt-3 text-base leading-relaxed text-muted sm:text-lg">{description}</div> : null}
       </div>
       {action ? <div className="shrink-0">{action}</div> : null}

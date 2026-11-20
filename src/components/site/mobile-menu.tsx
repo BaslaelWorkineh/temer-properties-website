@@ -39,7 +39,7 @@ export function MobileMenu({ items, phone, phoneDisplay }: { items: readonly Ite
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-controls={panelId}
-        className="grid size-11 place-items-center rounded-full text-ink hover:bg-soft"
+        className="grid size-10 place-items-center rounded-full text-ink hover:bg-soft"
       >
         {open ? <X className="size-6" aria-hidden="true" /> : <Menu className="size-6" aria-hidden="true" />}
         <span className="sr-only">{open ? "Close menu" : "Open menu"}</span>
@@ -47,7 +47,7 @@ export function MobileMenu({ items, phone, phoneDisplay }: { items: readonly Ite
       <div
         id={panelId}
         hidden={!open}
-        className="fixed inset-x-0 top-[4.5rem] bottom-0 z-40 overflow-y-auto border-t border-line bg-white px-4 pb-10 pt-4"
+        className="fixed inset-x-0 top-10 bottom-0 z-40 overflow-y-auto border-t border-line bg-white px-4 pb-10 pt-4"
       >
         <nav aria-label="Mobile">
           <ul className="space-y-1">

@@ -1,26 +1,26 @@
-import { ArrowRight, BadgeCheck, Building2, CalendarCheck2, HandCoins, KeyRound, MapPinned, Store } from "lucide-react";
+import { ArrowRight, CalendarCheck2, HandCoins, KeyRound, MapPinned } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import citySunset from "@/assets/hero/city-sunset-green.jpg";
 import { CtaBand } from "@/components/site/cta-band";
 import { FaqList } from "@/components/site/faq-list";
 import { JsonLd } from "@/components/site/json-ld";
 import { LocationCard } from "@/components/site/location-card";
 import { ProjectCard } from "@/components/site/project-card";
 import { PropertyFilters } from "@/components/site/property-filters";
-import { PropertyGrid } from "@/components/site/property-card";
+import { Marquee } from "@/components/site/marquee";
+import { PropertyCard } from "@/components/site/property-card";
 import { Container, SectionHeading } from "@/components/site/section";
 import { buttonStyles } from "@/components/ui/button";
 import { generalFaqs } from "@/lib/content/faqs";
-import { PROPERTY_TYPES, propertyTypes } from "@/lib/config/property-types";
 import { site } from "@/lib/config/site";
 import { getLocations, isLocationIndexable } from "@/lib/data/locations";
 import { getPublishedPosts } from "@/lib/data/posts";
 import { getProjects } from "@/lib/data/projects";
-import { getFeaturedProperties, getTypeCounts } from "@/lib/data/properties";
+import { getFeaturedProperties } from "@/lib/data/properties";
 import { formatDate } from "@/lib/format";
 import { buildMetadata } from "@/lib/seo/metadata";
 import { organizationJsonLd, websiteJsonLd } from "@/lib/seo/jsonld";
-import { pluralize } from "@/lib/utils";
 
 export const metadata = buildMetadata({
   title: "Temer Properties | Apartments, Homes & Shops for Sale in Addis Ababa",
@@ -30,8 +30,6 @@ export const metadata = buildMetadata({
   path: "/",
 });
 
-const typeIcons = { apartment: Building2, villa: KeyRound, townhouse: KeyRound, shop: Store, office: Building2 } as const;
-
 const steps = [
   { icon: MapPinned, title: "Choose", text: "Compare apartments, homes and shops by area, size, price and payment plan." },
   { icon: CalendarCheck2, title: "Visit", text: "Book a free site visit or a live video walkthrough at a time that suits you." },
@@ -40,49 +38,76 @@ const steps = [
 ];
 
 export default async function HomePage() {
-  const [featured, projects, locations, typeCounts, posts] = await Promise.all([
-    getFeaturedProperties(6),
+  const [featured, projects, locations, posts] = await Promise.all([
+    getFeaturedProperties(8),
     getProjects(),
     getLocations(),
-    getTypeCounts(),
     getPublishedPosts(3),
   ]);
   const activeProjects = projects.filter((p) => p.status !== "delivered");
   const deliveredProjects = projects.filter((p) => p.status === "delivered");
+  // Two-column grid: keep an even count so every row is full (6 -> 3 rows, 9 -> 8 -> 4 rows).
+  const latest = featured.slice(0, featured.length - (featured.length % 2));
+  // "Our projects": first half as big cards, the rest as small tiles. A single project still gets the big row.
+  const half = Math.ceil(activeProjects.length / 2);
+  const projectRows = [activeProjects.slice(0, half), activeProjects.slice(half)];
   const areas = locations.filter(isLocationIndexable).slice(0, 8);
-  const heroImage = featured.find((p) => p.image)?.image ?? activeProjects.find((p) => p.image)?.image ?? null;
 
   return (
     <>
       <JsonLd data={[organizationJsonLd(), websiteJsonLd()]} />
 
-      {/* Hero: the H1 is plain text, so it paints immediately as the LCP element. */}
-      <section className="relative overflow-hidden bg-brand-950 text-white">
+      {/*
+        Hero: sized to its content, directly below the thin header. The header's logo tab hangs ~4rem into it,
+        so the wordmark starts below that.
+        The green sunset (baked by scripts/generate-brand-assets.ts) is anchored to the top so only its bottom
+        is cropped; it is the only hero image and is preloaded. A "TEMER / PROPERTIES" wordmark sits in the sky
+        at the top left (decorative: the logo and H1 already carry the name); the copy sits low over the city.
+      */}
+      <section className="relative isolate flex flex-col overflow-hidden bg-brand-950 text-white">
+        <Image
+          src={citySunset}
+          alt=""
+          fill
+          preload
+          sizes="100vw"
+          placeholder="blur"
+          className="-z-10 object-cover object-[72%_top]"
+        />
         <div
-          className="pointer-events-none absolute inset-0 opacity-40 [background:radial-gradient(70rem_35rem_at_85%_-10%,#3a7d44,transparent),radial-gradient(45rem_25rem_at_-10%_110%,#c9a24a40,transparent)]"
+          className="absolute inset-0 -z-10 bg-gradient-to-br from-brand-950/75 via-brand-950/25 to-transparent"
           aria-hidden="true"
         />
-        <Container className="relative grid items-center gap-12 py-14 sm:py-20 lg:grid-cols-[1.15fr_1fr] lg:py-24">
-          <div>
-            <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm font-medium text-gold-300 ring-1 ring-white/15">
-              <BadgeCheck className="size-4" aria-hidden="true" /> Licensed real estate developer in Addis Ababa
-            </p>
-            <h1 className="mt-5 text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl">
-              Apartments, homes &amp; shops for sale in Addis Ababa
-            </h1>
-            <p className="mt-5 max-w-xl text-lg leading-relaxed text-white/80">
-              Buy directly from {site.name}. Compare real prices, sizes and payment plans across our projects, then see your
-              future home with a free site visit.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/properties" className={buttonStyles({ variant: "gold", size: "lg" })}>
-                Browse properties <ArrowRight className="size-4" aria-hidden="true" />
-              </Link>
-              <Link href="/book-a-visit" className={buttonStyles({ variant: "light", size: "lg" })}>
-                Book a site visit
-              </Link>
+        <div
+          className="absolute inset-x-0 bottom-0 -z-10 h-2/3 bg-gradient-to-t from-brand-950 via-brand-950/75 to-transparent"
+          aria-hidden="true"
+        />
+        <Container className="pt-24 sm:pt-28">
+          <p className="hero-wordmark" aria-hidden="true">
+            <span className="hero-wordmark__name">TEMER</span>
+            <span className="hero-wordmark__sub">PROPERTIES</span>
+          </p>
+        </Container>
+        <Container className="flex flex-1 flex-col justify-end pb-16 pt-4 sm:pt-12">
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-12">
+            <div className="max-w-2xl">
+              <h1 className="text-4xl font-bold leading-[1.05] sm:text-5xl">
+                Apartments, homes &amp; shops for sale in Addis Ababa
+              </h1>
+              <p className="mt-4 max-w-xl text-lg leading-relaxed text-white/80">
+                Buy directly from {site.name}. Compare real prices, sizes and payment plans across our projects, then see
+                your future home with a free site visit.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link href="/properties" className={buttonStyles({ variant: "gold", size: "lg" })}>
+                  Browse properties <ArrowRight className="size-4" aria-hidden="true" />
+                </Link>
+                <Link href="/book-a-visit" className={buttonStyles({ variant: "light", size: "lg" })}>
+                  Book a site visit
+                </Link>
+              </div>
             </div>
-            <dl className="mt-10 grid max-w-lg grid-cols-3 gap-4 border-t border-white/15 pt-6">
+            <dl className="grid grid-cols-3 gap-4 border-t border-white/15 pt-6 lg:gap-10 lg:border-t-0 lg:border-l lg:pl-10 lg:pt-0">
               {site.stats.map((s) => (
                 <div key={s.label} className="flex flex-col">
                   <dt className="text-xs text-white/65 sm:text-sm">{s.label}</dt>
@@ -91,78 +116,42 @@ export default async function HomePage() {
               ))}
             </dl>
           </div>
-          {heroImage ? (
-            <div className="relative hidden aspect-[4/5] overflow-hidden rounded-[2rem] shadow-2xl ring-1 ring-white/10 lg:block">
-              <Image
-                src={heroImage.url}
-                alt={heroImage.alt}
-                fill
-                sizes="(min-width: 1280px) 560px, 45vw"
-                loading="eager"
-                fetchPriority="high"
-                className="object-cover"
-              />
-            </div>
-          ) : null}
-        </Container>
-        <Container className="relative pb-10">
-          <h2 className="sr-only">Search properties</h2>
-          <PropertyFilters filters={{}} locations={areas} compact />
         </Container>
       </section>
 
-      {featured.length ? (
-        <section className="py-16 sm:py-20">
-          <Container>
-            <SectionHeading
-              eyebrow="Featured"
-              title="Latest properties for sale"
-              description="Current prices, sizes and offers on apartments, homes and shops across our Addis Ababa projects."
-              action={
-                <Link href="/properties" className={buttonStyles({ variant: "outline" })}>
-                  View all properties <ArrowRight className="size-4" aria-hidden="true" />
-                </Link>
-              }
-            />
-            <div className="mt-10">
-              <PropertyGrid properties={featured} />
-            </div>
-          </Container>
-        </section>
-      ) : null}
-
-      <section className="bg-soft py-16 sm:py-20">
-        <Container>
-          <SectionHeading eyebrow="Browse" title="What are you looking for?" />
-          <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-            {PROPERTY_TYPES.map((type) => {
-              const Icon = typeIcons[type];
-              const meta = propertyTypes[type];
-              return (
-                <li key={type}>
-                  <Link
-                    href={`/for-sale/${meta.slug}`}
-                    className="group flex h-full flex-col rounded-2xl bg-white p-5 shadow-sm ring-1 ring-line transition hover:-translate-y-0.5 hover:shadow-lg hover:ring-brand-300"
-                  >
-                    <Icon className="size-7 text-brand-500" aria-hidden="true" />
-                    <span className="mt-4 font-display text-xl font-bold text-ink">{meta.plural}</span>
-                    <span className="mt-1 text-sm text-muted">
-                      {typeCounts[type] ? pluralize(typeCounts[type], "listing") : "Ask about upcoming units"}
-                    </span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
+      {/*
+        Latest listings: a thin bar with the title beside the search filter (it submits to /properties), then
+        a near-edge-to-edge two-column grid of photo cards (an even count, so every row is full). The old
+        "Browse by type" grid is gone: the filter covers it, and the footer still links every /for-sale/* hub.
+      */}
+      <section className="pb-16 sm:pb-20">
+        <Container className="flex flex-col gap-3 py-4 lg:flex-row lg:items-center lg:gap-8">
+          <h2 className="shrink-0 text-2xl font-bold text-ink">Latest properties for sale</h2>
+          <PropertyFilters filters={{}} locations={areas} compact bare dense className="lg:flex-1" />
         </Container>
+        {latest.length ? (
+          <>
+            <ul className="grid gap-3 px-3 sm:grid-cols-2">
+              {latest.map((p) => (
+                <li key={p.id} className="aspect-[4/3] sm:aspect-[16/10] xl:aspect-[16/9]">
+                  <PropertyCard property={p} variant="overlay" />
+                </li>
+              ))}
+            </ul>
+            <Container className="mt-6 flex justify-end">
+              <Link href="/properties" className="inline-flex items-center gap-1 font-semibold text-brand-700 hover:underline">
+                View all properties <ArrowRight className="size-4" aria-hidden="true" />
+              </Link>
+            </Container>
+          </>
+        ) : null}
       </section>
 
       {activeProjects.length ? (
         <section className="py-16 sm:py-20">
           <Container>
             <SectionHeading
-              eyebrow="Projects"
-              title="Current projects"
+              title="Our projects"
               description="Buildings now selling or under construction. Units in projects under construction usually come with the most flexible payment plans."
               action={
                 <Link href="/projects" className={buttonStyles({ variant: "outline" })}>
@@ -170,14 +159,29 @@ export default async function HomePage() {
                 </Link>
               }
             />
-            <ul className="mt-10 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-              {activeProjects.slice(0, 6).map((p) => (
-                <li key={p.id}>
-                  <ProjectCard project={p} />
-                </li>
-              ))}
-            </ul>
           </Container>
+          {/* Two self-scrolling rows: big feature cards on top, small tiles below (different widths too). */}
+          <Marquee
+            className="mt-10"
+            rows={[
+              {
+                heightClass: "h-80 sm:h-[26rem]",
+                items: projectRows[0].map((p, i) => ({
+                  key: p.id,
+                  width: [44, 36, 48, 40][i % 4],
+                  node: <ProjectCard project={p} variant="overlay" />,
+                })),
+              },
+              {
+                heightClass: "h-40 sm:h-44",
+                items: projectRows[1].map((p, i) => ({
+                  key: p.id,
+                  width: [20, 17, 23, 18][i % 4],
+                  node: <ProjectCard project={p} variant="overlay" compact />,
+                })),
+              },
+            ]}
+          />
         </section>
       ) : null}
 
@@ -185,7 +189,6 @@ export default async function HomePage() {
         <section className="bg-soft py-16 sm:py-20">
           <Container>
             <SectionHeading
-              eyebrow="Neighbourhoods"
               title="Property by area"
               description="From central Piassa to fast-growing Ayat and Sarbet, find homes and shops in the part of Addis Ababa that fits your life."
               action={
@@ -209,7 +212,6 @@ export default async function HomePage() {
         <Container className="grid gap-12 lg:grid-cols-2">
           <div>
             <SectionHeading
-              eyebrow="How it works"
               title="Buying with Temer Properties"
               description="A clear, four-step process with the developer, not a middleman."
             />
@@ -226,7 +228,7 @@ export default async function HomePage() {
             </ol>
           </div>
           <div>
-            <SectionHeading eyebrow="FAQ" title="Common questions" />
+            <SectionHeading title="Common questions" />
             <div className="mt-8">
               <FaqList faqs={generalFaqs.filter((f) => ["Payments", "Visits", "Diaspora"].includes(f.group)).slice(0, 5)} />
             </div>
@@ -241,7 +243,6 @@ export default async function HomePage() {
         <section className="bg-brand-950 py-16 text-white sm:py-20">
           <Container>
             <SectionHeading
-              eyebrow="Track record"
               title={<span className="text-white">Projects we have delivered</span>}
               description={<span className="text-white/75">Completed buildings handed over to their owners.</span>}
             />
@@ -266,7 +267,6 @@ export default async function HomePage() {
         <section className="py-16 sm:py-20">
           <Container>
             <SectionHeading
-              eyebrow="Buyer guides"
               title="Advice for property buyers"
               action={
                 <Link href="/blog" className={buttonStyles({ variant: "outline" })}>

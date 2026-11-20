@@ -167,7 +167,7 @@ Environment variables are documented in `.env.example`.
    - Review the area guides and the "10,000+ customers / 400+ units" claims.
 4. **Photos and brand.**
    - Upload real photos with descriptive alt text.
-   - Replace the text logo (`src/components/site/logo.tsx`) and re-run `npx tsx scripts/generate-brand-assets.ts`.
+   - The official logo lives in `brand/temer-properties-logo.jpg`. If it changes, replace that file and re-run `npx tsx scripts/generate-brand-assets.ts` (regenerates the header/footer cut-outs, favicons, `logo.png` and the default share image).
 5. **Accounts.**
    - Change the admin password and remove `ADMIN_PASSWORD` from the server env after seeding.
    - Have the privacy policy and terms reviewed.

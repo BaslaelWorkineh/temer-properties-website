@@ -60,7 +60,7 @@ export function Gallery({ images, title }: { images: ImageItem[]; title: string 
         <button
           type="button"
           onClick={() => open(0)}
-          className="absolute bottom-4 right-4 inline-flex items-center gap-2 rounded-full bg-white/95 px-4 py-2 text-sm font-semibold text-ink shadow-md hover:bg-white"
+          className="absolute bottom-4 right-4 inline-flex items-center gap-2 rounded-none bg-white/95 px-4 py-2 text-sm font-semibold text-ink shadow-md hover:bg-white"
         >
           <Images className="size-4" aria-hidden="true" /> View all {count} photos
         </button>

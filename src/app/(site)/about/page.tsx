@@ -108,7 +108,7 @@ export default async function AboutPage() {
                 <li key={p.id}>
                   <Link
                     href={`/projects/${p.slug}`}
-                    className="inline-block rounded-full bg-soft px-5 py-2.5 font-semibold ring-1 ring-line hover:ring-brand-400"
+                    className="inline-block rounded-none bg-soft px-5 py-2.5 font-semibold ring-1 ring-line hover:ring-brand-400"
                   >
                     {p.name}
                     {p.location ? <span className="font-normal text-muted"> · {p.location.name}</span> : null}

@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+
 /* Brand palette taken from the existing Temer Properties sites. */
 @theme {
   --color-brand-50: #f2f8f3;
@@ -19,6 +20,17 @@
   --color-gold-400: #d4b26a;
   --color-gold-500: #c9a24a;
   --color-gold-600: #b8892f;
+
+  /* Square corners site-wide: every rounded-{xs…4xl} utility resolves to 0. Pills use rounded-none;
+     only true circles (icon buttons, dots, spinners) keep rounded-full. */
+  --radius-xs: 0;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-2xl: 0;
+  --radius-3xl: 0;
+  --radius-4xl: 0;
 
   --color-ink: #17251c;
   --color-muted: #5d6b63;
@@ -80,6 +92,97 @@
       animation-duration: 0.01ms !important;
       transition-duration: 0.01ms !important;
     }
+  }
+}
+
+/*
+ * Home hero wordmark, top left in the sky: solid "TEMER" over an outline-only "PROPERTIES".
+ * Sizes are in em of the wrapper so the two lines stay proportional; letter-spacing stretches
+ * PROPERTIES to roughly the width of TEMER (Inter 800).
+ */
+@layer components {
+  .hero-wordmark {
+    display: inline-flex;
+    flex-direction: column;
+    font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+    font-weight: 800;
+    font-size: clamp(3.5rem, 11vw, 9.5rem);
+    line-height: 0.9;
+    color: #fff;
+    user-select: none;
+    filter: drop-shadow(0 0.04em 0.25em rgb(2 12 7 / 0.35));
+  }
+  /*
+   * The T's built-in side bearing made TEMER start a few px further in than PROPERTIES. The two
+   * insets are swapped on purpose: TEMER is pulled left, PROPERTIES is pushed right (padding below).
+   */
+  .hero-wordmark__name {
+    letter-spacing: -0.02em;
+    margin-left: -0.02em;
+  }
+  /* Outline text needs a static font: variable Inter's overlapping glyph contours show up as stray
+     lines inside the stroked letters, so this line uses the (static) Barlow Condensed display face. */
+  .hero-wordmark__sub {
+    margin-top: 0.14em;
+    font-family: var(--font-barlow), ui-sans-serif, system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 0.4em;
+    letter-spacing: 0.45em;
+    margin-right: -0.45em; /* cancel the trailing letter-spacing so both lines end flush */
+    padding-left: 0.1em; /* lands PROPERTIES where TEMER's ink used to start; see the note above */
+    color: transparent;
+    -webkit-text-stroke: max(1px, 0.03em) var(--color-gold-400);
+  }
+}
+
+/* Self-scrolling rows on the home page (see components/site/marquee.tsx). */
+@layer components {
+  .marquee {
+    overflow: hidden;
+  }
+  .marquee__track {
+    display: flex;
+    width: max-content;
+    animation: marquee-scroll var(--marquee-duration, 45s) linear infinite;
+  }
+  .marquee[data-reverse] .marquee__track {
+    animation-direction: reverse;
+  }
+  .marquee:hover .marquee__track,
+  .marquee:focus-within .marquee__track {
+    animation-play-state: paused;
+  }
+  /* Gap as padding (not flex gap) so the two copies are exactly equal and -50% loops seamlessly. */
+  .marquee__copy {
+    display: flex;
+    gap: 0.75rem;
+    padding-right: 0.75rem;
+  }
+  .marquee__item {
+    width: calc(var(--w) * 0.72);
+  }
+  @media (min-width: 40rem) {
+    .marquee__item {
+      width: var(--w);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .marquee {
+      overflow-x: auto;
+    }
+    .marquee__track {
+      animation: none;
+      padding-left: 0.75rem;
+    }
+    .marquee__item[data-repeat] {
+      display: none;
+    }
+  }
+}
+
+@keyframes marquee-scroll {
+  to {
+    transform: translateX(-50%);
   }
 }
 

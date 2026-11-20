@@ -8,7 +8,7 @@ export function Pagination({ page, pageCount, hrefFor }: { page: number; pageCou
   const pages = Array.from({ length: pageCount }, (_, i) => i + 1).filter(
     (p) => p === 1 || p === pageCount || Math.abs(p - page) <= 1,
   );
-  const item = "grid h-10 min-w-10 place-items-center rounded-full px-3 text-sm font-semibold";
+  const item = "grid h-10 min-w-10 place-items-center rounded-none px-3 text-sm font-semibold";
   return (
     <nav aria-label="Pagination" className="mt-12 flex items-center justify-center gap-1.5">
       {page > 1 ? (

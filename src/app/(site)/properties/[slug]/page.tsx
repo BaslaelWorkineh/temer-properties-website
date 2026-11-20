@@ -11,9 +11,8 @@ import { JsonLd } from "@/components/site/json-ld";
 import { Markdown } from "@/components/site/markdown";
 import { PropertyGrid } from "@/components/site/property-card";
 import { Container } from "@/components/site/section";
-import { Badge, propertyStatusTone } from "@/components/ui/badge";
 import { buttonStyles } from "@/components/ui/button";
-import { projectStatusLabels, propertyStatusLabels, propertyTypes } from "@/lib/config/property-types";
+import { projectStatusLabels, propertyTypes } from "@/lib/config/property-types";
 import { absoluteUrl, site, whatsappLink } from "@/lib/config/site";
 import { getPropertyBySlug, getPropertySitemapEntries, getSimilarProperties } from "@/lib/data/properties";
 import { formatArea, formatDate, formatFloor, formatPrice } from "@/lib/format";
@@ -112,12 +111,7 @@ export default async function PropertyPage({ params }: PageProps<"/properties/[s
 
         <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_24rem]">
           <div className="min-w-0">
-            <div className="flex flex-wrap gap-2">
-              <Badge tone="green">{meta.label}</Badge>
-              <Badge tone={propertyStatusTone[p.status]}>{propertyStatusLabels[p.status]}</Badge>
-              {p.isFeatured && p.status === "available" ? <Badge tone="gold">Hot offer</Badge> : null}
-            </div>
-            <h1 className="mt-3 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">{p.title}</h1>
+            <h1 className="text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">{p.title}</h1>
             <p className="mt-3 flex items-start gap-2 text-lg text-muted">
               <MapPin className="mt-1 size-5 shrink-0 text-brand-500" aria-hidden="true" />
               <span>

@@ -123,7 +123,7 @@ function BrowseLinks({ locations }: { locations: LocationSummary[] }) {
             <li key={t}>
               <Link
                 href={`/for-sale/${propertyTypes[t].slug}`}
-                className="inline-block rounded-full bg-soft px-4 py-2 text-sm font-medium ring-1 ring-line hover:ring-brand-400"
+                className="inline-block rounded-none bg-soft px-4 py-2 text-sm font-medium ring-1 ring-line hover:ring-brand-400"
               >
                 {propertyTypes[t].plural} for sale
               </Link>
@@ -139,7 +139,7 @@ function BrowseLinks({ locations }: { locations: LocationSummary[] }) {
               <li key={l.slug}>
                 <Link
                   href={`/locations/${l.slug}`}
-                  className="inline-block rounded-full bg-soft px-4 py-2 text-sm font-medium ring-1 ring-line hover:ring-brand-400"
+                  className="inline-block rounded-none bg-soft px-4 py-2 text-sm font-medium ring-1 ring-line hover:ring-brand-400"
                 >
                   {l.name}
                 </Link>
@@ -161,8 +161,8 @@ function ResultsSkeleton() {
           <div key={i} className="overflow-hidden rounded-2xl border border-line">
             <div className="aspect-[4/3] animate-pulse bg-soft" />
             <div className="space-y-3 p-5">
-              <div className="h-6 w-1/2 animate-pulse rounded bg-soft" />
-              <div className="h-4 w-3/4 animate-pulse rounded bg-soft" />
+              <div className="h-6 w-1/2 animate-pulse rounded-none bg-soft" />
+              <div className="h-4 w-3/4 animate-pulse rounded-none bg-soft" />
             </div>
           </div>
         ))}

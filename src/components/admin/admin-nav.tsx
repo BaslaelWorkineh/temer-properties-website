@@ -55,7 +55,7 @@ function NavLinks({ counts, onNavigate }: { counts: Counts; onNavigate?: () => v
               <Icon className="size-4.5 shrink-0" aria-hidden="true" />
               <span className="flex-1">{label}</span>
               {value > 0 ? (
-                <span className="rounded-full bg-gold-500 px-2 py-0.5 text-xs font-bold text-brand-950" aria-label={`${value} need attention`}>
+                <span className="rounded-none bg-gold-500 px-2 py-0.5 text-xs font-bold text-brand-950" aria-label={`${value} need attention`}>
                   {value}
                 </span>
               ) : null}

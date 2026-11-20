@@ -24,7 +24,7 @@ const sizes: Record<Size, string> = {
 /** Class names for buttons and button-styled links. */
 export function buttonStyles({ variant = "primary", size = "md", className }: { variant?: Variant; size?: Size; className?: string } = {}) {
   return cn(
-    "inline-flex items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap transition-colors",
+    "inline-flex items-center justify-center gap-2 rounded-none font-semibold whitespace-nowrap transition-colors",
     "disabled:pointer-events-none disabled:opacity-60",
     variants[variant],
     sizes[size],

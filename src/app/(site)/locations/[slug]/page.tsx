@@ -89,7 +89,7 @@ export default async function LocationPage({ params }: PageProps<"/locations/[sl
               <Link
                 key={c.type}
                 href={`/for-sale/${propertyTypes[c.type].slug}/${l.slug}`}
-                className="rounded-full bg-brand-50 px-4 py-2 text-sm font-semibold text-brand-800 ring-1 ring-brand-200 hover:bg-brand-100"
+                className="rounded-none bg-brand-50 px-4 py-2 text-sm font-semibold text-brand-800 ring-1 ring-brand-200 hover:bg-brand-100"
               >
                 {propertyTypes[c.type].plural} in {l.name} ({c.count})
               </Link>
@@ -177,7 +177,7 @@ export default async function LocationPage({ params }: PageProps<"/locations/[sl
                 <li key={o.slug}>
                   <Link
                     href={`/locations/${o.slug}`}
-                    className="inline-block rounded-full bg-soft px-4 py-2 text-sm font-medium ring-1 ring-line hover:ring-brand-400"
+                    className="inline-block rounded-none bg-soft px-4 py-2 text-sm font-medium ring-1 ring-line hover:ring-brand-400"
                   >
                     Property in {o.name}
                   </Link>

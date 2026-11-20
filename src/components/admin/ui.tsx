@@ -109,7 +109,7 @@ export function Tabs({ tabs, active }: { tabs: Array<{ key: string; label: strin
         >
           {tab.label}
           {tab.count !== undefined ? (
-            <span className={cn("rounded-full px-1.5 text-xs", tab.key === active ? "bg-white/20" : "bg-soft")}>{tab.count}</span>
+            <span className={cn("rounded-none px-1.5 text-xs", tab.key === active ? "bg-white/20" : "bg-soft")}>{tab.count}</span>
           ) : null}
         </Link>
       ))}

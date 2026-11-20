@@ -8,24 +8,35 @@ import { cn } from "@/lib/utils";
 
 const PRICE_STEPS = [3_000_000, 5_000_000, 8_000_000, 12_000_000, 18_000_000, 25_000_000, 40_000_000];
 
-/** Plain GET form: works without JavaScript; next/form adds client-side navigation. */
+/**
+ * Plain GET form: works without JavaScript; next/form adds client-side navigation.
+ * `bare` drops the card chrome (background, padding, ring, shadow) so the fields sit directly in a section.
+ * `dense` makes the fields and button shorter (for a thin toolbar row).
+ */
 export function PropertyFilters({
   filters,
   locations,
   compact,
+  bare,
+  dense,
   className,
 }: {
   filters: Filters;
   locations: Array<{ slug: string; name: string }>;
   compact?: boolean;
+  bare?: boolean;
+  dense?: boolean;
   className?: string;
 }) {
-  const select = cn(inputStyles, "h-12");
+  // `!` because cn() does not resolve conflicts and the button size already sets a height.
+  const fieldHeight = dense ? "h-10!" : "h-12";
+  const select = cn(inputStyles, fieldHeight);
   return (
     <Form
       action="/properties"
       className={cn(
-        "grid gap-3 rounded-2xl bg-white p-3 shadow-lg shadow-brand-950/5 ring-1 ring-line sm:grid-cols-2",
+        "grid gap-3 sm:grid-cols-2",
+        !bare && "rounded-2xl bg-white p-3 shadow-lg shadow-brand-950/5 ring-1 ring-line",
         compact ? "lg:grid-cols-[1fr_1fr_1fr_auto]" : "lg:grid-cols-[repeat(5,1fr)_auto]",
         className,
       )}
@@ -93,7 +104,10 @@ export function PropertyFilters({
         </>
       ) : null}
 
-      <button type="submit" className={buttonStyles({ size: "lg", className: "h-12 sm:col-span-2 lg:col-span-1" })}>
+      <button
+        type="submit"
+        className={buttonStyles({ size: dense ? "sm" : "lg", className: cn(fieldHeight, "sm:col-span-2 lg:col-span-1") })}
+      >
         <Search className="size-4" aria-hidden="true" /> Search
       </button>
     </Form>

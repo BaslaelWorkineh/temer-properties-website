@@ -83,7 +83,7 @@ export function FaqEditor({ name, initial, errors }: { name: string; initial: Fa
       <button
         type="button"
         onClick={() => setRows((r) => [...r, { key: nextKey.current++, question: "", answer: "" }])}
-        className="mt-4 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold text-brand-700 ring-1 ring-line hover:ring-brand-300"
+        className="mt-4 inline-flex items-center gap-1.5 rounded-none px-3 py-1.5 text-sm font-semibold text-brand-700 ring-1 ring-line hover:ring-brand-300"
       >
         <Plus className="size-4" aria-hidden="true" /> Add question
       </button>

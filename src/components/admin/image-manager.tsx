@@ -91,7 +91,7 @@ export function ImageManager({
                 {/* eslint-disable-next-line @next/next/no-img-element -- admin preview of an uploaded file */}
                 <img src={img.url} alt="" className="aspect-[4/3] w-full object-cover" />
                 {!single && index === 0 ? (
-                  <span className="absolute left-2 top-2 rounded-full bg-brand-950/85 px-2.5 py-0.5 text-xs font-semibold text-white">Cover</span>
+                  <span className="absolute left-2 top-2 rounded-none bg-brand-950/85 px-2.5 py-0.5 text-xs font-semibold text-white">Cover</span>
                 ) : null}
                 <div className="absolute right-2 top-2 flex gap-1">
                   {!single ? (

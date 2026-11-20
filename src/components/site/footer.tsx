@@ -34,7 +34,7 @@ export async function Footer() {
     <footer className="mt-auto bg-brand-950 text-white/80">
       <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-2 lg:grid-cols-12 lg:px-8">
         <div className="lg:col-span-4">
-          <Logo inverted />
+          <Logo inverted height={104} loading="lazy" />
           <p className="mt-5 max-w-sm text-sm leading-relaxed text-white/70">{site.description}</p>
           <ul className="mt-6 flex flex-wrap gap-2">
             {socials.map(({ href, label, Icon }) => (

@@ -12,7 +12,6 @@ import { JsonLd } from "@/components/site/json-ld";
 import { Markdown } from "@/components/site/markdown";
 import { PropertyGrid } from "@/components/site/property-card";
 import { Container } from "@/components/site/section";
-import { Badge, projectStatusTone } from "@/components/ui/badge";
 import { buttonStyles } from "@/components/ui/button";
 import { projectStatusLabels } from "@/lib/config/property-types";
 import { site } from "@/lib/config/site";
@@ -99,11 +98,7 @@ export default async function ProjectPage({ params }: PageProps<"/projects/[slug
 
         <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_24rem]">
           <div className="min-w-0">
-            <div className="flex flex-wrap gap-2">
-              <Badge tone={projectStatusTone[p.status]}>{projectStatusLabels[p.status]}</Badge>
-              {p.category ? <Badge tone="gray">{p.category}</Badge> : null}
-            </div>
-            <h1 className="mt-3 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">{p.name}</h1>
+            <h1 className="text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">{p.name}</h1>
             <p className="mt-3 flex items-center gap-2 text-lg text-muted">
               <MapPin className="size-5 text-brand-500" aria-hidden="true" />
               {p.location ? (
@@ -130,7 +125,7 @@ export default async function ProjectPage({ params }: PageProps<"/projects/[slug
                 <h2 className="text-2xl font-bold">Unit types</h2>
                 <ul className="mt-4 flex flex-wrap gap-2">
                   {p.unitTypes.map((t) => (
-                    <li key={t} className="rounded-full bg-brand-50 px-4 py-2 text-sm font-medium text-brand-800 ring-1 ring-brand-200">
+                    <li key={t} className="rounded-none bg-brand-50 px-4 py-2 text-sm font-medium text-brand-800 ring-1 ring-brand-200">
                       {t}
                     </li>
                   ))}
