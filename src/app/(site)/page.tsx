@@ -89,8 +89,9 @@ export default async function HomePage() {
         Hero: sized to its content, directly below the thin header. The header's logo tab hangs ~4rem into it,
         so the wordmark starts below that.
         The green sunset (baked by scripts/generate-brand-assets.ts) is anchored to the top so only its bottom
-        is cropped; it is the only hero image and is preloaded. There is no big wordmark: the logo ribbon and the
-        H1 already carry the name. The copy sits low over the city, with one primary action.
+        is cropped; it is the only hero image and is preloaded. A big "TEMER / PROPERTIES" wordmark sits in the sky at
+        the top left (decorative: the logo and H1 carry the name for assistive tech); the copy sits low over the city,
+        with one primary action.
       */}
       <section className="relative isolate flex min-h-[30rem] flex-col overflow-hidden bg-brand-950 text-white sm:min-h-[36rem]">
         <Image
@@ -110,7 +111,13 @@ export default async function HomePage() {
           className="absolute inset-x-0 bottom-0 -z-10 h-2/3 bg-gradient-to-t from-brand-950 via-brand-950/75 to-transparent"
           aria-hidden="true"
         />
-        <Container className="flex flex-1 flex-col justify-end pb-14 pt-32 sm:pb-16 sm:pt-40">
+        <Container className="pt-12 sm:pt-14">
+          <p className="hero-wordmark" aria-hidden="true">
+            <span className="hero-wordmark__name">TEMER</span>
+            <span className="hero-wordmark__sub">PROPERTIES</span>
+          </p>
+        </Container>
+        <Container className="flex flex-1 flex-col justify-end pb-14 pt-8 sm:pb-16 sm:pt-12">
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-12">
             <div className="max-w-2xl">
               <h1 className="text-4xl font-bold leading-[1.05] sm:text-5xl">
