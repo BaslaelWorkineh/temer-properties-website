@@ -87,11 +87,12 @@ export const site = {
 export type SiteConfig = typeof site;
 
 export const mainNav = [
+  { href: "/", label: "Home" },
   { href: "/properties", label: "Properties" },
   { href: "/projects", label: "Projects" },
   { href: "/locations", label: "Locations" },
   { href: "/about", label: "About" },
-  { href: "/blog", label: "Guides" },
+  { href: "/blog", label: "Buying guides" },
   { href: "/contact", label: "Contact" },
 ] as const;
 

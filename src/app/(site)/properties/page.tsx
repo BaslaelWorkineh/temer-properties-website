@@ -90,7 +90,7 @@ async function Results({
           />
         </>
       ) : (
-        <div className="mt-6 rounded-2xl border border-dashed border-line bg-soft px-6 py-16 text-center">
+        <div className="mt-6 rounded-none border border-dashed border-line bg-soft px-6 py-16 text-center">
           <SearchX className="mx-auto size-10 text-muted" aria-hidden="true" />
           <h2 className="mt-4 text-2xl font-bold">No properties match these filters</h2>
           <p className="mx-auto mt-2 max-w-md text-muted">
@@ -155,10 +155,10 @@ function BrowseLinks({ locations }: { locations: LocationSummary[] }) {
 function ResultsSkeleton() {
   return (
     <div aria-hidden="true">
-      <div className="h-[4.5rem] rounded-2xl bg-white shadow-lg ring-1 ring-line" />
+      <div className="h-[4.5rem] rounded-none bg-white shadow-lg ring-1 ring-line" />
       <div className="mt-14 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
         {Array.from({ length: 6 }, (_, i) => (
-          <div key={i} className="overflow-hidden rounded-2xl border border-line">
+          <div key={i} className="overflow-hidden rounded-none border border-line">
             <div className="aspect-[4/3] animate-pulse bg-soft" />
             <div className="space-y-3 p-5">
               <div className="h-6 w-1/2 animate-pulse rounded-none bg-soft" />

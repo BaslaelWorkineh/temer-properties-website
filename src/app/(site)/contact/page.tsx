@@ -43,7 +43,7 @@ export default function ContactPage() {
                 <a
                   href={c.href}
                   {...(c.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                  className="flex items-center gap-4 rounded-2xl p-4 ring-1 ring-line transition hover:bg-soft hover:ring-brand-300"
+                  className="flex items-center gap-4 rounded-none p-4 ring-1 ring-line transition hover:bg-soft hover:ring-brand-300"
                 >
                   <span className="grid size-11 shrink-0 place-items-center rounded-full bg-brand-50 text-brand-600">
                     <c.icon className="size-5" aria-hidden="true" />
@@ -56,7 +56,7 @@ export default function ContactPage() {
               </li>
             ))}
           </ul>
-          <div className="rounded-2xl bg-soft p-6 ring-1 ring-line">
+          <div className="rounded-none bg-soft p-6 ring-1 ring-line">
             <h2 className="flex items-center gap-2 text-xl font-bold">
               <MapPin className="size-5 text-brand-500" aria-hidden="true" /> Office
             </h2>
@@ -76,7 +76,7 @@ export default function ContactPage() {
             <p className="mt-2 text-ink/80">{site.openingHoursText}</p>
           </div>
         </div>
-        <div className="rounded-2xl p-6 ring-1 ring-line sm:p-8">
+        <div className="rounded-none p-6 ring-1 ring-line sm:p-8">
           <h2 className="text-3xl font-bold">Send us a message</h2>
           <p className="mt-1 text-muted">Tell us what you are looking for and we&apos;ll call you back.</p>
           <InquiryForm className="mt-8" />

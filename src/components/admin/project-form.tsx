@@ -52,7 +52,7 @@ export function ProjectForm({ project, locations, siteUrl }: { project: Project 
               </select>
             )}
           </Field>
-          <Field id="category" label="Category" errors={errors.category} hint="e.g. Apartments & shops, Residential apartments.">
+          <Field id="category" label="Category" errors={errors.category} hint="Type of property shown on the card, e.g. Apartments & shops, Villas, Commercial. Optional.">
             {(p) => <input {...p} defaultValue={project?.category ?? ""} maxLength={100} className={inputStyles} />}
           </Field>
           <Field id="completion" label="Completion" errors={errors.completion} hint="e.g. Q4 2027, or Delivered 2015 E.C.">
@@ -69,10 +69,10 @@ export function ProjectForm({ project, locations, siteUrl }: { project: Project 
 
       <FormSection title="Description">
         <Field id="summary" label="Summary" errors={errors.summary} hint="1–2 sentences for cards and the search description fallback (max 300).">
-          {(p) => <textarea {...p} rows={2} maxLength={300} defaultValue={project?.summary ?? ""} className={inputStyles} />}
+          {(p) => <textarea {...p} rows={2} maxLength={300} defaultValue={project?.summary ?? ""} placeholder="e.g. Modern apartments and shops in the heart of Sarbet, now selling with flexible payment." className={inputStyles} />}
         </Field>
         <Field id="description" label="Full description" errors={errors.description} hint="Markdown supported. Cover the location, building, finishes, amenities and progress.">
-          {(p) => <textarea {...p} rows={12} defaultValue={project?.description ?? ""} className={`${inputStyles} font-mono text-sm`} />}
+          {(p) => <textarea {...p} rows={12} defaultValue={project?.description ?? ""} placeholder={"## About the project\nWhat is being built, who it is for and why the location is special.\n\n## Unit types\n- 1, 2 and 3-bedroom apartments\n- Ground-floor shops\n\n## Progress\nCurrent construction stage and expected handover."} className={`${inputStyles} font-mono text-sm`} />}
         </Field>
         <div className="grid gap-5 sm:grid-cols-2">
           <Field id="unitTypes" label="Unit types" errors={errors.unitTypes} hint="One per line, e.g. 2-bedroom apartments.">

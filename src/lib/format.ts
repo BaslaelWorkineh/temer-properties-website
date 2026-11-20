@@ -20,6 +20,11 @@ export function formatPriceCompact(price: number | null | undefined) {
   return `ETB ${numberFormat.format(price)}`;
 }
 
+/** Price after a percentage discount, rounded to the nearest 1,000 birr. */
+export function discountedPrice(price: number, percent: number) {
+  return Math.round((price * (100 - percent)) / 100 / 1000) * 1000;
+}
+
 export function formatArea(sqm: number | null | undefined) {
   if (!sqm) return null;
   return `${Number.isInteger(sqm) ? sqm : sqm.toFixed(1)} m²`;

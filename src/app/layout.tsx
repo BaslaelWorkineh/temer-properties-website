@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Barlow_Condensed, Inter } from "next/font/google";
+import { Barlow_Condensed, Inter, Montserrat } from "next/font/google";
 import { site, siteUrl } from "@/lib/config/site";
 import "./globals.css";
 
@@ -10,6 +10,9 @@ const barlow = Barlow_Condensed({
   variable: "--font-barlow",
   display: "swap",
 });
+
+/** Heavy geometric face that matches the Temer logo printed on the photos (used by ImageWatermark only). */
+const montserrat = Montserrat({ subsets: ["latin"], weight: ["800"], variable: "--font-brand", display: "swap" });
 
 /** Set SITE_NOINDEX=true on staging/preview deployments so they never compete with production. */
 const noindex = process.env.SITE_NOINDEX === "true";
@@ -55,7 +58,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${inter.variable} ${barlow.variable}`}>
+    <html lang="en" className={`${inter.variable} ${barlow.variable} ${montserrat.variable}`}>
       <body className="flex min-h-dvh flex-col bg-white font-sans text-ink antialiased">{children}</body>
     </html>
   );

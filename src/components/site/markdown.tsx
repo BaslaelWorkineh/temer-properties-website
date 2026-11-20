@@ -24,7 +24,7 @@ export function Markdown({ content, className }: { content: string; className?: 
               </a>
             ),
           // eslint-disable-next-line @next/next/no-img-element
-          img: ({ src, alt }) => (typeof src === "string" ? <img src={src} alt={alt ?? ""} loading="lazy" className="rounded-xl" /> : null),
+          img: ({ src, alt }) => (typeof src === "string" ? <img src={src} alt={alt ?? ""} loading="lazy" className="rounded-none" /> : null),
         }}
       >
         {content}

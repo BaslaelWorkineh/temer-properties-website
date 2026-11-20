@@ -159,11 +159,11 @@
     padding-right: 0.75rem;
   }
   .marquee__item {
-    width: calc(var(--w) * 0.72);
+    width: min(calc(var(--w) * 0.72), 88vw);
   }
   @media (min-width: 40rem) {
     .marquee__item {
-      width: var(--w);
+      width: min(var(--w), 88vw);
     }
   }
   @media (prefers-reduced-motion: reduce) {

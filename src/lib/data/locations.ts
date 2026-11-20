@@ -5,8 +5,10 @@ import { db } from "@/db";
 import { locations, projects, properties } from "@/db/schema";
 import { TAGS } from "@/lib/cache-tags";
 
-const propertyCount = sql<number>`(select count(*) from ${properties} where ${properties.locationId} = ${locations.id} and ${properties.isPublished} = 1 and ${properties.status} != 'sold')`;
-const projectCount = sql<number>`(select count(*) from ${projects} where ${projects.locationId} = ${locations.id} and ${projects.isPublished} = 1)`;
+// The outer table is written out ("locations"."id"): in a single-table select drizzle prints a bare "id", which
+// inside the subquery means the INNER table's id and silently miscounts every area.
+const propertyCount = sql<number>`(select count(*) from ${properties} where ${properties.locationId} = "locations"."id" and ${properties.isPublished} = 1 and ${properties.status} != 'sold')`;
+const projectCount = sql<number>`(select count(*) from ${projects} where ${projects.locationId} = "locations"."id" and ${projects.isPublished} = 1)`;
 
 export type LocationSummary = {
   id: number;

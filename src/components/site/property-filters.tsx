@@ -6,7 +6,7 @@ import { PROPERTY_TYPES, propertyTypes } from "@/lib/config/property-types";
 import { PROPERTY_SORTS, propertySortLabels, type PropertyFilters as Filters } from "@/lib/data/properties";
 import { cn } from "@/lib/utils";
 
-const PRICE_STEPS = [3_000_000, 5_000_000, 8_000_000, 12_000_000, 18_000_000, 25_000_000, 40_000_000];
+export const PRICE_STEPS = [3_000_000, 5_000_000, 8_000_000, 12_000_000, 18_000_000, 25_000_000, 40_000_000];
 
 /**
  * Plain GET form: works without JavaScript; next/form adds client-side navigation.
@@ -36,7 +36,7 @@ export function PropertyFilters({
       action="/properties"
       className={cn(
         "grid gap-3 sm:grid-cols-2",
-        !bare && "rounded-2xl bg-white p-3 shadow-lg shadow-brand-950/5 ring-1 ring-line",
+        !bare && "rounded-none bg-white p-3 shadow-lg shadow-brand-950/5 ring-1 ring-line",
         compact ? "lg:grid-cols-[1fr_1fr_1fr_auto]" : "lg:grid-cols-[repeat(5,1fr)_auto]",
         className,
       )}

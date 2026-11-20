@@ -47,7 +47,7 @@ export function MobileMenu({ items, phone, phoneDisplay }: { items: readonly Ite
       <div
         id={panelId}
         hidden={!open}
-        className="fixed inset-x-0 top-10 bottom-0 z-40 overflow-y-auto border-t border-line bg-white px-4 pb-10 pt-4"
+        className="fixed inset-x-0 top-14 bottom-0 z-40 overflow-y-auto border-t border-line bg-white px-4 pb-10 pt-4"
       >
         <nav aria-label="Mobile">
           <ul className="space-y-1">
@@ -60,7 +60,7 @@ export function MobileMenu({ items, phone, phoneDisplay }: { items: readonly Ite
                     onClick={() => setOpen(false)}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "block rounded-xl px-4 py-3 text-lg font-medium",
+                      "block rounded-none px-4 py-3 text-lg font-medium",
                       active ? "bg-brand-50 text-brand-800" : "text-ink hover:bg-soft",
                     )}
                   >

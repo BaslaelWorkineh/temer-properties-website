@@ -1,0 +1,1 @@
+ALTER TABLE `properties` ADD `discount_percent` integer;

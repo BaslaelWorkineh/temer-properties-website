@@ -21,6 +21,7 @@ export type PropertyCardData = {
   status: PropertyStatus;
   price: number | null;
   promo: string | null;
+  discountPercent: number | null;
   bedrooms: number | null;
   bathrooms: number | null;
   areaSqm: number | null;
@@ -40,6 +41,7 @@ const cardColumns = {
   status: properties.status,
   price: properties.price,
   promo: properties.promo,
+  discountPercent: properties.discountPercent,
   bedrooms: properties.bedrooms,
   bathrooms: properties.bathrooms,
   areaSqm: properties.areaSqm,
@@ -63,6 +65,7 @@ function toCard(row: CardRow): PropertyCardData {
     status: row.status,
     price: row.price,
     promo: row.promo,
+    discountPercent: row.discountPercent,
     bedrooms: row.bedrooms,
     bathrooms: row.bathrooms,
     areaSqm: row.areaSqm,

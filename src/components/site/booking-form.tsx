@@ -81,7 +81,7 @@ export function BookingForm({
     const d = state.data;
     const waText = `Hello Temer Properties, I booked a site visit${subject ? ` for ${subject}` : ""} (reference ${d.reference}) on ${formatVisitDate(d.visitDate)} at ${formatSlot(d.timeSlot)}.`;
     return (
-      <div role="status" className={cn("rounded-2xl bg-brand-50 p-6 ring-1 ring-brand-200", className)}>
+      <div role="status" className={cn("rounded-none bg-brand-50 p-6 ring-1 ring-brand-200", className)}>
         <CheckCircle2 className="size-10 text-brand-600" aria-hidden="true" />
         <h3 className="mt-3 text-2xl font-bold text-ink">Visit request received</h3>
         <p className="mt-2 leading-relaxed text-ink/80">
@@ -126,7 +126,7 @@ export function BookingForm({
             <label
               key={type}
               className={cn(
-                "flex cursor-pointer items-center justify-center rounded-xl border px-3 py-2.5 text-center text-sm font-medium transition",
+                "flex cursor-pointer items-center justify-center rounded-none border px-3 py-2.5 text-center text-sm font-medium transition",
                 visitType === type ? "border-brand-500 bg-brand-50 text-brand-800" : "border-line text-ink hover:border-brand-300",
               )}
             >
@@ -183,14 +183,14 @@ export function BookingForm({
           {loading ? <span className="ml-2 text-xs font-normal text-muted">Checking availability…</span> : null}
         </legend>
         {current && !current.open ? (
-          <p className="rounded-xl bg-gold-100 px-3 py-2 text-sm text-[#6b5016]">{current.message}</p>
+          <p className="rounded-none bg-gold-100 px-3 py-2 text-sm text-[#6b5016]">{current.message}</p>
         ) : (
           <div className="grid grid-cols-3 gap-2">
             {slots.map((slot) => (
               <label
                 key={slot.time}
                 className={cn(
-                  "flex cursor-pointer flex-col items-center rounded-xl border px-2 py-2 text-sm font-medium transition",
+                  "flex cursor-pointer flex-col items-center rounded-none border px-2 py-2 text-sm font-medium transition",
                   !slot.available && "cursor-not-allowed border-line bg-soft text-muted line-through",
                   slot.available && timeSlot === slot.time && "border-brand-500 bg-brand-50 text-brand-800",
                   slot.available && timeSlot !== slot.time && "border-line text-ink hover:border-brand-300",

@@ -70,12 +70,12 @@ export default async function AboutPage() {
           </div>
           <dl className="grid content-start gap-4 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
             {site.stats.map((s) => (
-              <div key={s.label} className="flex flex-col rounded-2xl bg-soft p-6 ring-1 ring-line">
+              <div key={s.label} className="flex flex-col rounded-none bg-soft p-6 ring-1 ring-line">
                 <dt className="text-sm text-muted">{s.label}</dt>
                 <dd className="order-first font-display text-4xl font-bold text-brand-600">{s.value}</dd>
               </div>
             ))}
-            <div className="flex items-center gap-3 rounded-2xl bg-brand-50 p-6 text-brand-800 ring-1 ring-brand-200 sm:col-span-3 lg:col-span-1 xl:col-span-3">
+            <div className="flex items-center gap-3 rounded-none bg-brand-50 p-6 text-brand-800 ring-1 ring-brand-200 sm:col-span-3 lg:col-span-1 xl:col-span-3">
               <BadgeCheck className="size-8 shrink-0" aria-hidden="true" />
               <p className="font-semibold">Licensed and verified real estate developer</p>
             </div>
@@ -88,7 +88,7 @@ export default async function AboutPage() {
           <SectionHeading title="What drives us" />
           <ul className="mt-8 grid gap-6 md:grid-cols-3">
             {values.map((v, i) => (
-              <li key={v.title} className="rounded-2xl bg-white p-6 ring-1 ring-line">
+              <li key={v.title} className="rounded-none bg-white p-6 ring-1 ring-line">
                 <span className="font-display text-sm font-bold text-gold-600">0{i + 1}</span>
                 <v.icon className="mt-3 size-7 text-brand-500" aria-hidden="true" />
                 <h3 className="mt-3 text-2xl font-bold">{v.title}</h3>

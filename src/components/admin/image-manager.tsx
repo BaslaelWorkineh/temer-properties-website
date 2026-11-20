@@ -157,6 +157,11 @@ export function ImageManager({
             JPEG, PNG, WebP or AVIF, up to 10 MB each.{" "}
             {single ? "One image." : `Up to ${limit} images. The first one is the cover photo.`}
           </p>
+          <ul className="mt-3 space-y-0.5 text-xs text-muted">
+            <li>Use bright, landscape photos (at least 1600 px wide).</li>
+            <li>Put the best photo first: it is the cover on cards and when shared.</li>
+            <li>Describe each photo in the alt text box that appears after upload.</li>
+          </ul>
           <input
             ref={inputRef}
             type="file"

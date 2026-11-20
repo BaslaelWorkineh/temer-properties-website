@@ -96,8 +96,11 @@ export function PropertyForm({
               </select>
             )}
           </Field>
-          <Field id="price" label="Price (ETB)" errors={errors.price} hint="Whole birr. Leave blank to show “Price on request”.">
+          <Field id="price" label="Price (ETB)" errors={errors.price} hint="Full price in whole birr, before any discount. Leave blank to show “Price on request”.">
             {(p) => <input {...p} defaultValue={property?.price ?? ""} inputMode="numeric" placeholder="e.g. 12,500,000" className={inputStyles} />}
+          </Field>
+          <Field id="discountPercent" label="Discount (%)" errors={errors.discountPercent} hint="Optional. Shows the old price crossed out, the new price and a red badge on the card. Leave blank for no discount.">
+            {(p) => <input {...p} type="number" min={1} max={90} defaultValue={property?.discountPercent ?? ""} placeholder="e.g. 10" className={inputStyles} />}
           </Field>
           <Field id="promo" label="Promotion" errors={errors.promo} hint="Optional short offer shown as a badge.">
             {(p) => <input {...p} defaultValue={property?.promo ?? ""} maxLength={120} placeholder="e.g. 10% off for full payment" className={inputStyles} />}
@@ -110,7 +113,7 @@ export function PropertyForm({
           <Field id="bedrooms" label="Bedrooms" errors={errors.bedrooms}>
             {(p) => <input {...p} type="number" min={0} max={50} defaultValue={property?.bedrooms ?? ""} className={inputStyles} />}
           </Field>
-          <Field id="bathrooms" label="Bathrooms" errors={errors.bathrooms}>
+          <Field id="bathrooms" label="Toilets / bathrooms" errors={errors.bathrooms}>
             {(p) => <input {...p} type="number" min={0} max={50} defaultValue={property?.bathrooms ?? ""} className={inputStyles} />}
           </Field>
           <Field id="areaSqm" label="Area (m²)" errors={errors.areaSqm}>
@@ -127,7 +130,7 @@ export function PropertyForm({
 
       <FormSection title="Description" description="Unique, specific text ranks better than copy reused across listings.">
         <Field id="summary" label="Summary" errors={errors.summary} hint="1–2 sentences for listing cards and the search description fallback (max 300).">
-          {(p) => <textarea {...p} rows={2} maxLength={300} defaultValue={property?.summary ?? ""} className={inputStyles} />}
+          {(p) => <textarea {...p} rows={2} maxLength={300} defaultValue={property?.summary ?? ""} placeholder="e.g. Spacious 3-bedroom apartment in Sarbet with 2 toilets, a balcony and flexible payment plan." className={inputStyles} />}
         </Field>
         <Field
           id="description"
@@ -135,7 +138,7 @@ export function PropertyForm({
           errors={errors.description}
           hint="Markdown supported: ## Heading, **bold**, - bullet lists. Describe layout, views, finishes, nearby schools and transport."
         >
-          {(p) => <textarea {...p} rows={12} defaultValue={property?.description ?? ""} className={`${inputStyles} font-mono text-sm`} />}
+          {(p) => <textarea {...p} rows={12} defaultValue={property?.description ?? ""} placeholder={"## About this home\nBright 3-bedroom apartment on the 6th floor with a balcony and city view.\n\n## What's included\n- Master bedroom with en-suite\n- Fitted kitchen\n- Lift, parking and backup generator\n\n## Nearby\nSchools, supermarkets and the main road within 5 minutes."} className={`${inputStyles} font-mono text-sm`} />}
         </Field>
         <Field id="features" label="Features & amenities" errors={errors.features} hint="One per line, e.g. Lift, Backup generator, Parking, Balcony.">
           {(p) => <textarea {...p} rows={5} defaultValue={property?.features.join("\n") ?? ""} className={inputStyles} />}

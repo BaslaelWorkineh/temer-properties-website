@@ -5,7 +5,7 @@ import { db } from "@/db";
 import { locations, projects, properties } from "@/db/schema";
 import { TAGS } from "@/lib/cache-tags";
 
-const availableUnits = sql<number>`(select count(*) from ${properties} where ${properties.projectId} = ${projects.id} and ${properties.isPublished} = 1 and ${properties.status} != 'sold')`;
+const availableUnits = sql<number>`(select count(*) from ${properties} where ${properties.projectId} = "projects"."id" and ${properties.isPublished} = 1 and ${properties.status} != 'sold')`;
 
 /** Selling projects first, delivered last. */
 const statusOrder = sql`case ${projects.status} when 'selling' then 0 when 'under_construction' then 1 when 'pre_launch' then 2 else 3 end`;

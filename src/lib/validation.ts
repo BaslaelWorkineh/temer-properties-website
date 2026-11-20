@@ -172,6 +172,7 @@ export const propertyInputSchema = z.object({
   locationId: optionalId,
   price: optionalInt(0, 100_000_000_000),
   promo: optionalText(120),
+  discountPercent: optionalInt(1, 90),
   bedrooms: optionalInt(0, 50),
   bathrooms: optionalInt(0, 50),
   areaSqm: optionalNumber(1, 100_000),

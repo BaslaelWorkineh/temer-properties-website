@@ -3,8 +3,8 @@
 import { ChevronLeft, ChevronRight, Images, X } from "lucide-react";
 import Image from "next/image";
 import { useRef, useState } from "react";
+import { ImageWatermark } from "@/components/site/image-watermark";
 import type { ImageItem } from "@/db/schema";
-import { cn } from "@/lib/utils";
 
 /**
  * Photo grid + lightbox. All grid images are server-rendered <img> tags with
@@ -23,47 +23,42 @@ export function Gallery({ images, title }: { images: ImageItem[]; title: string 
   const go = (delta: number) => setIndex((i) => (i + delta + count) % count);
   const alt = (img: ImageItem, i: number) => img.alt || `${title}, photo ${i + 1}`;
 
-  const side = images.slice(1, 3);
+  const thumbs = images.slice(1, 4);
   return (
-    <div className="relative">
-      <div className={cn("grid gap-2 overflow-hidden rounded-2xl", side.length ? "md:grid-cols-3 md:grid-rows-2" : "")}>
-        <button
-          type="button"
-          onClick={() => open(0)}
-          className={cn("relative aspect-[16/10] overflow-hidden bg-soft", side.length ? "md:col-span-2 md:row-span-2 md:aspect-auto md:min-h-[26rem]" : "")}
-        >
+    <div>
+      <div className="relative">
+        <button type="button" onClick={() => open(0)} className="relative block aspect-[16/10] w-full overflow-hidden bg-soft">
           <Image
             src={images[0].url}
             alt={alt(images[0], 0)}
             fill
             loading="eager"
             fetchPriority="high"
-            sizes={side.length ? "(min-width: 1280px) 820px, (min-width: 768px) 66vw, 100vw" : "(min-width: 1280px) 1240px, 100vw"}
+            sizes="(min-width: 1024px) 700px, 100vw"
             className="object-cover transition duration-500 hover:scale-[1.02]"
           />
+          <ImageWatermark className="left-4 top-4" />
           <span className="sr-only">Open photo 1 of {count}</span>
         </button>
-        {side.map((img, i) => (
-          <button key={img.url} type="button" onClick={() => open(i + 1)} className="relative hidden aspect-[16/10] overflow-hidden bg-soft md:block md:aspect-auto">
-            <Image
-              src={img.url}
-              alt={alt(img, i + 1)}
-              fill
-              sizes="(min-width: 1280px) 410px, 33vw"
-              className="object-cover transition duration-500 hover:scale-[1.03]"
-            />
-            <span className="sr-only">Open photo {i + 2} of {count}</span>
+        {count > 1 ? (
+          <button
+            type="button"
+            onClick={() => open(0)}
+            className="absolute bottom-3 right-3 inline-flex items-center gap-2 bg-white/95 px-3.5 py-2 text-sm font-semibold text-ink shadow-md hover:bg-white"
+          >
+            <Images className="size-4" aria-hidden="true" /> View all {count} photos
           </button>
-        ))}
+        ) : null}
       </div>
-      {count > 1 ? (
-        <button
-          type="button"
-          onClick={() => open(0)}
-          className="absolute bottom-4 right-4 inline-flex items-center gap-2 rounded-none bg-white/95 px-4 py-2 text-sm font-semibold text-ink shadow-md hover:bg-white"
-        >
-          <Images className="size-4" aria-hidden="true" /> View all {count} photos
-        </button>
+      {thumbs.length ? (
+        <div className="mt-2 grid grid-cols-3 gap-2">
+          {thumbs.map((img, i) => (
+            <button key={img.url} type="button" onClick={() => open(i + 1)} className="relative aspect-[16/10] overflow-hidden bg-soft">
+              <Image src={img.url} alt={alt(img, i + 1)} fill sizes="(min-width: 1024px) 230px, 33vw" className="object-cover transition duration-500 hover:scale-[1.04]" />
+              <span className="sr-only">Open photo {i + 2} of {count}</span>
+            </button>
+          ))}
+        </div>
       ) : null}
 
       <dialog

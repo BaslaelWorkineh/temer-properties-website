@@ -33,7 +33,7 @@ export default async function BlogPage() {
           <ul className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
             {posts.map((post) => (
               <li key={post.id}>
-                <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl ring-1 ring-line transition hover:shadow-xl">
+                <article className="group relative flex h-full flex-col overflow-hidden rounded-none ring-1 ring-line transition hover:shadow-xl">
                   <div className="relative aspect-[16/9] bg-soft">
                     {post.coverImage ? (
                       <Image

@@ -101,6 +101,8 @@ export const properties = sqliteTable(
     price: integer("price"),
     /** Short promotional line, e.g. "10% discount for full payment". */
     promo: text("promo"),
+    /** Optional discount, 1–90 (%). When set with a price, the card shows the old and the new price. */
+    discountPercent: integer("discount_percent"),
     bedrooms: integer("bedrooms"),
     bathrooms: integer("bathrooms"),
     areaSqm: real("area_sqm"),

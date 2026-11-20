@@ -38,7 +38,7 @@ export default async function BookAVisitPage({ searchParams }: PageProps<"/book-
           <ul className="space-y-6">
             {points.map((p) => (
               <li key={p.title} className="flex gap-4">
-                <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-brand-50 text-brand-600">
+                <span className="grid size-12 shrink-0 place-items-center rounded-none bg-brand-50 text-brand-600">
                   <p.icon className="size-6" aria-hidden="true" />
                 </span>
                 <div>
@@ -48,7 +48,7 @@ export default async function BookAVisitPage({ searchParams }: PageProps<"/book-
               </li>
             ))}
           </ul>
-          <p className="mt-10 rounded-2xl bg-soft p-6 text-ink/80 ring-1 ring-line">
+          <p className="mt-10 rounded-none bg-soft p-6 text-ink/80 ring-1 ring-line">
             Prefer to talk first? Call{" "}
             <a href={`tel:${site.contact.phone}`} className="inline-flex items-center gap-1 font-semibold text-brand-700 hover:underline">
               <Phone className="size-4" aria-hidden="true" />
@@ -57,7 +57,7 @@ export default async function BookAVisitPage({ searchParams }: PageProps<"/book-
             ({site.openingHoursText}).
           </p>
         </div>
-        <div className="rounded-2xl bg-white p-6 shadow-xl shadow-brand-950/5 ring-1 ring-line sm:p-8">
+        <div className="rounded-none bg-white p-6 shadow-xl shadow-brand-950/5 ring-1 ring-line sm:p-8">
           <h2 className="text-2xl font-bold">Your visit</h2>
           {/* The fallback is a fully working form, so the static HTML never shows a spinner. */}
           <Suspense fallback={<BookingForm projectOptions={options} whatsapp={site.contact.whatsapp} className="mt-6" />}>

@@ -83,7 +83,7 @@ export const propertyStatusLabels: Record<PropertyStatus, string> = {
 
 export const projectStatusLabels: Record<ProjectStatus, string> = {
   pre_launch: "Pre-launch",
-  under_construction: "Under construction",
-  selling: "Now selling",
+  under_construction: "In progress",
+  selling: "For sale",
   delivered: "Delivered",
 };

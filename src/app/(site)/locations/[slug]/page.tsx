@@ -129,7 +129,7 @@ export default async function LocationPage({ params }: PageProps<"/locations/[sl
         ) : null}
 
         {!listings.items.length && !projects.length ? (
-          <p className="rounded-2xl bg-soft p-8 text-center text-muted">
+          <p className="rounded-none bg-soft p-8 text-center text-muted">
             We don&apos;t have listings in {l.name} right now.{" "}
             <Link href="/contact" className="font-semibold text-brand-700 underline">
               Tell us what you need
@@ -145,7 +145,7 @@ export default async function LocationPage({ params }: PageProps<"/locations/[sl
               {l.description ? <Markdown content={l.description} className="mt-5" /> : null}
             </div>
             {l.highlights.length ? (
-              <aside className="self-start rounded-2xl bg-soft p-6 ring-1 ring-line">
+              <aside className="self-start rounded-none bg-soft p-6 ring-1 ring-line">
                 <h2 className="text-xl font-bold">{l.name} at a glance</h2>
                 <ul className="mt-4 space-y-3">
                   {l.highlights.map((h) => (

@@ -31,7 +31,7 @@ export function InquiryForm({
 
   if (state.status === "success") {
     return (
-      <div role="status" className={cn("rounded-2xl bg-brand-50 p-6 ring-1 ring-brand-200", className)}>
+      <div role="status" className={cn("rounded-none bg-brand-50 p-6 ring-1 ring-brand-200", className)}>
         <CheckCircle2 className="size-10 text-brand-600" aria-hidden="true" />
         <h3 className="mt-3 text-2xl font-bold text-ink">Message sent</h3>
         <p className="mt-2 text-ink/80">{state.message}</p>

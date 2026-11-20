@@ -78,7 +78,7 @@ export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
             </p>
           </header>
           {post.coverImage ? (
-            <div className="relative mt-8 aspect-[16/9] overflow-hidden rounded-2xl bg-soft">
+            <div className="relative mt-8 aspect-[16/9] overflow-hidden rounded-none bg-soft">
               <Image
                 src={post.coverImage.url}
                 alt={post.coverImage.alt || post.title}

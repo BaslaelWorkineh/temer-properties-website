@@ -1,23 +1,23 @@
-import { ArrowRight, CalendarCheck2, HandCoins, KeyRound, MapPinned } from "lucide-react";
+import { ArrowRight, CalendarCheck2, Clock, MapPin, Phone } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import citySunset from "@/assets/hero/city-sunset-green.jpg";
-import { CtaBand } from "@/components/site/cta-band";
+import { WhatsAppIcon } from "@/components/site/brand-icons";
 import { FaqList } from "@/components/site/faq-list";
 import { JsonLd } from "@/components/site/json-ld";
 import { LocationCard } from "@/components/site/location-card";
 import { ProjectCard } from "@/components/site/project-card";
-import { PropertyFilters } from "@/components/site/property-filters";
-import { Marquee } from "@/components/site/marquee";
+import { HomeSearch } from "@/components/site/home-search";
+import { SlideCarousel } from "@/components/site/slide-carousel";
 import { PropertyCard } from "@/components/site/property-card";
 import { Container, SectionHeading } from "@/components/site/section";
 import { buttonStyles } from "@/components/ui/button";
 import { generalFaqs } from "@/lib/content/faqs";
-import { site } from "@/lib/config/site";
+import { site, whatsappLink } from "@/lib/config/site";
 import { getLocations, isLocationIndexable } from "@/lib/data/locations";
 import { getPublishedPosts } from "@/lib/data/posts";
 import { getProjects } from "@/lib/data/projects";
-import { getFeaturedProperties } from "@/lib/data/properties";
+import { getFeaturedProperties, searchProperties } from "@/lib/data/properties";
 import { formatDate } from "@/lib/format";
 import { buildMetadata } from "@/lib/seo/metadata";
 import { organizationJsonLd, websiteJsonLd } from "@/lib/seo/jsonld";
@@ -31,27 +31,55 @@ export const metadata = buildMetadata({
 });
 
 const steps = [
-  { icon: MapPinned, title: "Choose", text: "Compare apartments, homes and shops by area, size, price and payment plan." },
-  { icon: CalendarCheck2, title: "Visit", text: "Book a free site visit or a live video walkthrough at a time that suits you." },
-  { icon: HandCoins, title: "Reserve", text: "Agree the payment plan and reserve your unit with a down payment." },
-  { icon: KeyRound, title: "Move in", text: "Follow construction progress and receive your keys at handover." },
+  {
+    title: "Choose",
+    text: "Compare apartments, homes and shops by area, size, price and payment plan.",
+    href: "/properties",
+    cta: "Browse properties",
+    image: { src: "/images/sample/project-1.jpg", alt: "Aerial view of new apartment buildings under construction in Addis Ababa" },
+  },
+  {
+    title: "Visit",
+    text: "Book a free site visit or a live video walkthrough at a time that suits you.",
+    href: "/book-a-visit",
+    cta: "Book a visit",
+    image: { src: "/images/sample/site-1.jpg", alt: "A Temer Properties building on site with its street frontage" },
+  },
+  {
+    title: "Reserve",
+    text: "Agree the payment plan and reserve your unit with a down payment.",
+    href: "/contact",
+    cta: "Talk to sales",
+    image: { src: "/images/sample/hero-2.jpg", alt: "Sales advisors helping buyers at a Temer Properties sales desk" },
+  },
+  {
+    title: "Move in",
+    text: "Follow construction progress and receive your keys at handover.",
+    href: "/projects",
+    cta: "See our projects",
+    image: { src: "/images/sample/site-3.jpg", alt: "A finished Temer Properties apartment tower at sunset" },
+  },
 ];
 
 export default async function HomePage() {
-  const [featured, projects, locations, posts] = await Promise.all([
-    getFeaturedProperties(8),
+  const [featured, listingCount, projects, locations, posts] = await Promise.all([
+    getFeaturedProperties(12),
+    searchProperties({ pageSize: 1 }),
     getProjects(),
     getLocations(),
     getPublishedPosts(3),
   ]);
   const activeProjects = projects.filter((p) => p.status !== "delivered");
   const deliveredProjects = projects.filter((p) => p.status === "delivered");
-  // Two-column grid: keep an even count so every row is full (6 -> 3 rows, 9 -> 8 -> 4 rows).
+  // Two columns: keep an even count so every row is full (up to 12 -> 6 rows).
   const latest = featured.slice(0, featured.length - (featured.length % 2));
-  // "Our projects": first half as big cards, the rest as small tiles. A single project still gets the big row.
-  const half = Math.ceil(activeProjects.length / 2);
-  const projectRows = [activeProjects.slice(0, half), activeProjects.slice(half)];
   const areas = locations.filter(isLocationIndexable).slice(0, 8);
+  // "Property by area": the six areas with the most listings get a card (real counts, ranked); the rest become links.
+  const rankedAreas = locations
+    .filter(isLocationIndexable)
+    .sort((a, b) => b.propertyCount - a.propertyCount || b.projectCount - a.projectCount || a.name.localeCompare(b.name));
+  const topAreas = rankedAreas.slice(0, 6);
+  const otherAreas = rankedAreas.slice(6);
 
   return (
     <>
@@ -61,10 +89,10 @@ export default async function HomePage() {
         Hero: sized to its content, directly below the thin header. The header's logo tab hangs ~4rem into it,
         so the wordmark starts below that.
         The green sunset (baked by scripts/generate-brand-assets.ts) is anchored to the top so only its bottom
-        is cropped; it is the only hero image and is preloaded. A "TEMER / PROPERTIES" wordmark sits in the sky
-        at the top left (decorative: the logo and H1 already carry the name); the copy sits low over the city.
+        is cropped; it is the only hero image and is preloaded. There is no big wordmark: the logo ribbon and the
+        H1 already carry the name. The copy sits low over the city, with one primary action.
       */}
-      <section className="relative isolate flex flex-col overflow-hidden bg-brand-950 text-white">
+      <section className="relative isolate flex min-h-[30rem] flex-col overflow-hidden bg-brand-950 text-white sm:min-h-[36rem]">
         <Image
           src={citySunset}
           alt=""
@@ -82,28 +110,21 @@ export default async function HomePage() {
           className="absolute inset-x-0 bottom-0 -z-10 h-2/3 bg-gradient-to-t from-brand-950 via-brand-950/75 to-transparent"
           aria-hidden="true"
         />
-        <Container className="pt-24 sm:pt-28">
-          <p className="hero-wordmark" aria-hidden="true">
-            <span className="hero-wordmark__name">TEMER</span>
-            <span className="hero-wordmark__sub">PROPERTIES</span>
-          </p>
-        </Container>
-        <Container className="flex flex-1 flex-col justify-end pb-16 pt-4 sm:pt-12">
+        <Container className="flex flex-1 flex-col justify-end pb-14 pt-32 sm:pb-16 sm:pt-40">
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-12">
             <div className="max-w-2xl">
               <h1 className="text-4xl font-bold leading-[1.05] sm:text-5xl">
                 Apartments, homes &amp; shops for sale in Addis Ababa
               </h1>
               <p className="mt-4 max-w-xl text-lg leading-relaxed text-white/80">
-                Buy directly from {site.name}. Compare real prices, sizes and payment plans across our projects, then see
-                your future home with a free site visit.
+                Buy directly from {site.name}. Compare real prices, sizes and payment plans, then book a free site visit.
               </p>
-              <div className="mt-6 flex flex-wrap gap-3">
+              <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
                 <Link href="/properties" className={buttonStyles({ variant: "gold", size: "lg" })}>
                   Browse properties <ArrowRight className="size-4" aria-hidden="true" />
                 </Link>
-                <Link href="/book-a-visit" className={buttonStyles({ variant: "light", size: "lg" })}>
-                  Book a site visit
+                <Link href="/book-a-visit" className="inline-flex items-center gap-1.5 font-semibold text-white underline-offset-4 hover:underline">
+                  Book a site visit <ArrowRight className="size-4" aria-hidden="true" />
                 </Link>
               </div>
             </div>
@@ -124,119 +145,142 @@ export default async function HomePage() {
         a near-edge-to-edge two-column grid of photo cards (an even count, so every row is full). The old
         "Browse by type" grid is gone: the filter covers it, and the footer still links every /for-sale/* hub.
       */}
-      <section className="pb-16 sm:pb-20">
-        <Container className="flex flex-col gap-3 py-4 lg:flex-row lg:items-center lg:gap-8">
-          <h2 className="shrink-0 text-2xl font-bold text-ink">Latest properties for sale</h2>
-          <PropertyFilters filters={{}} locations={areas} compact bare dense className="lg:flex-1" />
-        </Container>
-        {latest.length ? (
-          <>
-            <ul className="grid gap-3 px-3 sm:grid-cols-2">
-              {latest.map((p) => (
-                <li key={p.id} className="aspect-[4/3] sm:aspect-[16/10] xl:aspect-[16/9]">
-                  <PropertyCard property={p} variant="overlay" />
-                </li>
-              ))}
-            </ul>
-            <Container className="mt-6 flex justify-end">
-              <Link href="/properties" className="inline-flex items-center gap-1 font-semibold text-brand-700 hover:underline">
-                View all properties <ArrowRight className="size-4" aria-hidden="true" />
+      <section className="pb-12 sm:pb-14">
+        {/* Heading, search and tiles share one edge (12px from the screen), like the tiles themselves. */}
+        <div className="px-3 pb-6 pt-10 sm:pt-12">
+          <SectionHeading
+            title="Latest properties for sale"
+            description={`${listingCount.total} ${listingCount.total === 1 ? "property" : "properties"} available now.`}
+            action={
+              <Link href="/properties" className={buttonStyles({ variant: "outline" })}>
+                All properties <ArrowRight className="size-4" aria-hidden="true" />
               </Link>
-            </Container>
-          </>
+            }
+          />
+          <HomeSearch locations={areas} className="mt-6" />
+        </div>
+        {latest.length ? (
+          <ul className="grid gap-3 px-3 sm:grid-cols-2">
+            {latest.map((p, i) => (
+              <li key={p.id} className="aspect-[4/3] sm:aspect-[16/10] xl:aspect-[16/9]">
+                <PropertyCard property={p} variant="tile" eager={i < 2} />
+              </li>
+            ))}
+          </ul>
         ) : null}
       </section>
 
       {activeProjects.length ? (
-        <section className="py-16 sm:py-20">
-          <Container>
+        <section className="border-t border-line bg-soft py-12 sm:py-14">
+          {/* Same left edge as the properties heading above, so both section titles line up down the page. */}
+          <div className="px-3">
             <SectionHeading
               title="Our projects"
-              description="Buildings now selling or under construction. Units in projects under construction usually come with the most flexible payment plans."
+              description="Now selling, under construction and delivered."
               action={
                 <Link href="/projects" className={buttonStyles({ variant: "outline" })}>
                   All projects <ArrowRight className="size-4" aria-hidden="true" />
                 </Link>
               }
             />
-          </Container>
-          {/* Two self-scrolling rows: big feature cards on top, small tiles below (different widths too). */}
-          <Marquee
-            className="mt-10"
-            rows={[
-              {
-                heightClass: "h-80 sm:h-[26rem]",
-                items: projectRows[0].map((p, i) => ({
-                  key: p.id,
-                  width: [44, 36, 48, 40][i % 4],
-                  node: <ProjectCard project={p} variant="overlay" />,
-                })),
-              },
-              {
-                heightClass: "h-40 sm:h-44",
-                items: projectRows[1].map((p, i) => ({
-                  key: p.id,
-                  width: [20, 17, 23, 18][i % 4],
-                  node: <ProjectCard project={p} variant="overlay" compact />,
-                })),
-              },
-            ]}
-          />
+          </div>
+          {/* Slides rest for a few seconds, then glide to the next project. */}
+          <SlideCarousel
+            className="mt-8"
+            label="Our projects"
+            slideClassName="h-[26rem] w-[min(56rem,88vw)] sm:h-[30rem]"
+          >
+            {projects.map((p) => (
+              <ProjectCard key={p.id} project={p} variant="banner" />
+            ))}
+          </SlideCarousel>
         </section>
       ) : null}
 
-      {areas.length ? (
-        <section className="bg-soft py-16 sm:py-20">
-          <Container>
+      {topAreas.length ? (
+        <section className="py-12 sm:py-14">
+          {/* Same 12px edge as the property tiles and the other section headings. */}
+          <div className="px-3">
             <SectionHeading
               title="Property by area"
-              description="From central Piassa to fast-growing Ayat and Sarbet, find homes and shops in the part of Addis Ababa that fits your life."
+              description="Homes and shops in every part of Addis Ababa."
               action={
                 <Link href="/locations" className={buttonStyles({ variant: "outline" })}>
                   All areas <ArrowRight className="size-4" aria-hidden="true" />
                 </Link>
               }
             />
-            <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {areas.map((l) => (
+            <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {topAreas.map((l, i) => (
                 <li key={l.id}>
-                  <LocationCard location={l} />
+                  <LocationCard location={l} rank={i + 1} tint={i} />
                 </li>
               ))}
             </ul>
-          </Container>
+            {otherAreas.length ? (
+              <p className="mt-5 text-muted">
+                Also in:
+                {otherAreas.map((l) => (
+                  <Link key={l.id} href={`/locations/${l.slug}`} className="ml-3 font-semibold text-ink underline underline-offset-4 hover:text-brand-700">
+                    {l.name}
+                  </Link>
+                ))}
+              </p>
+            ) : null}
+          </div>
         </section>
       ) : null}
 
-      <section className="py-16 sm:py-20">
-        <Container className="grid gap-12 lg:grid-cols-2">
-          <div>
-            <SectionHeading
-              title="Buying with Temer Properties"
-              description="A clear, four-step process with the developer, not a middleman."
-            />
-            <ol className="mt-8 grid gap-4 sm:grid-cols-2">
-              {steps.map((step, i) => (
-                <li key={step.title} className="rounded-2xl bg-soft p-5 ring-1 ring-line">
-                  <step.icon className="size-6 text-brand-500" aria-hidden="true" />
-                  <h3 className="mt-3 font-display text-xl font-bold">
-                    {i + 1}. {step.title}
-                  </h3>
-                  <p className="mt-1 text-sm leading-relaxed text-muted">{step.text}</p>
-                </li>
-              ))}
-            </ol>
-          </div>
-          <div>
-            <SectionHeading title="Common questions" />
-            <div className="mt-8">
-              <FaqList faqs={generalFaqs.filter((f) => ["Payments", "Visits", "Diaspora"].includes(f.group)).slice(0, 5)} />
+      <section className="border-t border-line py-12 sm:py-14">
+        {/* Same 12px edge as the sections above. */}
+        <div className="px-3">
+          <SectionHeading
+            title="Buying with Temer Properties"
+            description="A clear, four-step process with the developer, not a middleman."
+            action={
+              <Link href="/book-a-visit" className={buttonStyles({ variant: "primary" })}>
+                Book a site visit <ArrowRight className="size-4" aria-hidden="true" />
+              </Link>
+            }
+          />
+          {/* Photo cards: a real photo on top, a black body below with the step, its text and its next action. */}
+          <ol className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {steps.map((step, i) => (
+              <li key={step.title} className="group flex flex-col overflow-hidden bg-[#0b0d0c] text-white">
+                <div className="relative aspect-[16/10] overflow-hidden">
+                  <Image
+                    src={step.image.src}
+                    alt={step.image.alt}
+                    fill
+                    sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                    className="object-cover transition duration-700 group-hover:scale-[1.06]"
+                  />
+                  <span className="absolute bottom-0 left-0 bg-[#0b0d0c] px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-white">
+                    Step {i + 1}
+                  </span>
+                </div>
+                <div className="flex flex-1 flex-col p-5">
+                  <h3 className="font-display text-3xl font-bold leading-tight">{step.title}</h3>
+                  <p className="mt-2 flex-1 text-[0.95rem] leading-relaxed text-white/75">{step.text}</p>
+                  <Link href={step.href} className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-gold-400 hover:text-white">
+                    {step.cta} <ArrowRight className="size-4 transition group-hover:translate-x-1" aria-hidden="true" />
+                  </Link>
+                </div>
+              </li>
+            ))}
+          </ol>
+
+          <div className="mt-12 grid gap-8 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
+            <div>
+              <h2 className="text-3xl font-bold text-ink sm:text-4xl">Common questions</h2>
+              <p className="mt-3 text-muted">Quick answers about payments, site visits and buying from abroad.</p>
+              <Link href="/faq" className={buttonStyles({ variant: "outline", className: "mt-5" })}>
+                All questions <ArrowRight className="size-4" aria-hidden="true" />
+              </Link>
             </div>
-            <Link href="/faq" className="mt-5 inline-flex items-center gap-1 font-semibold text-brand-700 hover:underline">
-              More answers <ArrowRight className="size-4" aria-hidden="true" />
-            </Link>
+            <FaqList faqs={generalFaqs.filter((f) => ["Payments", "Visits", "Diaspora"].includes(f.group)).slice(0, 5)} openFirst />
           </div>
-        </Container>
+        </div>
       </section>
 
       {deliveredProjects.length ? (
@@ -251,7 +295,7 @@ export default async function HomePage() {
                 <li key={p.id}>
                   <Link
                     href={`/projects/${p.slug}`}
-                    className="block rounded-2xl bg-white/5 p-5 ring-1 ring-white/10 transition hover:bg-white/10"
+                    className="block rounded-none bg-white/5 p-5 ring-1 ring-white/10 transition hover:bg-white/10"
                   >
                     <span className="font-display text-xl font-bold">{p.name}</span>
                     <span className="mt-1 block text-sm text-white/70">{p.location?.name ?? "Addis Ababa"}</span>
@@ -277,7 +321,7 @@ export default async function HomePage() {
             <ul className="mt-10 grid gap-6 md:grid-cols-3">
               {posts.map((post) => (
                 <li key={post.id}>
-                  <article className="relative h-full rounded-2xl p-6 ring-1 ring-line transition hover:shadow-lg">
+                  <article className="relative h-full rounded-none p-6 ring-1 ring-line transition hover:shadow-lg">
                     {post.publishedAt ? (
                       <time dateTime={post.publishedAt.toISOString()} className="text-sm text-muted">
                         {formatDate(post.publishedAt)}
@@ -297,7 +341,76 @@ export default async function HomePage() {
         </section>
       ) : null}
 
-      <CtaBand />
+      <section className="border-t border-line px-3 py-12 sm:py-14" aria-labelledby="visit-heading">
+        {/* One message, one primary action, the phone number once. Same 12px edge as the sections above. */}
+        <div className="grid gap-3 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+          <div className="flex flex-col justify-center bg-brand-950 p-8 text-white sm:p-12">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gold-400">Come and see it</p>
+            <h2 id="visit-heading" className="mt-3 text-4xl font-bold leading-[1.05] sm:text-5xl">
+              See it for yourself: book a free site visit
+            </h2>
+            <p className="mt-4 max-w-xl text-lg leading-relaxed text-white/75">
+              Walk through finished units and active construction sites with our sales team, in person or on a live video call from abroad.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href="/book-a-visit" className={buttonStyles({ variant: "gold", size: "lg" })}>
+                <CalendarCheck2 className="size-5" aria-hidden="true" /> Book a free site visit
+              </Link>
+              <a
+                href={whatsappLink("Hello Temer Properties, I would like to book a site visit.")}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex h-12 items-center justify-center gap-2 border border-white/45 px-6 text-base font-semibold text-white transition hover:bg-white hover:text-brand-950"
+              >
+                <WhatsAppIcon className="size-5" /> WhatsApp us
+              </a>
+            </div>
+          </div>
+
+          <div className="flex flex-col justify-center bg-soft p-8 ring-1 ring-line sm:p-10">
+            <h3 className="font-display text-3xl font-bold text-ink">Visit our office</h3>
+            <dl className="mt-6 grid gap-5 text-ink">
+              <div className="flex gap-3">
+                <dt className="mt-0.5 text-brand-700">
+                  <MapPin className="size-5" aria-hidden="true" />
+                  <span className="sr-only">Address</span>
+                </dt>
+                <dd>
+                  {site.address.street}
+                  <br />
+                  {site.address.locality}
+                </dd>
+              </div>
+              <div className="flex gap-3">
+                <dt className="mt-0.5 text-brand-700">
+                  <Clock className="size-5" aria-hidden="true" />
+                  <span className="sr-only">Opening hours</span>
+                </dt>
+                <dd>{site.openingHoursText}</dd>
+              </div>
+              <div className="flex gap-3">
+                <dt className="mt-0.5 text-brand-700">
+                  <Phone className="size-5" aria-hidden="true" />
+                  <span className="sr-only">Phone</span>
+                </dt>
+                <dd>
+                  <a href={`tel:${site.contact.phone}`} className="font-semibold hover:text-brand-700 hover:underline">
+                    {site.contact.phoneDisplay}
+                  </a>
+                </dd>
+              </div>
+            </dl>
+            <a
+              href={site.address.mapUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={buttonStyles({ variant: "secondary", size: "lg", className: "mt-8 self-start" })}
+            >
+              <MapPin className="size-5" aria-hidden="true" /> Get directions
+            </a>
+          </div>
+        </div>
+      </section>
     </>
   );
 }

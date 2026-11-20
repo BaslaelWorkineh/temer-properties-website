@@ -81,7 +81,7 @@ export default async function ForSaleTypePage({ params }: PageProps<"/for-sale/[
         {result.items.length ? (
           <PropertyGrid properties={result.items} eagerCount={3} />
         ) : (
-          <div className="rounded-2xl bg-soft p-10 text-center">
+          <div className="rounded-none bg-soft p-10 text-center">
             <h2 className="text-2xl font-bold">No {meta.plural.toLowerCase()} listed right now</h2>
             <p className="mx-auto mt-2 max-w-lg text-muted">
               New units are released regularly. Tell us what you are looking for and our sales team will contact you first.

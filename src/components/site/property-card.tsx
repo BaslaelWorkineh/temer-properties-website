@@ -1,13 +1,17 @@
 import { Bath, BedDouble, Camera, MapPin, Ruler } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { CardActions } from "@/components/site/card-actions";
+import { ContactActions } from "@/components/site/contact-actions";
 import { ImagePlaceholder } from "@/components/site/image-placeholder";
-import { propertyTypes } from "@/lib/config/property-types";
+import { ImageWatermark } from "@/components/site/image-watermark";
+import { TypeLabel } from "@/components/site/status-label";
+import { propertyStatusLabels, propertyTypes } from "@/lib/config/property-types";
 import type { PropertyCardData } from "@/lib/data/properties";
-import { formatArea, formatPrice } from "@/lib/format";
+import { discountedPrice, formatArea, formatPrice } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-type CardVariant = "default" | "overlay";
+type CardVariant = "default" | "overlay" | "tile";
 
 export function PropertyCard({
   property,
@@ -24,6 +28,58 @@ export function PropertyCard({
   const meta = propertyTypes[p.type];
   const Heading = headingLevel === 2 ? "h2" : "h3";
   const place = [p.project?.name, p.location?.name ?? "Addis Ababa"].filter(Boolean).join(", ");
+  const hasDiscount = !!p.price && !!p.discountPercent;
+
+  if (variant === "tile") {
+    // Apple-sized photo tile with the mockup's copy at the bottom: location, name, price, specs and one wide
+    // "View details" button with a chat button for the contact icons. The tile fills its parent, which sets the size.
+    return (
+      <article className="group relative isolate flex size-full flex-col justify-end overflow-hidden bg-brand-950 text-white">
+        {p.image ? (
+          <Image
+            src={p.image.url}
+            alt={p.image.alt || `${p.title} in ${place}`}
+            fill
+            sizes="(min-width: 640px) 50vw, 100vw"
+            loading={eager ? "eager" : "lazy"}
+            className="-z-10 object-cover transition duration-700 group-hover:scale-[1.03]"
+          />
+        ) : (
+          <div className="absolute inset-0 -z-10">
+            <ImagePlaceholder label={meta.label} />
+          </div>
+        )}
+        <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/90 via-black/40 via-40% to-transparent to-65%" aria-hidden="true" />
+        <div className="absolute inset-x-0 top-0 -z-10 h-1/4 bg-gradient-to-b from-black/35 to-transparent" aria-hidden="true" />
+        {/* The brand mark starts behind the type label, which sits on top of it. */}
+        <ImageWatermark className="left-4 top-7 z-0" />
+        <div className="absolute left-4 top-4 z-[2] flex gap-1.5">
+          <TypeLabel>{meta.label}</TypeLabel>
+          {p.status !== "available" ? <TypeLabel className="bg-gold-500 text-brand-950">{propertyStatusLabels[p.status]}</TypeLabel> : null}
+        </div>
+        {hasDiscount ? (
+          <span className="absolute right-4 top-4 z-[2] bg-red-600 px-2.5 py-1 text-xs font-bold text-white">-{p.discountPercent}%</span>
+        ) : null}
+        <div className="relative p-4 sm:p-5">
+          <p className="flex items-center gap-1.5 text-xs text-white/80">
+            <MapPin className="size-3.5 shrink-0" aria-hidden="true" />
+            {place}
+          </p>
+          <Heading className="mt-1 font-sans text-lg font-semibold leading-snug sm:text-xl">{p.title}</Heading>
+          <PriceBlock p={p} className="mt-1 text-white" oldClassName="text-white/65" showPercent />
+          <CardSpecs
+            p={p}
+            residential={meta.residential}
+            className="mt-2 border-t-0 pt-0 text-xs text-white/85"
+            iconClassName="size-3.5 text-white/70"
+          />
+          <CardActions href={`/properties/${p.slug}`}>
+            <ContactActions subject={p.title} tone="dark" />
+          </CardActions>
+        </div>
+      </article>
+    );
+  }
 
   if (variant === "overlay") {
     // Photo fills the whole card; the copy sits on a dark gradient at the bottom. The card fills its
@@ -48,6 +104,10 @@ export function PropertyCard({
           className="absolute inset-0 -z-10 bg-gradient-to-t from-brand-950 from-30% via-brand-950/70 via-50% to-transparent to-75%"
           aria-hidden="true"
         />
+        <ImageWatermark className="left-4 top-4" />
+        {hasDiscount ? (
+          <span className="absolute right-3 top-12 bg-red-600 px-2.5 py-0.5 text-xs font-bold text-white">-{p.discountPercent}%</span>
+        ) : null}
         {p.imageCount > 1 ? (
           <span className="absolute right-3 top-3 inline-flex items-center gap-1 bg-black/55 px-2 py-0.5 text-xs font-medium text-white">
             <Camera className="size-3.5" aria-hidden="true" />
@@ -56,7 +116,7 @@ export function PropertyCard({
           </span>
         ) : null}
         <div className="p-5">
-          <p className="font-display text-2xl font-bold tracking-tight text-gold-400">{formatPrice(p.price)}</p>
+          <PriceBlock p={p} className="text-gold-400" oldClassName="text-white/60" />
           <Heading className="mt-1 font-sans text-[1.05rem] font-semibold leading-snug text-white">
             <Link href={`/properties/${p.slug}`} className="after:absolute after:inset-0 after:content-[''] focus:outline-none">
               {p.title}
@@ -68,13 +128,16 @@ export function PropertyCard({
           </p>
           {p.promo ? <p className="mt-3 bg-gold-500 px-3 py-1.5 text-xs font-semibold text-brand-950">{p.promo}</p> : null}
           <CardSpecs p={p} residential={meta.residential} className="mt-4 border-white/20 text-white/85" iconClassName="text-white/60" />
+          <div className="mt-4">
+            <ContactActions subject={p.title} tone="dark" />
+          </div>
         </div>
       </article>
     );
   }
 
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-brand-950/5">
+    <article className="group relative flex flex-col overflow-hidden rounded-none border border-line bg-white shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-brand-950/5">
       <div className="relative aspect-[4/3] overflow-hidden bg-soft">
         {p.image ? (
           <Image
@@ -88,6 +151,10 @@ export function PropertyCard({
         ) : (
           <ImagePlaceholder label={meta.label} />
         )}
+        <ImageWatermark className="left-4 top-4" />
+        {hasDiscount ? (
+          <span className="absolute right-3 top-3 bg-red-600 px-2.5 py-0.5 text-xs font-bold text-white">-{p.discountPercent}%</span>
+        ) : null}
         {p.imageCount > 1 ? (
           <span className="absolute bottom-3 right-3 inline-flex items-center gap-1 rounded-none bg-black/55 px-2 py-0.5 text-xs font-medium text-white">
             <Camera className="size-3.5" aria-hidden="true" />
@@ -97,7 +164,7 @@ export function PropertyCard({
         ) : null}
       </div>
       <div className="flex flex-1 flex-col p-5">
-        <p className="font-display text-2xl font-bold tracking-tight text-brand-700">{formatPrice(p.price)}</p>
+        <PriceBlock p={p} className="text-brand-700" oldClassName="text-muted" />
         <Heading className="mt-1 font-sans text-[1.05rem] font-semibold leading-snug text-ink">
           <Link href={`/properties/${p.slug}`} className="after:absolute after:inset-0 after:content-[''] focus:outline-none">
             {p.title}
@@ -114,9 +181,38 @@ export function PropertyCard({
           className="mt-auto border-line text-ink/80 [&:not(:first-child)]:mt-4"
           iconClassName="text-muted"
         />
+        <div className="mt-4 border-t border-line pt-4">
+          <ContactActions subject={p.title} />
+        </div>
       </div>
     </article>
   );
+}
+
+/** Price, or the discounted price with the original crossed out. */
+function PriceBlock({
+  p,
+  className,
+  oldClassName,
+  wrapperClassName,
+  showPercent,
+}: {
+  p: PropertyCardData;
+  className?: string;
+  oldClassName?: string;
+  wrapperClassName?: string;
+  showPercent?: boolean;
+}) {
+  if (p.price && p.discountPercent) {
+    return (
+      <div className={cn("flex flex-wrap items-baseline gap-x-2.5", wrapperClassName)}>
+        <p className={cn("font-display text-2xl font-bold tracking-tight", className)}>{formatPrice(discountedPrice(p.price, p.discountPercent))}</p>
+        <p className={cn("text-sm line-through decoration-red-500/70", oldClassName)}>{formatPrice(p.price)}</p>
+        {showPercent ? <p className="text-sm font-bold text-red-300">-{p.discountPercent}%</p> : null}
+      </div>
+    );
+  }
+  return <p className={cn("font-display text-2xl font-bold tracking-tight", className, wrapperClassName)}>{formatPrice(p.price)}</p>;
 }
 
 /** Beds / baths / size row shared by both card variants. */
@@ -149,7 +245,7 @@ function CardSpecs({
             <Bath className={icon} aria-hidden="true" />
             <span className="sr-only">Bathrooms</span>
           </dt>
-          <dd>{p.bathrooms} bath</dd>
+          <dd>{p.bathrooms} {p.bathrooms === 1 ? "toilet" : "toilets"}</dd>
         </div>
       ) : null}
       {p.areaSqm ? (
