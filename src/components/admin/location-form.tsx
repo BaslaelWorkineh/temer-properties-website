@@ -1,6 +1,7 @@
 "use client";
 
 import { saveLocationAction } from "@/app/admin/(panel)/locations/actions";
+import { AmharicFields } from "@/components/admin/amharic-fields";
 import { FaqEditor } from "@/components/admin/faq-editor";
 import { Checkbox } from "@/components/admin/form-controls";
 import { ImageManager } from "@/components/admin/image-manager";
@@ -61,6 +62,19 @@ export function LocationForm({ location, siteUrl }: { location: Location | null;
 
       <FormSection title="Frequently asked questions">
         <FaqEditor name="faqs" initial={location?.faqs ?? []} errors={errors.faqs} />
+      </FormSection>
+
+      <FormSection title="Amharic (አማርኛ)" description="Shown on the Amharic pages. Empty fields show the English text.">
+        <AmharicFields
+          initial={location?.translations?.am}
+          fields={[
+            { name: "name", label: "Area name", kind: "text" },
+            { name: "summary", label: "Summary", kind: "area" },
+            { name: "description", label: "Area guide", kind: "markdown" },
+            { name: "highlights", label: "Highlights", kind: "lines", hint: "One per line." },
+            { name: "faqs", label: "Frequently asked questions", kind: "faqs" },
+          ]}
+        />
       </FormSection>
 
       <FormSection title="Search appearance">

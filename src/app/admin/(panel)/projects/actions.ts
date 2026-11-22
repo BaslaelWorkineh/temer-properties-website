@@ -9,7 +9,7 @@ import { bookings, inquiries, projects, properties, type FaqItem, type ImageItem
 import { requireAdmin, requireOwner } from "@/lib/auth/session";
 import { TAGS } from "@/lib/cache-tags";
 import { refreshPublicContent } from "@/lib/revalidate";
-import { bool, errorState, json, lines, optStr, projectInputSchema, str, validationError, type FormState } from "@/lib/validation";
+import { bool, errorState, json, lines, optStr, projectInputSchema, readAm, str, validationError, type FormState } from "@/lib/validation";
 
 type Saved = { id: number; slug: string };
 
@@ -78,6 +78,11 @@ export async function saveProjectAction(_prev: FormState<Saved>, formData: FormD
     isFeatured: data.isFeatured,
     isPublished: data.isPublished,
     sortOrder: data.sortOrder ?? 0,
+    translations: readAm(formData, {
+      text: ["name", "summary", "description", "category", "paymentPlan", "completion", "address"],
+      lines: ["unitTypes", "amenities"],
+      faqs: true,
+    }),
     seoTitle: data.seoTitle ?? null,
     seoDescription: data.seoDescription ?? null,
   };

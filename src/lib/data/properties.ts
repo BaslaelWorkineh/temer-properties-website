@@ -5,6 +5,8 @@ import { db } from "@/db";
 import { locations, projects, properties, type ImageItem } from "@/db/schema";
 import { TAGS } from "@/lib/cache-tags";
 import { PROPERTY_TYPES, type PropertyStatus, type PropertyType } from "@/lib/config/property-types";
+import type { Locale } from "@/lib/i18n/config";
+import { isTranslated, localizeRow } from "@/lib/i18n/localize";
 
 /*
  * Public, cached reads. Every function here runs inside `use cache` so pages
@@ -52,19 +54,25 @@ const cardColumns = {
   locationSlug: locations.slug,
   projectName: projects.name,
   projectSlug: projects.slug,
+  translations: properties.translations,
+  locationTranslations: locations.translations,
+  projectTranslations: projects.translations,
 };
 
 type CardRow = Awaited<ReturnType<typeof cardQuery>>[number];
 
-function toCard(row: CardRow): PropertyCardData {
+function toCard(row: CardRow, lang: Locale = "en"): PropertyCardData {
+  const text = localizeRow({ title: row.title, promo: row.promo }, row.translations, lang);
+  const locationName = row.locationName ? localizeRow({ name: row.locationName }, row.locationTranslations, lang).name : null;
+  const projectName = row.projectName ? localizeRow({ name: row.projectName }, row.projectTranslations, lang).name : null;
   return {
     id: row.id,
     slug: row.slug,
-    title: row.title,
+    title: text.title,
     type: row.type,
     status: row.status,
     price: row.price,
-    promo: row.promo,
+    promo: text.promo,
     discountPercent: row.discountPercent,
     bedrooms: row.bedrooms,
     bathrooms: row.bathrooms,
@@ -73,8 +81,8 @@ function toCard(row: CardRow): PropertyCardData {
     isFeatured: row.isFeatured,
     image: row.images[0] ?? null,
     imageCount: row.images.length,
-    location: row.locationSlug && row.locationName ? { name: row.locationName, slug: row.locationSlug } : null,
-    project: row.projectSlug && row.projectName ? { name: row.projectName, slug: row.projectSlug } : null,
+    location: row.locationSlug && locationName ? { name: locationName, slug: row.locationSlug } : null,
+    project: row.projectSlug && projectName ? { name: projectName, slug: row.projectSlug } : null,
   };
 }
 
@@ -127,7 +135,7 @@ export type PropertyFilters = {
   pageSize?: number;
 };
 
-export async function searchProperties(filters: PropertyFilters) {
+export async function searchProperties(filters: PropertyFilters, lang: Locale = "en") {
   "use cache";
   cacheLife("hours");
   cacheTag(TAGS.properties, TAGS.locations, TAGS.projects);
@@ -158,10 +166,10 @@ export async function searchProperties(filters: PropertyFilters) {
       .where(where),
   ]);
   const total = Number(totals[0]?.total ?? 0);
-  return { items: rows.map(toCard), total, page, pageSize, pageCount: Math.max(1, Math.ceil(total / pageSize)) };
+  return { items: rows.map((r) => toCard(r, lang)), total, page, pageSize, pageCount: Math.max(1, Math.ceil(total / pageSize)) };
 }
 
-export async function getFeaturedProperties(limit = 6) {
+export async function getFeaturedProperties(limit = 6, lang: Locale = "en") {
   "use cache";
   cacheLife("hours");
   cacheTag(TAGS.properties, TAGS.locations, TAGS.projects);
@@ -169,10 +177,10 @@ export async function getFeaturedProperties(limit = 6) {
     .where(and(eq(properties.isPublished, true), ne(properties.status, "sold")))
     .orderBy(...recommendedOrder)
     .limit(limit);
-  return rows.map(toCard);
+  return rows.map((r) => toCard(r, lang));
 }
 
-export async function getPropertyBySlug(slug: string) {
+export async function getPropertyBySlug(slug: string, lang: Locale = "en") {
   "use cache";
   cacheLife("hours");
   cacheTag(TAGS.properties, TAGS.locations, TAGS.projects);
@@ -186,6 +194,7 @@ export async function getPropertyBySlug(slug: string) {
         city: locations.city,
         latitude: locations.latitude,
         longitude: locations.longitude,
+        translations: locations.translations,
       },
       project: {
         id: projects.id,
@@ -199,6 +208,7 @@ export async function getPropertyBySlug(slug: string) {
         latitude: projects.latitude,
         longitude: projects.longitude,
         images: projects.images,
+        translations: projects.translations,
       },
     })
     .from(properties)
@@ -207,13 +217,21 @@ export async function getPropertyBySlug(slug: string) {
     .where(and(eq(properties.slug, slug), eq(properties.isPublished, true)))
     .limit(1);
   if (!row) return null;
-  return { ...row.property, location: row.location?.id ? row.location : null, project: row.project?.id ? row.project : null };
+  const location = row.location?.id ? { ...localizeRow(row.location, row.location.translations, lang) } : null;
+  const project = row.project?.id ? { ...localizeRow(row.project, row.project.translations, lang) } : null;
+  return {
+    ...localizeRow(row.property, row.property.translations, lang),
+    // True when the Amharic text is complete enough for the Amharic page to be indexed as its own page.
+    translated: isTranslated(row.property.translations, ["title", "description"]),
+    location,
+    project,
+  };
 }
 
 export type PropertyDetail = NonNullable<Awaited<ReturnType<typeof getPropertyBySlug>>>;
 
 /** Same area first, then same type. Never includes sold units. */
-export async function getSimilarProperties(id: number, type: PropertyType, locationId: number | null, limit = 3) {
+export async function getSimilarProperties(id: number, type: PropertyType, locationId: number | null, limit = 3, lang: Locale = "en") {
   "use cache";
   cacheLife("hours");
   cacheTag(TAGS.properties, TAGS.locations, TAGS.projects);
@@ -225,7 +243,7 @@ export async function getSimilarProperties(id: number, type: PropertyType, locat
       ...recommendedOrder,
     )
     .limit(limit);
-  return rows.map(toCard);
+  return rows.map((r) => toCard(r, lang));
 }
 
 /** Slugs for generateStaticParams and the sitemap. */
@@ -233,11 +251,18 @@ export async function getPropertySitemapEntries() {
   "use cache";
   cacheLife("hours");
   cacheTag(TAGS.properties);
-  return db
-    .select({ slug: properties.slug, status: properties.status, updatedAt: properties.updatedAt, images: properties.images })
+  const rows = await db
+    .select({
+      slug: properties.slug,
+      status: properties.status,
+      updatedAt: properties.updatedAt,
+      images: properties.images,
+      translations: properties.translations,
+    })
     .from(properties)
     .where(eq(properties.isPublished, true))
     .orderBy(desc(properties.updatedAt));
+  return rows.map(({ translations, ...r }) => ({ ...r, translated: isTranslated(translations, ["title", "description"]) }));
 }
 
 /** Count of on-market (published, not sold) listings per type. */
@@ -256,7 +281,7 @@ export async function getTypeCounts() {
 }
 
 /** Type × area combinations that have on-market listings: the /for-sale/[type]/[location] pages. */
-export async function getTypeLocationCombos() {
+export async function getTypeLocationCombos(lang: Locale = "en") {
   "use cache";
   cacheLife("hours");
   cacheTag(TAGS.properties, TAGS.locations);
@@ -265,6 +290,7 @@ export async function getTypeLocationCombos() {
       type: properties.type,
       locationSlug: locations.slug,
       locationName: locations.name,
+      locationTranslations: locations.translations,
       count: sql<number>`count(*)`,
       updatedAt: sql<number>`max(${properties.updatedAt})`,
     })
@@ -273,5 +299,10 @@ export async function getTypeLocationCombos() {
     .where(and(eq(properties.isPublished, true), ne(properties.status, "sold"), eq(locations.isPublished, true)))
     .groupBy(properties.type, locations.id)
     .orderBy(desc(sql`count(*)`));
-  return rows.map((r) => ({ ...r, count: Number(r.count), updatedAt: new Date(Number(r.updatedAt) * 1000) }));
+  return rows.map(({ locationTranslations, ...r }) => ({
+    ...r,
+    locationName: localizeRow({ name: r.locationName }, locationTranslations, lang).name,
+    count: Number(r.count),
+    updatedAt: new Date(Number(r.updatedAt) * 1000),
+  }));
 }

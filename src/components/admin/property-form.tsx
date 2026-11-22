@@ -3,6 +3,7 @@
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { autosavePropertyDraftAction, savePropertyAction } from "@/app/admin/(panel)/properties/actions";
+import { AmharicFields } from "@/components/admin/amharic-fields";
 import { FeaturePicker } from "@/components/admin/feature-picker";
 import { Checkbox } from "@/components/admin/form-controls";
 import { ImageManager } from "@/components/admin/image-manager";
@@ -377,6 +378,18 @@ export function PropertyForm({
           >
             {(p) => <textarea {...p} rows={10} defaultValue={property?.description ?? ""} placeholder={DESCRIPTION_PLACEHOLDER} className={`${inputStyles} font-mono text-sm`} />}
           </Field>
+          <AmharicFields
+            initial={property?.translations?.am}
+            fields={[
+              { name: "title", label: "Title", kind: "text" },
+              { name: "promo", label: "Special offer", kind: "text" },
+              { name: "summary", label: "One-sentence summary", kind: "area" },
+              { name: "description", label: "Describe the home", kind: "markdown" },
+              { name: "features", label: "What comes with it?", kind: "lines", hint: "One per line." },
+              { name: "paymentPlan", label: "How can the buyer pay?", kind: "area" },
+              { name: "completion", label: "When can they move in?", kind: "text" },
+            ]}
+          />
         </FormSection>
       </div>
 

@@ -14,6 +14,36 @@ export type ImageItem = {
 
 export type FaqItem = { question: string; answer: string };
 
+/**
+ * Amharic versions of the text fields, stored next to the English columns: `{ am: { title: "…" } }`.
+ * Keys match the English column names. A missing or empty value falls back to the English text, so a record can
+ * be translated field by field. See src/lib/i18n/localize.ts.
+ */
+export type PropertyAm = {
+  title?: string;
+  summary?: string;
+  description?: string;
+  features?: string[];
+  paymentPlan?: string;
+  promo?: string;
+  completion?: string;
+};
+export type ProjectAm = {
+  name?: string;
+  summary?: string;
+  description?: string;
+  category?: string;
+  paymentPlan?: string;
+  completion?: string;
+  address?: string;
+  unitTypes?: string[];
+  amenities?: string[];
+  faqs?: FaqItem[];
+};
+export type LocationAm = { name?: string; summary?: string; description?: string; highlights?: string[]; faqs?: FaqItem[] };
+export type PostAm = { title?: string; excerpt?: string; content?: string };
+export type Translations<A> = { am?: A };
+
 const timestamps = {
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
@@ -47,6 +77,7 @@ export const locations = sqliteTable(
     longitude: real("longitude"),
     sortOrder: integer("sort_order").notNull().default(0),
     isPublished: integer("is_published", { mode: "boolean" }).notNull().default(true),
+    translations: text("translations", { mode: "json" }).$type<Translations<LocationAm>>().notNull().default(sql`'{}'`),
     ...seo,
     ...timestamps,
   },
@@ -81,6 +112,7 @@ export const projects = sqliteTable(
     isFeatured: integer("is_featured", { mode: "boolean" }).notNull().default(false),
     isPublished: integer("is_published", { mode: "boolean" }).notNull().default(true),
     sortOrder: integer("sort_order").notNull().default(0),
+    translations: text("translations", { mode: "json" }).$type<Translations<ProjectAm>>().notNull().default(sql`'{}'`),
     ...seo,
     ...timestamps,
   },
@@ -119,6 +151,7 @@ export const properties = sqliteTable(
     isFeatured: integer("is_featured", { mode: "boolean" }).notNull().default(false),
     isPublished: integer("is_published", { mode: "boolean" }).notNull().default(true),
     sortOrder: integer("sort_order").notNull().default(0),
+    translations: text("translations", { mode: "json" }).$type<Translations<PropertyAm>>().notNull().default(sql`'{}'`),
     ...seo,
     ...timestamps,
   },
@@ -143,6 +176,7 @@ export const posts = sqliteTable(
     authorName: text("author_name").notNull().default("Temer Properties"),
     isPublished: integer("is_published", { mode: "boolean" }).notNull().default(false),
     publishedAt: integer("published_at", { mode: "timestamp" }),
+    translations: text("translations", { mode: "json" }).$type<Translations<PostAm>>().notNull().default(sql`'{}'`),
     ...seo,
     ...timestamps,
   },

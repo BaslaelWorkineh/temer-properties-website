@@ -1,5 +1,6 @@
 "use client";
 
+import { AmharicFields } from "@/components/admin/amharic-fields";
 import { savePostAction } from "@/app/admin/(panel)/posts/actions";
 import { Checkbox } from "@/components/admin/form-controls";
 import { ImageManager } from "@/components/admin/image-manager";
@@ -43,6 +44,17 @@ export function PostForm({ post, siteUrl }: { post: Post | null; siteUrl: string
 
       <FormSection title="Cover image">
         <ImageManager name="coverImage" single initial={post?.coverImage ?? null} defaultAlt={post?.title ?? ""} errors={errors.coverImage} />
+      </FormSection>
+
+      <FormSection title="Amharic (አማርኛ)" description="Shown on the Amharic pages. Empty fields show the English text.">
+        <AmharicFields
+          initial={post?.translations?.am}
+          fields={[
+            { name: "title", label: "Title", kind: "text" },
+            { name: "excerpt", label: "Excerpt", kind: "area" },
+            { name: "content", label: "Content", kind: "markdown" },
+          ]}
+        />
       </FormSection>
 
       <FormSection title="Search appearance">

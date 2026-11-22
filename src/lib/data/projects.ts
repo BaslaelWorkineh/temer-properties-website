@@ -4,6 +4,8 @@ import { cacheLife, cacheTag } from "next/cache";
 import { db } from "@/db";
 import { locations, projects, properties } from "@/db/schema";
 import { TAGS } from "@/lib/cache-tags";
+import type { Locale } from "@/lib/i18n/config";
+import { isTranslated, localizeRow } from "@/lib/i18n/localize";
 
 const availableUnits = sql<number>`(select count(*) from ${properties} where ${properties.projectId} = "projects"."id" and ${properties.isPublished} = 1 and ${properties.status} != 'sold')`;
 
@@ -25,6 +27,8 @@ const summaryColumns = {
   updatedAt: projects.updatedAt,
   locationName: locations.name,
   locationSlug: locations.slug,
+  translations: projects.translations,
+  locationTranslations: locations.translations,
   availableUnits,
 };
 
@@ -32,14 +36,17 @@ function summaryQuery() {
   return db.select(summaryColumns).from(projects).leftJoin(locations, eq(projects.locationId, locations.id));
 }
 
-function toSummary(r: Awaited<ReturnType<typeof summaryQuery>>[number]): ProjectSummary {
-  const { locationName, locationSlug, images, availableUnits: units, ...rest } = r;
+function toSummary(r: Awaited<ReturnType<typeof summaryQuery>>[number], lang: Locale = "en"): ProjectSummary {
+  const { locationName, locationSlug, images, availableUnits: units, translations, locationTranslations, ...rest } = r;
+  const text = localizeRow(rest, translations, lang);
+  const placeName = locationName ? localizeRow({ name: locationName }, locationTranslations, lang).name : null;
   return {
-    ...rest,
+    ...text,
     image: images[0] ?? null,
     images,
     availableUnits: Number(units),
-    location: locationSlug && locationName ? { name: locationName, slug: locationSlug } : null,
+    translated: isTranslated(translations, ["name", "summary"]),
+    location: locationSlug && placeName ? { name: placeName, slug: locationSlug } : null,
   };
 }
 
@@ -58,10 +65,12 @@ export type ProjectSummary = {
   isFeatured: boolean;
   updatedAt: Date;
   availableUnits: number;
+  /** True when the Amharic text is complete enough to index the Amharic page. */
+  translated: boolean;
   location: { name: string; slug: string } | null;
 };
 
-export async function getProjects(options: { locationId?: number } = {}): Promise<ProjectSummary[]> {
+export async function getProjects(options: { locationId?: number } = {}, lang: Locale = "en"): Promise<ProjectSummary[]> {
   "use cache";
   cacheLife("hours");
   cacheTag(TAGS.projects, TAGS.locations, TAGS.properties);
@@ -70,10 +79,10 @@ export async function getProjects(options: { locationId?: number } = {}): Promis
   const rows = await summaryQuery()
     .where(and(...conditions))
     .orderBy(statusOrder, asc(projects.sortOrder), asc(projects.name));
-  return rows.map(toSummary);
+  return rows.map((r) => toSummary(r, lang));
 }
 
-export async function getProjectBySlug(slug: string) {
+export async function getProjectBySlug(slug: string, lang: Locale = "en") {
   "use cache";
   cacheLife("hours");
   cacheTag(TAGS.projects, TAGS.locations, TAGS.properties);
@@ -88,6 +97,7 @@ export async function getProjectBySlug(slug: string) {
         city: locations.city,
         latitude: locations.latitude,
         longitude: locations.longitude,
+        translations: locations.translations,
       },
     })
     .from(projects)
@@ -95,17 +105,23 @@ export async function getProjectBySlug(slug: string) {
     .where(and(eq(projects.slug, slug), eq(projects.isPublished, true)))
     .limit(1);
   if (!row) return null;
-  return { ...row.project, availableUnits: Number(row.availableUnits), location: row.location?.id ? row.location : null };
+  return {
+    ...localizeRow(row.project, row.project.translations, lang),
+    availableUnits: Number(row.availableUnits),
+    translated: isTranslated(row.project.translations, ["name", "description"]),
+    location: row.location?.id ? { ...localizeRow(row.location, row.location.translations, lang) } : null,
+  };
 }
 
 /** For the booking form's "Which project?" select. */
-export async function getProjectOptions() {
+export async function getProjectOptions(lang: Locale = "en") {
   "use cache";
   cacheLife("hours");
   cacheTag(TAGS.projects);
-  return db
-    .select({ id: projects.id, name: projects.name, slug: projects.slug, status: projects.status })
+  const rows = await db
+    .select({ id: projects.id, name: projects.name, slug: projects.slug, status: projects.status, translations: projects.translations })
     .from(projects)
     .where(eq(projects.isPublished, true))
     .orderBy(statusOrder, asc(projects.name));
+  return rows.map(({ translations, ...r }) => localizeRow(r, translations, lang));
 }

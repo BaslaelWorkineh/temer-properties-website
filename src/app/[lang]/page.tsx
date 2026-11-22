@@ -13,7 +13,7 @@ import { SlideCarousel } from "@/components/site/slide-carousel";
 import { PropertyCard } from "@/components/site/property-card";
 import { Container, SectionHeading } from "@/components/site/section";
 import { buttonStyles } from "@/components/ui/button";
-import { generalFaqs } from "@/lib/content/faqs";
+import { getGeneralFaqs } from "@/lib/content/faqs";
 import { site, whatsappLink } from "@/lib/config/site";
 import { getLocations, isLocationIndexable } from "@/lib/data/locations";
 import { getPublishedPosts } from "@/lib/data/posts";
@@ -46,11 +46,11 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
   const dict = getDictionary(lang);
   const steps = stepMeta.map((m, i) => ({ ...m, ...dict.home.steps[i] }));
   const [featured, listingCount, projects, locations, posts] = await Promise.all([
-    getFeaturedProperties(12),
-    searchProperties({ pageSize: 1 }),
-    getProjects(),
-    getLocations(),
-    getPublishedPosts(3),
+    getFeaturedProperties(12, lang),
+    searchProperties({ pageSize: 1 }, lang),
+    getProjects({}, lang),
+    getLocations(lang),
+    getPublishedPosts(3, lang),
   ]);
   const activeProjects = projects.filter((p) => p.status !== "delivered");
   const deliveredProjects = projects.filter((p) => p.status === "delivered");
@@ -96,8 +96,8 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
         />
         <Container className="pt-12 sm:pt-14">
           <p className="hero-wordmark" aria-hidden="true">
-            <span className="hero-wordmark__name">TEMER</span>
-            <span className="hero-wordmark__sub">PROPERTIES</span>
+            <span className="hero-wordmark__name">{dict.brand.name}</span>
+            <span className="hero-wordmark__sub">{dict.brand.sub}</span>
           </p>
         </Container>
         <Container className="flex flex-1 flex-col justify-end pb-14 pt-8 sm:pb-16 sm:pt-12">
@@ -268,7 +268,7 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
                 {dict.common.allQuestions} <ArrowRight className="size-4" aria-hidden="true" />
               </Link>
             </div>
-            <FaqList faqs={generalFaqs.filter((f) => ["Payments", "Visits", "Diaspora"].includes(f.group)).slice(0, 5)} openFirst />
+            <FaqList faqs={getGeneralFaqs(lang).filter((f) => ["Payments", "Visits", "Diaspora"].includes(f.group)).slice(0, 5)} openFirst />
           </div>
         </div>
       </section>
@@ -314,7 +314,7 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
                   <article className="relative h-full rounded-none p-6 ring-1 ring-line transition hover:shadow-lg">
                     {post.publishedAt ? (
                       <time dateTime={post.publishedAt.toISOString()} className="text-sm text-muted">
-                        {formatDate(post.publishedAt)}
+                        {formatDate(post.publishedAt, undefined, lang)}
                       </time>
                     ) : null}
                     <h3 className="mt-2 text-xl font-bold leading-snug">
@@ -366,9 +366,9 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
                   <span className="sr-only">{dict.home.addressLabel}</span>
                 </dt>
                 <dd>
-                  {site.address.street}
+                  {dict.office.street}
                   <br />
-                  {site.address.locality}
+                  {dict.office.locality}
                 </dd>
               </div>
               <div className="flex gap-3">

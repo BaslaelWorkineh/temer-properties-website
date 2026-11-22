@@ -11,7 +11,7 @@ import { TAGS } from "@/lib/cache-tags";
 import { publishBlockers } from "@/lib/property-readiness";
 import { refreshPublicContent } from "@/lib/revalidate";
 import { slugify } from "@/lib/utils";
-import { bool, errorState, json, lines, optStr, propertyInputSchema, str, validationError, type FormState } from "@/lib/validation";
+import { bool, errorState, json, lines, optStr, propertyInputSchema, readAm, str, validationError, type FormState } from "@/lib/validation";
 
 type Saved = { id: number; slug: string };
 
@@ -140,6 +140,7 @@ async function persistProperty(formData: FormData, mode: "save" | "draft"): Prom
     isFeatured: data.isFeatured,
     isPublished: data.isPublished,
     sortOrder: data.sortOrder ?? 0,
+    translations: readAm(formData, { text: ["title", "summary", "description", "paymentPlan", "promo", "completion"], lines: ["features"] }),
     seoTitle: data.seoTitle ?? null,
     seoDescription: data.seoDescription ?? null,
   };

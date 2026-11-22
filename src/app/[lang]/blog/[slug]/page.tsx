@@ -8,7 +8,10 @@ import { JsonLd } from "@/components/site/json-ld";
 import { Markdown } from "@/components/site/markdown";
 import { Container } from "@/components/site/section";
 import { getPostBySlug, getPublishedPosts } from "@/lib/data/posts";
-import { formatDate } from "@/lib/format";
+import { site } from "@/lib/config/site";
+import { hasLocale, locales, type Locale } from "@/lib/i18n/config";
+import { getDictionary } from "@/lib/i18n/dictionaries";
+import { formatPostDate, getPagesDict } from "@/lib/i18n/dict/pages";
 import { articleJsonLd } from "@/lib/seo/jsonld";
 import { buildMetadata } from "@/lib/seo/metadata";
 import { stripMarkdown, truncate } from "@/lib/utils";
@@ -21,9 +24,25 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/blog/[slug]">): Promise<Metadata> {
-  const { slug } = await params;
-  const post = await getPostBySlug(slug);
+  const { slug, lang: rawLang } = await params;
+  const lang: Locale = hasLocale(rawLang) ? rawLang : "en";
+  const post = await getPostBySlug(slug, lang);
   if (!post) return { title: "Guide not found", robots: { index: false, follow: true } };
+  // With a complete Amharic translation the guide exists in both languages (self-canonical + hreflang).
+  // Without one, /am/... points its canonical at the English page.
+  if (post.translated && lang === "am") {
+    return buildMetadata({
+      title: post.title,
+      description: post.excerpt || stripMarkdown(post.content),
+      path: `/blog/${post.slug}`,
+      images: [post.coverImage],
+      type: "article",
+      publishedTime: post.publishedAt,
+      modifiedTime: post.updatedAt,
+      lang: "am",
+      translations: locales,
+    });
+  }
   return buildMetadata({
     title: post.seoTitle || post.title,
     description: post.seoDescription || post.excerpt || stripMarkdown(post.content),
@@ -32,14 +51,17 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/blog/[slug
     type: "article",
     publishedTime: post.publishedAt,
     modifiedTime: post.updatedAt,
+    ...(post.translated ? { lang: "en" as const, translations: locales } : {}),
   });
 }
 
 export default async function PostPage({ params }: PageProps<"/[lang]/blog/[slug]">) {
-  const { slug } = await params;
-  const post = await getPostBySlug(slug);
+  const { slug, lang: rawLang } = await params;
+  const lang: Locale = hasLocale(rawLang) ? rawLang : "en";
+  const dict = getPagesDict(lang).blog;
+  const post = await getPostBySlug(slug, lang);
   if (!post) notFound();
-  const more = (await getPublishedPosts(4)).filter((p) => p.slug !== post.slug).slice(0, 3);
+  const more = (await getPublishedPosts(4, lang)).filter((p) => p.slug !== post.slug).slice(0, 3);
 
   return (
     <>
@@ -53,26 +75,27 @@ export default async function PostPage({ params }: PageProps<"/[lang]/blog/[slug
       <Container className="pt-6 pb-10">
         <Breadcrumbs
           items={[
-            { name: "Guides", path: "/blog" },
+            { name: dict.breadcrumb, path: "/blog" },
             { name: post.title, path: `/blog/${post.slug}` },
           ]}
+          lang={lang}
         />
         <article className="mx-auto mt-8 max-w-3xl">
           <header>
             <h1 className="text-4xl font-bold leading-tight sm:text-5xl">{post.title}</h1>
             {post.excerpt ? <p className="mt-4 text-xl leading-relaxed text-muted">{post.excerpt}</p> : null}
             <p className="mt-5 text-sm text-muted">
-              By {post.authorName}
+              {dict.by(lang === "am" && post.authorName === site.name ? getDictionary(lang).brand.full : post.authorName)}
               {post.publishedAt ? (
                 <>
                   {" · "}
-                  <time dateTime={post.publishedAt.toISOString()}>{formatDate(post.publishedAt)}</time>
+                  <time dateTime={post.publishedAt.toISOString()}>{formatPostDate(post.publishedAt, lang)}</time>
                 </>
               ) : null}
               {post.publishedAt && post.updatedAt.getTime() - post.publishedAt.getTime() > 86_400_000 ? (
                 <>
-                  {" · Updated "}
-                  <time dateTime={post.updatedAt.toISOString()}>{formatDate(post.updatedAt)}</time>
+                  {dict.updated}
+                  <time dateTime={post.updatedAt.toISOString()}>{formatPostDate(post.updatedAt, lang)}</time>
                 </>
               ) : null}
             </p>
@@ -95,7 +118,7 @@ export default async function PostPage({ params }: PageProps<"/[lang]/blog/[slug
 
         {more.length ? (
           <aside className="mx-auto mt-16 max-w-3xl border-t border-line pt-10">
-            <h2 className="text-2xl font-bold">More guides</h2>
+            <h2 className="text-2xl font-bold">{dict.moreGuides}</h2>
             <ul className="mt-4 space-y-3">
               {more.map((p) => (
                 <li key={p.slug}>

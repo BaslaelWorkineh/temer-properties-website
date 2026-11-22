@@ -7,6 +7,10 @@ import type { Locale } from "@/lib/i18n/config";
  * The Amharic text is a first draft: have a native speaker review it before launch.
  */
 export type Dictionary = {
+  /** Big hero wordmark: the brand name split over two lines. */
+  brand: { name: string; sub: string; full: string };
+  /** Office address as printed on the site (the map link and phone stay in site.ts). */
+  office: { street: string; locality: string };
   nav: { home: string; properties: string; projects: string; locations: string; about: string; guides: string; contact: string };
   common: {
     bookVisit: string;
@@ -110,6 +114,8 @@ export type Dictionary = {
 };
 
 const en: Dictionary = {
+  brand: { name: "TEMER", sub: "PROPERTIES", full: "Temer Properties" },
+  office: { street: "Woldemaryam Building, Sarbet to Kera Road", locality: "Addis Ababa" },
   nav: { home: "Home", properties: "Properties", projects: "Projects", locations: "Locations", about: "About", guides: "Buying guides", contact: "Contact" },
   common: {
     bookVisit: "Book a visit",
@@ -227,6 +233,8 @@ const en: Dictionary = {
 };
 
 const am: Dictionary = {
+  brand: { name: "ቴምር", sub: "ፕሮፐርቲስ", full: "ቴምር ፕሮፐርቲስ" },
+  office: { street: "ወልደማርያም ሕንፃ፣ ከሳርቤት ወደ ቄራ በሚወስደው መንገድ", locality: "አዲስ አበባ" },
   nav: { home: "መነሻ", properties: "ንብረቶች", projects: "ፕሮጀክቶች", locations: "አካባቢዎች", about: "ስለ እኛ", guides: "የግዢ መመሪያዎች", contact: "አግኙን" },
   common: {
     bookVisit: "ጉብኝት ይያዙ",
@@ -284,7 +292,7 @@ const am: Dictionary = {
     privacy: "የግላዊነት መመሪያ",
     terms: "የአጠቃቀም ደንቦች",
     staffLogin: "የሠራተኞች መግቢያ",
-    rights: (year) => `© ${year} እየሩስ ተመር ፕሮፐርቲስ። መብቱ በሕግ የተጠበቀ ነው።`,
+    rights: (year) => `© ${year} እየሩስ ቴምር ፕሮፐርቲስ። መብቱ በሕግ የተጠበቀ ነው።`,
     address: "ኢትዮጵያ",
   },
   search: {
@@ -301,11 +309,11 @@ const am: Dictionary = {
     upTo: (m) => `እስከ ${m} ሚሊዮን ብር`,
   },
   home: {
-    title: "ተመር ፕሮፐርቲስ | በአዲስ አበባ ለሽያጭ የቀረቡ አፓርታማዎች፣ ቤቶችና ሱቆች",
+    title: "ቴምር ፕሮፐርቲስ | በአዲስ አበባ ለሽያጭ የቀረቡ አፓርታማዎች፣ ቤቶችና ሱቆች",
     description:
-      "በአዲስ አበባ አዳዲስ አፓርታማዎችን፣ ቤቶችንና የንግድ ሱቆችን በቀጥታ ከተመር ፕሮፐርቲስ ይግዙ። በሳርቤት፣ በመገናኛ፣ በአያት እና በሌሎችም አካባቢዎች ያሉ ዋጋዎችን፣ ስፋቶችንና የክፍያ ዕቅዶችን ያወዳድሩ፣ ከዚያም ነፃ የቦታ ጉብኝት በኢንተርኔት ይያዙ።",
+      "በአዲስ አበባ አዳዲስ አፓርታማዎችን፣ ቤቶችንና የንግድ ሱቆችን በቀጥታ ከቴምር ፕሮፐርቲስ ይግዙ። በሳርቤት፣ በመገናኛ፣ በአያት እና በሌሎችም አካባቢዎች ያሉ ዋጋዎችን፣ ስፋቶችንና የክፍያ ዕቅዶችን ያወዳድሩ፣ ከዚያም ነፃ የቦታ ጉብኝት በኢንተርኔት ይያዙ።",
     h1: "በአዲስ አበባ ለሽያጭ የቀረቡ አፓርታማዎች፣ ቤቶችና ሱቆች",
-    lead: () => `በቀጥታ ከተመር ፕሮፐርቲስ ይግዙ። ትክክለኛ ዋጋ፣ ስፋትና የክፍያ ዕቅድ ያወዳድሩ፣ ከዚያም ነፃ የቦታ ጉብኝት ይያዙ።`,
+    lead: () => `በቀጥታ ከቴምር ፕሮፐርቲስ ይግዙ። ትክክለኛ ዋጋ፣ ስፋትና የክፍያ ዕቅድ ያወዳድሩ፣ ከዚያም ነፃ የቦታ ጉብኝት ይያዙ።`,
     browse: "ንብረቶችን ይመልከቱ",
     latestTitle: "ለሽያጭ የቀረቡ አዳዲስ ንብረቶች",
     latestCount: (n) => `${n} ንብረቶች አሁን ይገኛሉ።`,
@@ -314,7 +322,7 @@ const am: Dictionary = {
     areaTitle: "ንብረት በአካባቢ",
     areaDesc: "በሁሉም የአዲስ አበባ ክፍሎች ያሉ ቤቶችና ሱቆች።",
     alsoIn: "እንዲሁም፦",
-    buyingTitle: "ከተመር ፕሮፐርቲስ ጋር መግዛት",
+    buyingTitle: "ከቴምር ፕሮፐርቲስ ጋር መግዛት",
     buyingDesc: "ከአስማሚ ሳይሆን ከገንቢው ጋር የሚደረግ ግልጽ የአራት ደረጃ ሂደት።",
     step: (n) => `ደረጃ ${n}`,
     steps: [

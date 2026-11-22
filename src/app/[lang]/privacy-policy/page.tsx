@@ -1,50 +1,60 @@
+import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { Container } from "@/components/site/section";
 import { site } from "@/lib/config/site";
+import { hasLocale, locales, type Locale } from "@/lib/i18n/config";
+import { getPagesDict } from "@/lib/i18n/dict/pages";
 import { buildMetadata } from "@/lib/seo/metadata";
 
-export const metadata = buildMetadata({
-  title: "Privacy Policy",
-  description: `How ${site.name} collects, uses and protects the personal information you share through this website.`,
-  path: "/privacy-policy",
-});
+export async function generateMetadata({ params }: PageProps<"/[lang]/privacy-policy">): Promise<Metadata> {
+  const { lang } = await params;
+  const l: Locale = hasLocale(lang) ? lang : "en";
+  const pages = getPagesDict(l);
+  return buildMetadata({
+    title: pages.privacy.metaTitle,
+    description: pages.privacy.metaDescription(l === "en" ? site.name : pages.brand),
+    path: "/privacy-policy",
+    lang: l,
+    translations: locales,
+  });
+}
 
-// Template text: have it reviewed by the company's legal adviser before launch.
-export default function PrivacyPage() {
+// Template text: have it reviewed by the company's legal adviser before launch (the Amharic too).
+export default async function PrivacyPage({ params }: PageProps<"/[lang]/privacy-policy">) {
+  const { lang: rawLang } = await params;
+  const lang: Locale = hasLocale(rawLang) ? rawLang : "en";
+  const pages = getPagesDict(lang);
+  const dict = pages.privacy;
+  const legalName = lang === "en" ? site.legalName : pages.legalName;
+  const name = lang === "en" ? site.name : pages.brand;
+
   return (
     <Container className="max-w-3xl py-10">
-      <Breadcrumbs items={[{ name: "Privacy policy", path: "/privacy-policy" }]} />
+      <Breadcrumbs items={[{ name: dict.breadcrumb, path: "/privacy-policy" }]} lang={lang} />
       <article className="prose-content mt-8">
-        <h1 className="text-4xl font-bold">Privacy policy</h1>
-        <p>
-          This policy explains how {site.legalName} (&quot;{site.name}&quot;, &quot;we&quot;) handles personal information
-          collected through this website.
-        </p>
-        <h2>What we collect</h2>
-        <p>
-          When you book a site visit or send an enquiry, we collect the details you enter: your name, phone number, email
-          address (optional), preferred visit date and time, and your message. We also keep the page you sent it from.
-        </p>
-        <h2>How we use it</h2>
+        <h1 className="text-4xl font-bold">{dict.h1}</h1>
+        <p>{dict.intro(legalName, name)}</p>
+        <h2>{dict.collectTitle}</h2>
+        <p>{dict.collect}</p>
+        <h2>{dict.useTitle}</h2>
         <ul>
-          <li>To contact you about your enquiry or confirm your site visit.</li>
-          <li>To share information about the properties you asked about.</li>
-          <li>To keep records of bookings and improve our service.</li>
+          {dict.uses.map((u) => (
+            <li key={u}>{u}</li>
+          ))}
         </ul>
-        <p>We do not sell your personal information. We share it only with staff who need it to respond to you.</p>
-        <h2>How long we keep it</h2>
-        <p>We keep enquiry and booking records for as long as needed to serve you and meet legal obligations, then delete them.</p>
-        <h2>Your choices</h2>
+        <p>{dict.noSell}</p>
+        <h2>{dict.keepTitle}</h2>
+        <p>{dict.keep}</p>
+        <h2>{dict.choicesTitle}</h2>
         <p>
-          You can ask us to access, correct or delete your information at any time by emailing{" "}
-          <a href={`mailto:${site.contact.email}`}>{site.contact.email}</a> or calling{" "}
-          <a href={`tel:${site.contact.phone}`}>{site.contact.phoneDisplay}</a>.
+          {dict.choices.pre}
+          <a href={`mailto:${site.contact.email}`}>{site.contact.email}</a>
+          {dict.choices.mid}
+          <a href={`tel:${site.contact.phone}`}>{site.contact.phoneDisplay}</a>
+          {dict.choices.post}
         </p>
-        <h2>Cookies</h2>
-        <p>
-          This website does not use advertising or tracking cookies. Staff who sign in to the admin area receive a security
-          cookie that keeps them signed in.
-        </p>
+        <h2>{dict.cookiesTitle}</h2>
+        <p>{dict.cookies}</p>
       </article>
     </Container>
   );

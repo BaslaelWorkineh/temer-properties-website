@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "@/components/site/link";
 import type { LocationSummary } from "@/lib/data/locations";
 import type { Locale } from "@/lib/i18n/config";
+import { cityName } from "@/lib/i18n/dict/areas";
 import { getDictionary, localizedAreaName } from "@/lib/i18n/dictionaries";
 import { cn } from "@/lib/utils";
 
@@ -39,7 +40,7 @@ export function LocationCard({
       {l.image ? (
         <Image
           src={l.image.url}
-          alt={l.image.alt || `${l.name}, ${l.city}`}
+          alt={l.image.alt || `${localizedAreaName(lang, l.name)}, ${cityName(lang, l.city)}`}
           fill
           sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
           className="-z-10 object-cover transition duration-500 group-hover:scale-[1.05]"
@@ -68,7 +69,7 @@ export function LocationCard({
           {localizedAreaName(lang, l.name)}
         </Link>
       </h3>
-      <p className="mt-1 text-sm font-medium text-white">{counts || l.city}</p>
+      <p className="mt-1 text-sm font-medium text-white">{counts || cityName(lang, l.city)}</p>
     </article>
   );
 }

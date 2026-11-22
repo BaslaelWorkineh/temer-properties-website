@@ -15,10 +15,12 @@ import { PropertyGrid } from "@/components/site/property-card";
 import { Container } from "@/components/site/section";
 import { StatusLabel } from "@/components/site/status-label";
 import { buttonStyles } from "@/components/ui/button";
-import { projectStatusLabels } from "@/lib/config/property-types";
 import { site } from "@/lib/config/site";
 import { getProjectBySlug, getProjects } from "@/lib/data/projects";
 import { searchProperties } from "@/lib/data/properties";
+import { hasLocale, locales, type Locale } from "@/lib/i18n/config";
+import { cityName, getAreasDict } from "@/lib/i18n/dict/areas";
+import { getDictionary, localizedAreaName } from "@/lib/i18n/dictionaries";
 import { faqJsonLd, itemListJsonLd, projectJsonLd } from "@/lib/seo/jsonld";
 import { buildMetadata } from "@/lib/seo/metadata";
 import { stripMarkdown, truncate } from "@/lib/utils";
@@ -47,28 +49,52 @@ function seoDescription(p: Project) {
 }
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/projects/[slug]">): Promise<Metadata> {
-  const { slug } = await params;
-  const p = await getProjectBySlug(slug);
-  if (!p) return { title: "Project not found", robots: { index: false, follow: true } };
-  return buildMetadata({ title: seoTitle(p), description: seoDescription(p), path: `/projects/${p.slug}`, images: p.images });
+  const { slug, lang: rawLang } = await params;
+  const lang: Locale = hasLocale(rawLang) ? rawLang : "en";
+  const p = await getProjectBySlug(slug, lang);
+  if (!p) return { title: getAreasDict("en").projectDetail.notFound, robots: { index: false, follow: true } };
+  // With a complete Amharic translation the page exists in both languages (self-canonical + hreflang).
+  // Without one, /am/... points its canonical at the English page.
+  if (p.translated && lang === "am") {
+    return buildMetadata({
+      title: p.name,
+      description: p.summary || stripMarkdown(p.description ?? "") || p.name,
+      path: `/projects/${p.slug}`,
+      images: p.images,
+      lang: "am",
+      translations: locales,
+    });
+  }
+  return buildMetadata({
+    title: seoTitle(p),
+    description: seoDescription(p),
+    path: `/projects/${p.slug}`,
+    images: p.images,
+    ...(p.translated ? { lang: "en" as const, translations: locales } : {}),
+  });
 }
 
 export default async function ProjectPage({ params }: PageProps<"/[lang]/projects/[slug]">) {
-  const { slug } = await params;
-  const p = await getProjectBySlug(slug);
+  const { slug, lang: rawLang } = await params;
+  const lang: Locale = hasLocale(rawLang) ? rawLang : "en";
+  const dict = getDictionary(lang);
+  const t = getAreasDict(lang).projectDetail;
+  const p = await getProjectBySlug(slug, lang);
   if (!p) notFound();
 
-  const units = await searchProperties({ project: p.slug, pageSize: 48 });
+  const units = await searchProperties({ project: p.slug, pageSize: 48 }, lang);
   const residential = p.unitTypes.some((t) => /bed|apartment|studio|home|villa/i.test(t)) || /apartment|residential/i.test(p.category ?? "");
-  const where = p.location ? `${p.location.name}, ${p.location.city}` : "Addis Ababa";
+  const where = p.location
+    ? `${localizedAreaName(lang, p.location.name)}, ${cityName(lang, p.location.city)}`
+    : getAreasDict(lang).addisAbaba;
   const lat = p.latitude ?? p.location?.latitude;
   const lng = p.longitude ?? p.location?.longitude;
 
   const facts = [
-    { icon: Building2, label: "Status", value: projectStatusLabels[p.status] },
-    p.totalUnits ? { icon: Layers, label: "Units", value: String(p.totalUnits) } : null,
-    p.floors ? { icon: Layers, label: "Floors", value: String(p.floors) } : null,
-    p.completion ? { icon: CalendarClock, label: p.status === "delivered" ? "Delivered" : "Completion", value: p.completion } : null,
+    { icon: Building2, label: t.status, value: dict.projectStatus[p.status] },
+    p.totalUnits ? { icon: Layers, label: t.units, value: String(p.totalUnits) } : null,
+    p.floors ? { icon: Layers, label: t.floors, value: String(p.floors) } : null,
+    p.completion ? { icon: CalendarClock, label: p.status === "delivered" ? t.delivered : t.completion, value: p.completion } : null,
   ].filter((f): f is { icon: typeof Building2; label: string; value: string } => Boolean(f));
 
   return (
@@ -84,9 +110,10 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/project
       <Container className="pt-6 pb-16">
         <Breadcrumbs
           items={[
-            { name: "Projects", path: "/projects" },
+            { name: t.projectsCrumb, path: "/projects" },
             { name: p.name, path: `/projects/${p.slug}` },
           ]}
+          lang={lang}
         />
 
         <div className="mt-5 grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:items-start">
@@ -95,10 +122,10 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/project
               <Gallery images={p.images} title={p.name} />
             ) : (
               <div className="relative aspect-[16/10] overflow-hidden">
-                <ImagePlaceholder label="Project" />
+                <ImagePlaceholder label={getAreasDict(lang).common.placeholderProject} />
               </div>
             )}
-            <div className="mt-4"><StatusLabel status={p.status} /></div>
+            <div className="mt-4"><StatusLabel status={p.status} lang={lang} /></div>
             <h1 className="mt-2 text-3xl font-bold leading-tight sm:text-4xl">{p.name}</h1>
             <p className="mt-1.5 flex items-center gap-1.5 text-sm text-muted">
               <MapPin className="size-4" aria-hidden="true" />
@@ -123,7 +150,7 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/project
 
             {p.unitTypes.length ? (
               <section className="mt-6">
-                <h2 className="text-lg font-bold">Unit types</h2>
+                <h2 className="text-lg font-bold">{t.unitTypes}</h2>
                 <ul className="mt-4 flex flex-wrap gap-2">
                   {p.unitTypes.map((t) => (
                     <li key={t} className="rounded-none bg-brand-50 px-4 py-2 text-sm font-medium text-brand-800 ring-1 ring-brand-200">
@@ -136,14 +163,14 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/project
 
             {p.description ? (
               <section className="mt-6">
-                <h2 className="text-lg font-bold">About {p.name}</h2>
+                <h2 className="text-lg font-bold">{t.about(p.name)}</h2>
                 <Markdown content={p.description} className="mt-1.5" />
               </section>
             ) : null}
 
             {p.amenities.length ? (
               <section className="mt-6">
-                <h2 className="text-lg font-bold">Amenities</h2>
+                <h2 className="text-lg font-bold">{t.amenities}</h2>
                 <ul className="mt-5 grid gap-3 sm:grid-cols-2">
                   {p.amenities.map((a) => (
                     <li key={a} className="flex items-start gap-2.5">
@@ -157,7 +184,7 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/project
 
             {p.paymentPlan ? (
               <section className="mt-6">
-                <h2 className="text-lg font-bold">Payment plan</h2>
+                <h2 className="text-lg font-bold">{t.paymentPlan}</h2>
                 <Markdown content={p.paymentPlan} className="mt-1.5" />
               </section>
             ) : null}
@@ -170,34 +197,34 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/project
                   rel="noopener noreferrer"
                   className={buttonStyles({ variant: "outline" })}
                 >
-                  <MapPin className="size-4" aria-hidden="true" /> Open in Google Maps
+                  <MapPin className="size-4" aria-hidden="true" /> {t.openMaps}
                 </a>
               ) : null}
               {p.videoUrl ? (
                 <a href={p.videoUrl} target="_blank" rel="noopener noreferrer" className={buttonStyles({ variant: "outline" })}>
-                  <PlayCircle className="size-4" aria-hidden="true" /> Watch the video
+                  <PlayCircle className="size-4" aria-hidden="true" /> {t.watchVideo}
                 </a>
               ) : null}
             </div>
           </div>
 
-          <aside className="flex flex-col gap-4 lg:sticky lg:top-24" aria-label={p.status === "delivered" ? "Contact us" : "Contact and book a site visit"}>
+          <aside className="flex flex-col gap-4 lg:sticky lg:top-24" aria-label={p.status === "delivered" ? t.asideDelivered : t.asideActive}>
             <div className="bg-white p-5 ring-1 ring-line">
-              <StatusLabel status={p.status} />
-              <ContactPanel subject={p.name} className="mt-3" />
-              <p className="mt-3 text-[0.8125rem] text-muted">Or book a free site visit and a sales person will show you around.</p>
+              <StatusLabel status={p.status} lang={lang} />
+              <ContactPanel subject={p.name} className="mt-3" lang={lang} />
+              <p className="mt-3 text-[0.8125rem] text-muted">{t.orBook}</p>
             </div>
             <div className="bg-white p-5 ring-1 ring-line">
               {p.status === "delivered" ? (
                 <>
-                  <h2 className="text-xl font-bold">Ask about this project</h2>
-                  <p className="mt-1 text-sm text-muted">Resale or similar units elsewhere? We&apos;ll advise.</p>
+                  <h2 className="text-xl font-bold">{t.askAbout}</h2>
+                  <p className="mt-1 text-sm text-muted">{t.askLead}</p>
                   <InquiryForm projectId={p.id} defaultInterest="delivered" className="mt-4" />
                 </>
               ) : (
                 <>
-                  <h2 className="text-xl font-bold">Visit {p.name}</h2>
-                  <p className="mt-1 text-sm text-muted">In person or by video call. We&apos;ll call to confirm.</p>
+                  <h2 className="text-xl font-bold">{t.visit(p.name)}</h2>
+                  <p className="mt-1 text-sm text-muted">{t.visitLead}</p>
                   <BookingForm projectId={p.id} subject={p.name} whatsapp={site.contact.whatsapp} className="mt-4" />
                 </>
               )}
@@ -206,23 +233,21 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/project
         </div>
 
         <section className="mt-20">
-          <h2 className="text-3xl font-bold">Units for sale at {p.name}</h2>
+          <h2 className="text-3xl font-bold">{t.unitsForSale(p.name)}</h2>
           {units.items.length ? (
             <div className="mt-8">
-              <PropertyGrid properties={units.items} />
+              <PropertyGrid properties={units.items} lang={lang} />
             </div>
           ) : (
             <p className="mt-4 max-w-2xl text-muted">
-              {p.status === "delivered"
-                ? "All units in this project have been handed over."
-                : "Individual units are not listed online yet. Contact our sales team for current availability, floor plans and prices."}
+              {p.status === "delivered" ? t.allHandedOver : t.notListed}
             </p>
           )}
         </section>
 
         {p.faqs.length ? (
           <section className="mt-20 max-w-3xl">
-            <h2 className="text-3xl font-bold">Questions about {p.name}</h2>
+            <h2 className="text-3xl font-bold">{t.questionsAbout(p.name)}</h2>
             <div className="mt-6">
               <FaqList faqs={p.faqs} />
             </div>

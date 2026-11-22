@@ -4,6 +4,8 @@ import { cacheLife, cacheTag } from "next/cache";
 import { db } from "@/db";
 import { locations, projects, properties } from "@/db/schema";
 import { TAGS } from "@/lib/cache-tags";
+import type { Locale } from "@/lib/i18n/config";
+import { isTranslated, localizeRow } from "@/lib/i18n/localize";
 
 // The outer table is written out ("locations"."id"): in a single-table select drizzle prints a bare "id", which
 // inside the subquery means the INNER table's id and silently miscounts every area.
@@ -20,6 +22,8 @@ export type LocationSummary = {
   propertyCount: number;
   projectCount: number;
   updatedAt: Date;
+  /** True when the Amharic text is complete enough to index the Amharic page. */
+  translated: boolean;
 };
 
 /** A location page is only worth indexing when it has something to show. */
@@ -27,7 +31,7 @@ export function isLocationIndexable(l: { propertyCount: number; projectCount: nu
   return l.propertyCount + l.projectCount > 0;
 }
 
-export async function getLocations(): Promise<LocationSummary[]> {
+export async function getLocations(lang: Locale = "en"): Promise<LocationSummary[]> {
   "use cache";
   cacheLife("hours");
   cacheTag(TAGS.locations, TAGS.properties, TAGS.projects);
@@ -42,14 +46,20 @@ export async function getLocations(): Promise<LocationSummary[]> {
       propertyCount,
       projectCount,
       updatedAt: locations.updatedAt,
+      translations: locations.translations,
     })
     .from(locations)
     .where(eq(locations.isPublished, true))
     .orderBy(asc(locations.sortOrder), asc(locations.name));
-  return rows.map((r) => ({ ...r, propertyCount: Number(r.propertyCount), projectCount: Number(r.projectCount) }));
+  return rows.map(({ translations, ...r }) => ({
+    ...localizeRow(r, translations, lang),
+    propertyCount: Number(r.propertyCount),
+    projectCount: Number(r.projectCount),
+    translated: isTranslated(translations, ["name", "description"]),
+  }));
 }
 
-export async function getLocationBySlug(slug: string) {
+export async function getLocationBySlug(slug: string, lang: Locale = "en") {
   "use cache";
   cacheLife("hours");
   cacheTag(TAGS.locations, TAGS.properties, TAGS.projects);
@@ -59,5 +69,10 @@ export async function getLocationBySlug(slug: string) {
     .where(and(eq(locations.slug, slug), eq(locations.isPublished, true)))
     .limit(1);
   if (!row) return null;
-  return { ...row.location, propertyCount: Number(row.propertyCount), projectCount: Number(row.projectCount) };
+  return {
+    ...localizeRow(row.location, row.location.translations, lang),
+    propertyCount: Number(row.propertyCount),
+    projectCount: Number(row.projectCount),
+    translated: isTranslated(row.location.translations, ["name", "description"]),
+  };
 }

@@ -3,17 +3,18 @@ import Image from "next/image";
 import Link from "@/components/site/link";
 import { ContactActions } from "@/components/site/contact-actions";
 import type { Locale } from "@/lib/i18n/config";
-import { getDictionary } from "@/lib/i18n/dictionaries";
+import { getAreasDict } from "@/lib/i18n/dict/areas";
+import { getDictionary, localizedAreaName } from "@/lib/i18n/dictionaries";
 import { ImagePlaceholder } from "@/components/site/image-placeholder";
 import { ImageWatermark } from "@/components/site/image-watermark";
 import { StatusLabel } from "@/components/site/status-label";
 import { buttonStyles } from "@/components/ui/button";
 import type { ProjectSummary } from "@/lib/data/projects";
-import { pluralize } from "@/lib/utils";
+import type { AreasDict } from "@/lib/i18n/dict/areas";
 
-function availabilityLabel(p: ProjectSummary) {
-  if (p.status === "delivered") return p.totalUnits ? `${p.totalUnits} units delivered` : "Completed project";
-  return p.availableUnits ? `${pluralize(p.availableUnits, "unit")} listed` : (p.unitTypes[0] ?? "Ask for availability");
+function availabilityLabel(p: ProjectSummary, t: AreasDict) {
+  if (p.status === "delivered") return p.totalUnits ? t.common.unitsDelivered(p.totalUnits) : t.common.completedProject;
+  return p.availableUnits ? t.common.unitsListed(p.availableUnits) : (p.unitTypes[0] ?? t.common.askAvailability);
 }
 
 /**
@@ -33,7 +34,8 @@ export function ProjectCard({
   lang?: Locale;
 }) {
   const p = project;
-  const where = p.location?.name ?? "Addis Ababa";
+  const t = getAreasDict(lang);
+  const where = p.location?.name ? localizedAreaName(lang, p.location.name) : t.addisAbaba;
 
   if (variant === "banner") {
     // Wide slide for the self-scrolling row: photo fills the card, a pill button and a one-line caption sit
@@ -50,7 +52,7 @@ export function ProjectCard({
           />
         ) : (
           <div className="absolute inset-0 -z-10">
-            <ImagePlaceholder label="Project" />
+            <ImagePlaceholder label={t.common.placeholderProject} />
           </div>
         )}
         <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/85 via-black/35 via-45% to-transparent to-70%" aria-hidden="true" />
@@ -96,7 +98,7 @@ export function ProjectCard({
           />
         ) : (
           <div className="absolute inset-0 -z-10">
-            <ImagePlaceholder label="Project" />
+            <ImagePlaceholder label={t.common.placeholderProject} />
           </div>
         )}
         <div
@@ -109,7 +111,7 @@ export function ProjectCard({
         />
         <ImageWatermark className="left-4 top-4" />
         <div className="absolute right-3 top-3">
-          <StatusLabel status={p.status} />
+          <StatusLabel status={p.status} lang={lang} />
         </div>
         <div className={compact ? "p-4" : "p-6 sm:p-8"}>
           <h3 className={compact ? "text-lg font-bold leading-tight" : "text-3xl font-bold leading-tight sm:text-4xl"}>
@@ -125,10 +127,10 @@ export function ProjectCard({
             <>
               {p.summary ? <p className="mt-3 line-clamp-2 max-w-xl text-sm leading-relaxed text-white/80">{p.summary}</p> : null}
               <p className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-gold-400">
-                {availabilityLabel(p)} <ArrowUpRight className="size-4" aria-hidden="true" />
+                {availabilityLabel(p, t)} <ArrowUpRight className="size-4" aria-hidden="true" />
               </p>
               <div className="mt-4">
-                <ContactActions subject={p.name} tone="dark" />
+                <ContactActions subject={p.name} tone="dark" lang={lang} />
               </div>
             </>
           ) : null}
@@ -149,11 +151,11 @@ export function ProjectCard({
             className="object-cover transition duration-500 group-hover:scale-[1.04]"
           />
         ) : (
-          <ImagePlaceholder label="Project" />
+          <ImagePlaceholder label={t.common.placeholderProject} />
         )}
         <ImageWatermark className="left-4 top-4" />
         <div className="absolute right-3 top-3">
-          <StatusLabel status={p.status} />
+          <StatusLabel status={p.status} lang={lang} />
         </div>
       </div>
       <div className="flex flex-1 flex-col p-5">
@@ -169,11 +171,11 @@ export function ProjectCard({
         </p>
         {p.summary ? <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-ink/75">{p.summary}</p> : null}
         <div className="mt-auto flex items-center justify-between gap-3 pt-5 text-sm">
-          <span className="font-medium text-brand-700">{availabilityLabel(p)}</span>
+          <span className="font-medium text-brand-700">{availabilityLabel(p, t)}</span>
           <ArrowUpRight className="size-5 text-muted transition group-hover:text-brand-600" aria-hidden="true" />
         </div>
         <div className="mt-4 border-t border-line pt-4">
-          <ContactActions subject={p.name} />
+          <ContactActions subject={p.name} lang={lang} />
         </div>
       </div>
     </article>

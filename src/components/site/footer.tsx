@@ -10,6 +10,17 @@ import { getLocations, isLocationIndexable } from "@/lib/data/locations";
 import type { Locale } from "@/lib/i18n/config";
 import { getDictionary, localizedAreaName } from "@/lib/i18n/dictionaries";
 
+/** Network names as Amharic readers know them (screen-reader text only: the icons are the visible part). */
+const amharicSocial: Record<string, string> = {
+  Facebook: "ፌስቡክ",
+  Instagram: "ኢንስታግራም",
+  TikTok: "ቲክቶክ",
+  YouTube: "ዩቲዩብ",
+  "X (Twitter)": "ኤክስ (ትዊተር)",
+  Telegram: "ቴሌግራም",
+  WhatsApp: "ዋትስአፕ",
+};
+
 const socials = [
   { href: site.social.facebook, label: "Facebook", Icon: FacebookIcon },
   { href: site.social.instagram, label: "Instagram", Icon: InstagramIcon },
@@ -32,7 +43,7 @@ async function Copyright({ lang }: { lang: Locale }) {
  */
 export async function Footer({ lang }: { lang: Locale }) {
   const dict = getDictionary(lang);
-  const locations = (await getLocations()).filter(isLocationIndexable).slice(0, 10);
+  const locations = (await getLocations(lang)).filter(isLocationIndexable).slice(0, 10);
 
   return (
     <footer className="mt-auto bg-brand-950 text-white/80">
@@ -50,7 +61,7 @@ export async function Footer({ lang }: { lang: Locale }) {
                   className="grid size-10 place-items-center rounded-full bg-white/10 text-white transition hover:bg-gold-500 hover:text-brand-950"
                 >
                   <Icon className="size-4.5" />
-                  <span className="sr-only">{label}</span>
+                  <span className="sr-only">{lang === "am" ? (amharicSocial[label] ?? label) : label}</span>
                 </a>
               </li>
             ))}
@@ -100,9 +111,9 @@ export async function Footer({ lang }: { lang: Locale }) {
             <p className="flex gap-3">
               <MapPin className="mt-0.5 size-4 shrink-0 text-gold-400" aria-hidden="true" />
               <span>
-                {site.name}
+                {dict.brand.full}
                 <br />
-                {site.address.street}, {site.address.locality}, {dict.footer.address}
+                {dict.office.street}, {dict.office.locality}, {dict.footer.address}
               </span>
             </p>
             <p className="flex gap-3">

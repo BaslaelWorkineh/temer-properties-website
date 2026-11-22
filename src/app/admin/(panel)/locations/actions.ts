@@ -9,7 +9,7 @@ import { locations, projects, properties, type FaqItem, type ImageItem } from "@
 import { requireAdmin, requireOwner } from "@/lib/auth/session";
 import { TAGS } from "@/lib/cache-tags";
 import { refreshPublicContent } from "@/lib/revalidate";
-import { bool, errorState, json, lines, locationInputSchema, optStr, str, validationError, type FormState } from "@/lib/validation";
+import { bool, errorState, json, lines, locationInputSchema, optStr, readAm, str, validationError, type FormState } from "@/lib/validation";
 
 type Saved = { id: number; slug: string };
 
@@ -58,6 +58,7 @@ export async function saveLocationAction(_prev: FormState<Saved>, formData: Form
     longitude: data.longitude ?? null,
     isPublished: data.isPublished,
     sortOrder: data.sortOrder ?? 0,
+    translations: readAm(formData, { text: ["name", "summary", "description"], lines: ["highlights"], faqs: true }),
     seoTitle: data.seoTitle ?? null,
     seoDescription: data.seoDescription ?? null,
   };

@@ -3,6 +3,7 @@ import { TelegramIcon, WhatsAppIcon } from "@/components/site/brand-icons";
 import { site, whatsappLink } from "@/lib/config/site";
 import type { Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
+import { getPropertiesDict } from "@/lib/i18n/dict/properties";
 
 const base =
   "inline-flex size-10 items-center justify-center border transition focus-visible:outline-2 focus-visible:outline-offset-2";
@@ -26,30 +27,31 @@ export function ContactActions({
   lang?: Locale;
 }) {
   const dict = getDictionary(lang);
+  const pd = getPropertiesDict(lang);
   const button = `${tone === "dark" ? darkButton : lightButton}${round ? " rounded-full" : ""}`;
   const { contact } = site;
-  const message = `Hello Temer Properties, I'm interested in: ${subject}`;
+  const message = pd.contact.message(subject);
   return (
-    <div className="relative z-10 flex items-center gap-2" role="group" aria-label={`Contact us about ${subject}`}>
+    <div className="relative z-10 flex items-center gap-2" role="group" aria-label={pd.contact.about(subject)}>
       <a href={`tel:${contact.phone}`} className={button} title={dict.common.call}>
         <Phone className="size-4" aria-hidden="true" />
         <span className="sr-only">{dict.common.call} {contact.phoneDisplay}</span>
       </a>
-      <a href={whatsappLink(message)} target="_blank" rel="noopener noreferrer" className={button} title="WhatsApp">
+      <a href={whatsappLink(message)} target="_blank" rel="noopener noreferrer" className={button} title={dict.common.whatsapp}>
         <WhatsAppIcon className="size-4" />
-        <span className="sr-only">WhatsApp</span>
+        <span className="sr-only">{dict.common.whatsapp}</span>
       </a>
-      <a href={contact.telegram} target="_blank" rel="noopener noreferrer" className={button} title="Telegram">
+      <a href={contact.telegram} target="_blank" rel="noopener noreferrer" className={button} title={pd.contact.telegram}>
         <TelegramIcon className="size-4" />
-        <span className="sr-only">Telegram</span>
+        <span className="sr-only">{pd.contact.telegram}</span>
       </a>
       <a
         href={`mailto:${contact.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`}
         className={button}
-        title="Email"
+        title={pd.contact.email}
       >
         <Mail className="size-4" aria-hidden="true" />
-        <span className="sr-only">Email</span>
+        <span className="sr-only">{pd.contact.email}</span>
       </a>
     </div>
   );

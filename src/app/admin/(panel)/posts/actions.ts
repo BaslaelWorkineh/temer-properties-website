@@ -9,7 +9,7 @@ import { posts, type ImageItem } from "@/db/schema";
 import { requireAdmin, requireOwner } from "@/lib/auth/session";
 import { TAGS } from "@/lib/cache-tags";
 import { refreshPublicContent } from "@/lib/revalidate";
-import { bool, errorState, json, optStr, postInputSchema, validationError, type FormState } from "@/lib/validation";
+import { bool, errorState, json, optStr, postInputSchema, readAm, validationError, type FormState } from "@/lib/validation";
 
 type Saved = { id: number; slug: string };
 
@@ -57,6 +57,7 @@ export async function savePostAction(_prev: FormState<Saved>, formData: FormData
     isPublished: data.isPublished,
     // First publication date is kept forever (articles shouldn't jump to the top on every edit).
     publishedAt: existing?.publishedAt ?? (data.isPublished ? new Date() : null),
+    translations: readAm(formData, { text: ["title", "excerpt", "content"] }),
     seoTitle: data.seoTitle ?? null,
     seoDescription: data.seoDescription ?? null,
   };

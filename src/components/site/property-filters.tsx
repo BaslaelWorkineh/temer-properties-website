@@ -2,8 +2,11 @@ import { Search } from "lucide-react";
 import { AutoSubmitForm as Form } from "@/components/site/auto-submit-form";
 import { buttonStyles } from "@/components/ui/button";
 import { inputStyles } from "@/components/ui/form";
-import { PROPERTY_TYPES, propertyTypes } from "@/lib/config/property-types";
-import { PROPERTY_SORTS, propertySortLabels, type PropertyFilters as Filters } from "@/lib/data/properties";
+import { PROPERTY_TYPES } from "@/lib/config/property-types";
+import { PROPERTY_SORTS, type PropertyFilters as Filters } from "@/lib/data/properties";
+import type { Locale } from "@/lib/i18n/config";
+import { getDictionary, localizedAreaName } from "@/lib/i18n/dictionaries";
+import { getPropertiesDict } from "@/lib/i18n/dict/properties";
 import { cn } from "@/lib/utils";
 
 export const PRICE_STEPS = [3_000_000, 5_000_000, 8_000_000, 12_000_000, 18_000_000, 25_000_000, 40_000_000];
@@ -20,6 +23,7 @@ export function PropertyFilters({
   bare,
   dense,
   className,
+  lang = "en",
 }: {
   filters: Filters;
   locations: Array<{ slug: string; name: string }>;
@@ -27,7 +31,10 @@ export function PropertyFilters({
   bare?: boolean;
   dense?: boolean;
   className?: string;
+  lang?: Locale;
 }) {
+  const dict = getDictionary(lang);
+  const f = getPropertiesDict(lang).filters;
   // `!` because cn() does not resolve conflicts and the button size already sets a height.
   const fieldHeight = dense ? "h-10!" : "h-12";
   const select = cn(inputStyles, fieldHeight);
@@ -42,37 +49,37 @@ export function PropertyFilters({
       )}
     >
       <label className="sr-only" htmlFor="filter-type">
-        Property type
+        {f.type}
       </label>
       <select id="filter-type" name="type" defaultValue={filters.type ?? ""} className={select}>
-        <option value="">All property types</option>
+        <option value="">{f.allTypes}</option>
         {PROPERTY_TYPES.map((t) => (
           <option key={t} value={t}>
-            {propertyTypes[t].plural}
+            {dict.types[t].plural}
           </option>
         ))}
       </select>
 
       <label className="sr-only" htmlFor="filter-location">
-        Area
+        {f.area}
       </label>
       <select id="filter-location" name="location" defaultValue={filters.location ?? ""} className={select}>
-        <option value="">All areas</option>
+        <option value="">{f.allAreas}</option>
         {locations.map((l) => (
           <option key={l.slug} value={l.slug}>
-            {l.name}
+            {localizedAreaName(lang, l.name)}
           </option>
         ))}
       </select>
 
       <label className="sr-only" htmlFor="filter-bedrooms">
-        Bedrooms
+        {f.bedrooms}
       </label>
       <select id="filter-bedrooms" name="bedrooms" defaultValue={filters.bedrooms ? String(filters.bedrooms) : ""} className={select}>
-        <option value="">Any bedrooms</option>
+        <option value="">{f.anyBedrooms}</option>
         {[1, 2, 3, 4].map((n) => (
           <option key={n} value={n}>
-            {n}+ bedrooms
+            {f.nBedrooms(n)}
           </option>
         ))}
       </select>
@@ -80,24 +87,24 @@ export function PropertyFilters({
       {!compact ? (
         <>
           <label className="sr-only" htmlFor="filter-max-price">
-            Maximum price
+            {f.maxPrice}
           </label>
           <select id="filter-max-price" name="maxPrice" defaultValue={filters.maxPrice ? String(filters.maxPrice) : ""} className={select}>
-            <option value="">Any price</option>
+            <option value="">{f.anyPrice}</option>
             {PRICE_STEPS.map((p) => (
               <option key={p} value={p}>
-                Up to ETB {p / 1_000_000}M
+                {f.upTo(p / 1_000_000)}
               </option>
             ))}
           </select>
 
           <label className="sr-only" htmlFor="filter-sort">
-            Sort by
+            {f.sortBy}
           </label>
           <select id="filter-sort" name="sort" defaultValue={filters.sort ?? "recommended"} className={select}>
             {PROPERTY_SORTS.map((s) => (
               <option key={s} value={s}>
-                {propertySortLabels[s]}
+                {f.sorts[s]}
               </option>
             ))}
           </select>
@@ -108,7 +115,7 @@ export function PropertyFilters({
         type="submit"
         className={buttonStyles({ size: dense ? "sm" : "lg", className: cn(fieldHeight, "sm:col-span-2 lg:col-span-1") })}
       >
-        <Search className="size-4" aria-hidden="true" /> Search
+        <Search className="size-4" aria-hidden="true" /> {f.search}
       </button>
     </Form>
   );

@@ -5,20 +5,21 @@ import { usePathname } from "next/navigation";
 import { startTransition, useActionState, useEffect, useId, useState, useSyncExternalStore } from "react";
 import { createBooking, type BookingResult } from "@/actions/public";
 import { WhatsAppIcon } from "@/components/site/brand-icons";
+import { useLang } from "@/components/site/lang";
 import { Honeypot, PhoneInput } from "@/components/site/phone-input";
 import { buttonStyles } from "@/components/ui/button";
 import { Field, FieldError, FormMessage, inputStyles } from "@/components/ui/form";
-import { VISIT_TYPES, bookingConfig, visitTypeLabels, type VisitType } from "@/lib/config/booking";
+import { VISIT_TYPES, bookingConfig, type VisitType } from "@/lib/config/booking";
 import { addDays, addisToday, formatSlot, formatVisitDate } from "@/lib/dates";
+import { bookableDateIssue, dateIssueMessage, getFormsDict } from "@/lib/i18n/dict/forms";
 import { cn } from "@/lib/utils";
 import type { FormState } from "@/lib/validation";
 
-type Slot = { time: string; label: string; remaining: number; available: boolean };
+type Slot = { time: string; remaining: number; available: boolean };
 type Availability = { date: string; open: boolean; message?: string; slots: Slot[] };
 
 const allSlots: Slot[] = bookingConfig.slots.map((time) => ({
   time,
-  label: formatSlot(time),
   remaining: bookingConfig.capacityPerSlot,
   available: true,
 }));
@@ -50,6 +51,8 @@ export function BookingForm({
 }) {
   const uid = useId();
   const pathname = usePathname();
+  const lang = useLang();
+  const t = getFormsDict(lang);
   const [state, formAction, pending] = useActionState(createBooking, { status: "idle" } as FormState<BookingResult>);
 
   // Today in Addis Ababa, read only in the browser (no Date access during prerendering).
@@ -76,19 +79,28 @@ export function BookingForm({
   const loading = Boolean(date) && !current && !loadFailed;
   const slots = current?.open ? current.slots : allSlots;
   const errors = state.status === "error" ? (state.fieldErrors ?? {}) : {};
+  // The API sends its message in English; work out the same reason here so it shows in the visitor's language.
+  const issue = today && date ? bookableDateIssue(date, today) : null;
+  const closedMessage = issue ? dateIssueMessage(issue, lang) : current?.message;
 
   if (state.status === "success" && state.data) {
     const d = state.data;
-    const waText = `Hello Temer Properties, I booked a site visit${subject ? ` for ${subject}` : ""} (reference ${d.reference}) on ${formatVisitDate(d.visitDate)} at ${formatSlot(d.timeSlot)}.`;
+    const when = { date: formatVisitDate(d.visitDate, lang), time: formatSlot(d.timeSlot, lang) };
+    const waText = t.booking.whatsappMessage(d.reference, when.date, when.time, subject);
     return (
       <div role="status" className={cn("rounded-none bg-brand-50 p-6 ring-1 ring-brand-200", className)}>
         <CheckCircle2 className="size-10 text-brand-600" aria-hidden="true" />
-        <h3 className="mt-3 text-2xl font-bold text-ink">Visit request received</h3>
+        <h3 className="mt-3 text-2xl font-bold text-ink">{t.booking.receivedTitle}</h3>
         <p className="mt-2 leading-relaxed text-ink/80">
-          Thank you! Your reference is <strong className="font-semibold text-ink">{d.reference}</strong>. Our team will call you to
-          confirm your {visitTypeLabels[d.visitType as VisitType].toLowerCase()} on{" "}
-          <strong className="font-semibold text-ink">{formatVisitDate(d.visitDate)}</strong> at{" "}
-          <strong className="font-semibold text-ink">{formatSlot(d.timeSlot)}</strong>.
+          {t.booking.successParts(d.reference, t.visitTypes[d.visitType as VisitType], when.date, when.time).map((part, i) =>
+            part.bold ? (
+              <strong key={i} className="font-semibold text-ink">
+                {part.text}
+              </strong>
+            ) : (
+              <span key={i}>{part.text}</span>
+            ),
+          )}
         </p>
         <a
           href={`https://wa.me/${whatsapp}?text=${encodeURIComponent(waText)}`}
@@ -96,7 +108,7 @@ export function BookingForm({
           rel="noopener noreferrer"
           className={buttonStyles({ variant: "outline", className: "mt-5" })}
         >
-          <WhatsAppIcon className="size-4 text-[#25D366]" /> Message us on WhatsApp
+          <WhatsAppIcon className="size-4 text-[#25D366]" /> {t.booking.whatsappButton}
         </a>
       </div>
     );
@@ -117,10 +129,11 @@ export function BookingForm({
       {propertyId ? <input type="hidden" name="propertyId" value={propertyId} /> : null}
       {projectId ? <input type="hidden" name="projectId" value={projectId} /> : null}
       <input type="hidden" name="source" value={pathname} />
+      <input type="hidden" name="lang" value={lang} />
       <Honeypot idPrefix={uid} />
 
       <fieldset>
-        <legend className="mb-1.5 text-sm font-medium text-ink">How would you like to visit?</legend>
+        <legend className="mb-1.5 text-sm font-medium text-ink">{t.booking.howToVisit}</legend>
         <div className="grid grid-cols-2 gap-2">
           {VISIT_TYPES.map((type) => (
             <label
@@ -138,17 +151,17 @@ export function BookingForm({
                 onChange={() => setVisitType(type)}
                 className="sr-only"
               />
-              {type === "in_person" ? "In person" : "Video call"}
+              {type === "in_person" ? t.booking.inPerson : t.booking.videoCall}
             </label>
           ))}
         </div>
       </fieldset>
 
       {projectOptions?.length ? (
-        <Field id={`${uid}-project`} name="projectId" label="Which project?" errors={errors.projectId}>
+        <Field id={`${uid}-project`} name="projectId" label={t.booking.whichProject} errors={errors.projectId}>
           {(props) => (
             <select {...props} defaultValue={defaultProjectId ?? ""} className={inputStyles}>
-              <option value="">Not sure yet, advise me</option>
+              <option value="">{t.booking.notSure}</option>
               {projectOptions.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name}
@@ -159,7 +172,7 @@ export function BookingForm({
         </Field>
       ) : null}
 
-      <Field id={`${uid}-date`} name="visitDate" label="Preferred date" required errors={errors.visitDate}>
+      <Field id={`${uid}-date`} name="visitDate" label={t.booking.date} required errors={errors.visitDate}>
         {(props) => (
           <input
             {...props}
@@ -179,11 +192,11 @@ export function BookingForm({
 
       <fieldset aria-describedby={errors.timeSlot ? `${uid}-slot-error` : undefined}>
         <legend className="mb-1.5 text-sm font-medium text-ink">
-          Preferred time <span className="text-red-600">*</span>
-          {loading ? <span className="ml-2 text-xs font-normal text-muted">Checking availability…</span> : null}
+          {t.booking.time} <span className="text-red-600">*</span>
+          {loading ? <span className="ml-2 text-xs font-normal text-muted">{t.booking.checking}</span> : null}
         </legend>
         {current && !current.open ? (
-          <p className="rounded-none bg-gold-100 px-3 py-2 text-sm text-[#6b5016]">{current.message}</p>
+          <p className="rounded-none bg-gold-100 px-3 py-2 text-sm text-[#6b5016]">{closedMessage}</p>
         ) : (
           <div className="grid grid-cols-3 gap-2">
             {slots.map((slot) => (
@@ -205,9 +218,9 @@ export function BookingForm({
                   onChange={() => setTimeSlot(slot.time)}
                   className="sr-only"
                 />
-                {slot.label}
+                {formatSlot(slot.time, lang)}
                 {current?.open && slot.available && slot.remaining === 1 ? (
-                  <span className="text-[0.65rem] font-semibold text-gold-600 no-underline">1 spot left</span>
+                  <span className="text-[0.65rem] font-semibold text-gold-600 no-underline">{t.booking.oneSpotLeft}</span>
                 ) : null}
               </label>
             ))}
@@ -216,17 +229,17 @@ export function BookingForm({
         <FieldError id={`${uid}-slot-error`} errors={errors.timeSlot} />
       </fieldset>
 
-      <Field id={`${uid}-name`} name="fullName" label="Full name" required errors={errors.fullName}>
+      <Field id={`${uid}-name`} name="fullName" label={t.fields.fullName} required errors={errors.fullName}>
         {(props) => <input {...props} autoComplete="name" className={inputStyles} />}
       </Field>
 
       <PhoneInput idPrefix={uid} errors={errors.phone} />
 
       <div className="grid gap-5 sm:grid-cols-[1fr_7rem]">
-        <Field id={`${uid}-email`} name="email" label="Email (optional)" errors={errors.email}>
+        <Field id={`${uid}-email`} name="email" label={t.fields.emailOptional} errors={errors.email}>
           {(props) => <input {...props} type="email" autoComplete="email" className={inputStyles} />}
         </Field>
-        <Field id={`${uid}-party`} name="partySize" label="People" errors={errors.partySize}>
+        <Field id={`${uid}-party`} name="partySize" label={t.fields.people} errors={errors.partySize}>
           {(props) => (
             <select {...props} defaultValue="1" className={inputStyles}>
               {Array.from({ length: bookingConfig.maxPartySize }, (_, i) => i + 1).map((n) => (
@@ -239,13 +252,13 @@ export function BookingForm({
         </Field>
       </div>
 
-      <Field id={`${uid}-message`} name="message" label="Anything we should know? (optional)" errors={errors.message}>
+      <Field id={`${uid}-message`} name="message" label={t.booking.messageLabel} errors={errors.message}>
         {(props) => (
           <textarea
             {...props}
             rows={3}
             maxLength={1000}
-            placeholder="e.g. I'm interested in a 3-bedroom unit and payment plans"
+            placeholder={t.booking.messagePlaceholder}
             className={inputStyles}
           />
         )}
@@ -259,9 +272,9 @@ export function BookingForm({
         ) : (
           <CalendarCheck2 className="size-5" aria-hidden="true" />
         )}
-        {pending ? "Sending…" : "Request site visit"}
+        {pending ? t.booking.sending : t.booking.submit}
       </button>
-      <p className="text-center text-xs text-muted">Free, no obligation. We confirm every visit by phone.</p>
+      <p className="text-center text-xs text-muted">{t.booking.footnote}</p>
     </form>
   );
 }

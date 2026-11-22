@@ -15,6 +15,13 @@
       "when": 1795170224792,
       "tag": "0001_melted_korvac",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1795308548700,
+      "tag": "0002_unknown_reavers",
+      "breakpoints": true
     }
   ]
 }

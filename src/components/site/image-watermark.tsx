@@ -1,3 +1,6 @@
+"use client";
+
+import { useLang } from "@/components/site/lang";
 import { cn } from "@/lib/utils";
 
 /**
@@ -7,6 +10,7 @@ import { cn } from "@/lib/utils";
  * Place it inside a `relative` image wrapper.
  */
 export function ImageWatermark({ className }: { className?: string }) {
+  const am = useLang() === "am";
   return (
     <span
       aria-hidden="true"
@@ -15,8 +19,10 @@ export function ImageWatermark({ className }: { className?: string }) {
         className,
       )}
     >
-      <span className="block text-[1.35rem] tracking-tight">Temer</span>
-      <span className="mt-0.5 block text-[0.6rem] tracking-[0.14em]">PROPERTIES</span>
+      <span className={cn("block text-[1.35rem] tracking-tight", am && "font-[family-name:var(--font-ethiopic)] font-black")}>{am ? "ቴምር" : "Temer"}</span>
+      <span className={cn("mt-0.5 block text-[0.6rem] tracking-[0.14em]", am && "font-[family-name:var(--font-ethiopic)] tracking-[0.06em]")}>
+        {am ? "ፕሮፐርቲስ" : "PROPERTIES"}
+      </span>
     </span>
   );
 }

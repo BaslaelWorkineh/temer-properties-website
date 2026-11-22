@@ -5,10 +5,13 @@ import { ImagePlaceholder } from "@/components/site/image-placeholder";
 import { JsonLd } from "@/components/site/json-ld";
 import { Container, PageHero } from "@/components/site/section";
 import { getPublishedPosts } from "@/lib/data/posts";
-import { formatDate } from "@/lib/format";
+import { hasLocale, type Locale } from "@/lib/i18n/config";
+import { formatPostDate, getPagesDict } from "@/lib/i18n/dict/pages";
 import { itemListJsonLd } from "@/lib/seo/jsonld";
 import { buildMetadata } from "@/lib/seo/metadata";
 
+// Post titles, excerpts and covers come from the database in English, so the page stays an English page for search
+// engines: no `lang` here means the canonical (also for /am/blog) is the English URL. Only the surrounding UI is translated.
 export const metadata = buildMetadata({
   title: "Property Buyer Guides for Addis Ababa",
   description:
@@ -16,16 +19,19 @@ export const metadata = buildMetadata({
   path: "/blog",
 });
 
-export default async function BlogPage() {
-  const posts = await getPublishedPosts();
+export default async function BlogPage({ params }: PageProps<"/[lang]/blog">) {
+  const { lang: rawLang } = await params;
+  const lang: Locale = hasLocale(rawLang) ? rawLang : "en";
+  const dict = getPagesDict(lang).blog;
+  const posts = await getPublishedPosts(undefined, lang);
   return (
     <>
       <JsonLd data={itemListJsonLd(posts.map((p) => ({ path: `/blog/${p.slug}`, name: p.title })), "Buyer guides")} />
       <PageHero>
-        <Breadcrumbs items={[{ name: "Guides", path: "/blog" }]} inverted />
-        <h1 className="mt-4 text-4xl font-bold sm:text-5xl">Buyer guides</h1>
+        <Breadcrumbs items={[{ name: dict.breadcrumb, path: "/blog" }]} inverted lang={lang} />
+        <h1 className="mt-4 text-4xl font-bold sm:text-5xl">{dict.h1}</h1>
         <p className="mt-3 max-w-2xl text-lg text-white/80">
-          Straight answers to the questions buyers ask us most, from payment plans to buying from abroad.
+          {dict.intro}
         </p>
       </PageHero>
       <Container className="py-14">
@@ -44,13 +50,13 @@ export default async function BlogPage() {
                         className="object-cover"
                       />
                     ) : (
-                      <ImagePlaceholder label="Guide" />
+                      <ImagePlaceholder label={dict.guideLabel} />
                     )}
                   </div>
                   <div className="flex flex-1 flex-col p-6">
                     {post.publishedAt ? (
                       <time dateTime={post.publishedAt.toISOString()} className="text-sm text-muted">
-                        {formatDate(post.publishedAt)}
+                        {formatPostDate(post.publishedAt, lang)}
                       </time>
                     ) : null}
                     <h2 className="mt-2 text-2xl font-bold leading-snug">
@@ -65,7 +71,7 @@ export default async function BlogPage() {
             ))}
           </ul>
         ) : (
-          <p className="text-muted">Guides are coming soon.</p>
+          <p className="text-muted">{dict.comingSoon}</p>
         )}
       </Container>
     </>

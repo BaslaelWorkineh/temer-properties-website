@@ -1,6 +1,7 @@
 "use client";
 
 import { saveProjectAction } from "@/app/admin/(panel)/projects/actions";
+import { AmharicFields } from "@/components/admin/amharic-fields";
 import { FaqEditor } from "@/components/admin/faq-editor";
 import { Checkbox } from "@/components/admin/form-controls";
 import { ImageManager } from "@/components/admin/image-manager";
@@ -110,6 +111,24 @@ export function ProjectForm({ project, locations, siteUrl }: { project: Project 
 
       <FormSection title="Frequently asked questions">
         <FaqEditor name="faqs" initial={project?.faqs ?? []} errors={errors.faqs} />
+      </FormSection>
+
+      <FormSection title="Amharic (አማርኛ)" description="Shown on the Amharic pages. Empty fields show the English text.">
+        <AmharicFields
+          initial={project?.translations?.am}
+          fields={[
+            { name: "name", label: "Project name", kind: "text" },
+            { name: "category", label: "Category", kind: "text" },
+            { name: "summary", label: "Summary", kind: "area" },
+            { name: "description", label: "Full description", kind: "markdown" },
+            { name: "unitTypes", label: "Unit types", kind: "lines", hint: "One per line." },
+            { name: "amenities", label: "Amenities", kind: "lines", hint: "One per line." },
+            { name: "paymentPlan", label: "Payment plan", kind: "area" },
+            { name: "completion", label: "Completion", kind: "text" },
+            { name: "address", label: "Address", kind: "text" },
+            { name: "faqs", label: "Frequently asked questions", kind: "faqs" },
+          ]}
+        />
       </FormSection>
 
       <FormSection title="Search appearance">

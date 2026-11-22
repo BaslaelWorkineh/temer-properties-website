@@ -135,6 +135,28 @@
   }
 }
 
+/* Amharic wordmark: Ethiopic glyphs, no negative tracking, solid gold second line (outlined strokes look rough on Ethiopic). */
+@layer components {
+  .hero-wordmark:lang(am) {
+    font-family: var(--font-ethiopic), ui-sans-serif, system-ui, sans-serif;
+    font-size: clamp(3rem, 9vw, 7.5rem);
+    line-height: 1.05;
+  }
+  .hero-wordmark:lang(am) .hero-wordmark__name {
+    letter-spacing: 0;
+    margin-left: 0;
+  }
+  .hero-wordmark:lang(am) .hero-wordmark__sub {
+    font-family: var(--font-ethiopic), ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.45em;
+    letter-spacing: 0.06em;
+    margin-right: 0;
+    padding-left: 0;
+    color: var(--color-gold-400);
+    -webkit-text-stroke: 0;
+  }
+}
+
 /* Self-scrolling rows on the home page (see components/site/marquee.tsx). */
 @layer components {
   .marquee {

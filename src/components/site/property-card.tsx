@@ -8,7 +8,8 @@ import { ImageWatermark } from "@/components/site/image-watermark";
 import { TypeLabel } from "@/components/site/status-label";
 import { propertyTypes } from "@/lib/config/property-types";
 import type { Locale } from "@/lib/i18n/config";
-import { getDictionary } from "@/lib/i18n/dictionaries";
+import { getDictionary, localizedAreaName } from "@/lib/i18n/dictionaries";
+import { getPropertiesDict } from "@/lib/i18n/dict/properties";
 import type { PropertyCardData } from "@/lib/data/properties";
 import { discountedPrice, formatArea, formatPrice } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -30,10 +31,11 @@ export function PropertyCard({
   lang?: Locale;
 }) {
   const dict = getDictionary(lang);
+  const pd = getPropertiesDict(lang);
   const p = property;
   const meta = propertyTypes[p.type];
   const Heading = headingLevel === 2 ? "h2" : "h3";
-  const place = [p.project?.name, p.location?.name ?? "Addis Ababa"].filter(Boolean).join(", ");
+  const place = [p.project?.name, p.location?.name ? localizedAreaName(lang, p.location.name) : pd.detail.addis].filter(Boolean).join(", ");
   const hasDiscount = !!p.price && !!p.discountPercent;
 
   if (variant === "tile") {
@@ -82,7 +84,7 @@ export function PropertyCard({
             iconClassName="size-3.5 text-white/70"
           />
           <CardActions href={`/properties/${p.slug}`} label={dict.common.viewDetails}>
-            <ContactActions subject={p.title} tone="dark" />
+            <ContactActions subject={p.title} tone="dark" lang={lang} />
           </CardActions>
         </div>
       </article>
@@ -120,11 +122,11 @@ export function PropertyCard({
           <span className="absolute right-3 top-3 inline-flex items-center gap-1 bg-black/55 px-2 py-0.5 text-xs font-medium text-white">
             <Camera className="size-3.5" aria-hidden="true" />
             {p.imageCount}
-            <span className="sr-only"> photos</span>
+            <span className="sr-only"> {pd.card.photos}</span>
           </span>
         ) : null}
         <div className="p-5">
-          <PriceBlock p={p} className="text-gold-400" oldClassName="text-white/60" />
+          <PriceBlock p={p} className="text-gold-400" oldClassName="text-white/60" lang={lang} />
           <Heading className="mt-1 font-sans text-[1.05rem] font-semibold leading-snug text-white">
             <Link href={`/properties/${p.slug}`} className="after:absolute after:inset-0 after:content-[''] focus:outline-none">
               {p.title}
@@ -135,9 +137,9 @@ export function PropertyCard({
             {place}
           </p>
           {p.promo ? <p className="mt-3 bg-gold-500 px-3 py-1.5 text-xs font-semibold text-brand-950">{p.promo}</p> : null}
-          <CardSpecs p={p} residential={meta.residential} className="mt-4 border-white/20 text-white/85" iconClassName="text-white/60" />
+          <CardSpecs p={p} lang={lang} residential={meta.residential} className="mt-4 border-white/20 text-white/85" iconClassName="text-white/60" />
           <div className="mt-4">
-            <ContactActions subject={p.title} tone="dark" />
+            <ContactActions subject={p.title} tone="dark" lang={lang} />
           </div>
         </div>
       </article>
@@ -167,12 +169,12 @@ export function PropertyCard({
           <span className="absolute bottom-3 right-3 inline-flex items-center gap-1 rounded-none bg-black/55 px-2 py-0.5 text-xs font-medium text-white">
             <Camera className="size-3.5" aria-hidden="true" />
             {p.imageCount}
-            <span className="sr-only"> photos</span>
+            <span className="sr-only"> {dict.common.photos}</span>
           </span>
         ) : null}
       </div>
       <div className="flex flex-1 flex-col p-5">
-        <PriceBlock p={p} className="text-brand-700" oldClassName="text-muted" />
+        <PriceBlock p={p} className="text-brand-700" oldClassName="text-muted" lang={lang} />
         <Heading className="mt-1 font-sans text-[1.05rem] font-semibold leading-snug text-ink">
           <Link href={`/properties/${p.slug}`} className="after:absolute after:inset-0 after:content-[''] focus:outline-none">
             {p.title}
@@ -185,12 +187,13 @@ export function PropertyCard({
         {p.promo ? <p className="mt-3 rounded-lg bg-gold-100 px-3 py-1.5 text-xs font-semibold text-[#6b5016]">{p.promo}</p> : null}
         <CardSpecs
           p={p}
+          lang={lang}
           residential={meta.residential}
           className="mt-auto border-line text-ink/80 [&:not(:first-child)]:mt-4"
           iconClassName="text-muted"
         />
         <div className="mt-4 border-t border-line pt-4">
-          <ContactActions subject={p.title} />
+          <ContactActions subject={p.title} lang={lang} />
         </div>
       </div>
     </article>
@@ -216,15 +219,15 @@ function PriceBlock({
   if (p.price && p.discountPercent) {
     return (
       <div className={cn("flex flex-wrap items-baseline gap-x-2.5", wrapperClassName)}>
-        <p className={cn("font-display text-2xl font-bold tracking-tight", className)}>{formatPrice(discountedPrice(p.price, p.discountPercent))}</p>
-        <p className={cn("text-sm line-through decoration-red-500/70", oldClassName)}>{formatPrice(p.price)}</p>
+        <p className={cn("font-display text-2xl font-bold tracking-tight", className)}>{formatPrice(discountedPrice(p.price, p.discountPercent), lang)}</p>
+        <p className={cn("text-sm line-through decoration-red-500/70", oldClassName)}>{formatPrice(p.price, lang)}</p>
         {showPercent ? <p className="text-sm font-bold text-red-300">-{p.discountPercent}%</p> : null}
       </div>
     );
   }
   return (
     <p className={cn("font-display text-2xl font-bold tracking-tight", className, wrapperClassName)}>
-      {p.price && p.price > 0 ? formatPrice(p.price) : getDictionary(lang).common.priceOnRequest}
+      {p.price && p.price > 0 ? formatPrice(p.price, lang) : getDictionary(lang).common.priceOnRequest}
     </p>
   );
 }
@@ -244,6 +247,7 @@ function CardSpecs({
   lang?: Locale;
 }) {
   const dict = getDictionary(lang);
+  const pd = getPropertiesDict(lang);
   const icon = cn("size-4", iconClassName);
   return (
     <dl className={cn("flex flex-wrap gap-x-5 gap-y-1 border-t pt-4 text-sm", className)}>
@@ -251,7 +255,7 @@ function CardSpecs({
         <div className="flex items-center gap-1.5">
           <dt>
             <BedDouble className={icon} aria-hidden="true" />
-            <span className="sr-only">Bedrooms</span>
+            <span className="sr-only">{pd.card.bedrooms}</span>
           </dt>
           <dd>{p.bedrooms === 0 ? dict.common.studio : `${p.bedrooms} ${dict.common.bed}`}</dd>
         </div>
@@ -260,7 +264,7 @@ function CardSpecs({
         <div className="flex items-center gap-1.5">
           <dt>
             <Bath className={icon} aria-hidden="true" />
-            <span className="sr-only">Bathrooms</span>
+            <span className="sr-only">{pd.card.bathrooms}</span>
           </dt>
           <dd>{dict.common.toilets(p.bathrooms)}</dd>
         </div>
@@ -269,7 +273,7 @@ function CardSpecs({
         <div className="flex items-center gap-1.5">
           <dt>
             <Ruler className={icon} aria-hidden="true" />
-            <span className="sr-only">Area</span>
+            <span className="sr-only">{pd.card.area}</span>
           </dt>
           <dd>{formatArea(p.areaSqm)}</dd>
         </div>
@@ -282,17 +286,19 @@ export function PropertyGrid({
   properties,
   eagerCount = 0,
   variant,
+  lang = "en",
 }: {
   properties: PropertyCardData[];
   eagerCount?: number;
   variant?: CardVariant;
+  lang?: Locale;
 }) {
   return (
     <ul className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
       {properties.map((p, i) => (
         <li key={p.id} className="flex">
           <div className={cn("w-full", variant === "overlay" && "aspect-[4/5]")}>
-            <PropertyCard property={p} eager={i < eagerCount} variant={variant} />
+            <PropertyCard property={p} eager={i < eagerCount} variant={variant} lang={lang} />
           </div>
         </li>
       ))}

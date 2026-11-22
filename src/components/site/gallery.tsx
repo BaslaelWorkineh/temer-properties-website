@@ -4,7 +4,9 @@ import { ChevronLeft, ChevronRight, Images, X } from "lucide-react";
 import Image from "next/image";
 import { useRef, useState } from "react";
 import { ImageWatermark } from "@/components/site/image-watermark";
+import { useLang } from "@/components/site/lang";
 import type { ImageItem } from "@/db/schema";
+import { getPropertiesDict } from "@/lib/i18n/dict/properties";
 
 /**
  * Photo grid + lightbox. All grid images are server-rendered <img> tags with
@@ -12,6 +14,8 @@ import type { ImageItem } from "@/db/schema";
  * element and is fetched with high priority.
  */
 export function Gallery({ images, title }: { images: ImageItem[]; title: string }) {
+  const lang = useLang();
+  const g = getPropertiesDict(lang).gallery;
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [index, setIndex] = useState(0);
   const count = images.length;
@@ -21,7 +25,7 @@ export function Gallery({ images, title }: { images: ImageItem[]; title: string 
     dialogRef.current?.showModal();
   };
   const go = (delta: number) => setIndex((i) => (i + delta + count) % count);
-  const alt = (img: ImageItem, i: number) => img.alt || `${title}, photo ${i + 1}`;
+  const alt = (img: ImageItem, i: number) => (lang === "am" ? g.photoN(title, i + 1) : img.alt || g.photoN(title, i + 1));
 
   const thumbs = images.slice(1, 4);
   return (
@@ -38,7 +42,7 @@ export function Gallery({ images, title }: { images: ImageItem[]; title: string 
             className="object-cover transition duration-500 hover:scale-[1.02]"
           />
           <ImageWatermark className="left-4 top-4" />
-          <span className="sr-only">Open photo 1 of {count}</span>
+          <span className="sr-only">{g.openPhoto(1, count)}</span>
         </button>
         {count > 1 ? (
           <button
@@ -46,7 +50,7 @@ export function Gallery({ images, title }: { images: ImageItem[]; title: string 
             onClick={() => open(0)}
             className="absolute bottom-3 right-3 inline-flex items-center gap-2 bg-white/95 px-3.5 py-2 text-sm font-semibold text-ink shadow-md hover:bg-white"
           >
-            <Images className="size-4" aria-hidden="true" /> View all {count} photos
+            <Images className="size-4" aria-hidden="true" /> {g.viewAll(count)}
           </button>
         ) : null}
       </div>
@@ -55,7 +59,7 @@ export function Gallery({ images, title }: { images: ImageItem[]; title: string 
           {thumbs.map((img, i) => (
             <button key={img.url} type="button" onClick={() => open(i + 1)} className="relative aspect-[16/10] overflow-hidden bg-soft">
               <Image src={img.url} alt={alt(img, i + 1)} fill sizes="(min-width: 1024px) 230px, 33vw" className="object-cover transition duration-500 hover:scale-[1.04]" />
-              <span className="sr-only">Open photo {i + 2} of {count}</span>
+              <span className="sr-only">{g.openPhoto(i + 2, count)}</span>
             </button>
           ))}
         </div>
@@ -63,7 +67,7 @@ export function Gallery({ images, title }: { images: ImageItem[]; title: string 
 
       <dialog
         ref={dialogRef}
-        aria-label={`${title}: photos`}
+        aria-label={g.photosOf(title)}
         onKeyDown={(e) => {
           if (e.key === "ArrowRight") go(1);
           if (e.key === "ArrowLeft") go(-1);
@@ -78,7 +82,7 @@ export function Gallery({ images, title }: { images: ImageItem[]; title: string 
             </span>
             <button type="button" onClick={() => dialogRef.current?.close()} className="grid size-10 place-items-center rounded-full hover:bg-white/10" autoFocus>
               <X className="size-6" aria-hidden="true" />
-              <span className="sr-only">Close</span>
+              <span className="sr-only">{g.close}</span>
             </button>
           </div>
           <div className="relative flex-1">
@@ -93,7 +97,7 @@ export function Gallery({ images, title }: { images: ImageItem[]; title: string 
                 className="absolute left-3 top-1/2 grid size-12 -translate-y-1/2 place-items-center rounded-full bg-white/10 hover:bg-white/20"
               >
                 <ChevronLeft className="size-7" aria-hidden="true" />
-                <span className="sr-only">Previous photo</span>
+                <span className="sr-only">{g.previous}</span>
               </button>
               <button
                 type="button"
@@ -101,7 +105,7 @@ export function Gallery({ images, title }: { images: ImageItem[]; title: string 
                 className="absolute right-3 top-1/2 grid size-12 -translate-y-1/2 place-items-center rounded-full bg-white/10 hover:bg-white/20"
               >
                 <ChevronRight className="size-7" aria-hidden="true" />
-                <span className="sr-only">Next photo</span>
+                <span className="sr-only">{g.next}</span>
               </button>
             </>
           ) : null}

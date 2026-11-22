@@ -8,12 +8,14 @@ import { checkBookableDate, generateBookingReference } from "@/lib/booking";
 import { ACTIVE_BOOKING_STATUSES, bookingConfig, inquiryInterestLabels, visitTypeLabels } from "@/lib/config/booking";
 import { absoluteUrl } from "@/lib/config/site";
 import { formatSlot, formatVisitDate } from "@/lib/dates";
+import { hasLocale, type Locale } from "@/lib/i18n/config";
+import { getFormsDict } from "@/lib/i18n/dict/forms";
 import { notifyTeam } from "@/lib/notify";
 import { getClientIp, rateLimit } from "@/lib/rate-limit";
 import {
-  bookingSchema,
   errorState,
-  inquirySchema,
+  makeBookingSchema,
+  makeInquirySchema,
   normalizePhone,
   optStr,
   str,
@@ -24,6 +26,12 @@ import {
 export type BookingResult = { reference: string; visitDate: string; timeSlot: string; visitType: string };
 
 class SlotFullError extends Error {}
+
+/** The visitor's language, sent by the form as a hidden field. Anything unexpected falls back to English. */
+function langOf(formData: FormData): Locale {
+  const value = str(formData, "lang");
+  return hasLocale(value) ? value : "en";
+}
 
 /** Resolves optional property/project ids to real, published records (ignores tampered ids). */
 async function resolveSubject(propertyId?: number, projectId?: number) {
@@ -46,15 +54,17 @@ async function resolveSubject(propertyId?: number, projectId?: number) {
 }
 
 export async function createBooking(_prev: FormState<BookingResult>, formData: FormData): Promise<FormState<BookingResult>> {
+  const lang = langOf(formData);
+  const t = getFormsDict(lang);
   // Honeypot: real people never fill the hidden "website" field.
-  if (str(formData, "website")) return errorState("Your request could not be sent. Please call us instead.");
+  if (str(formData, "website")) return errorState(t.actions.bookingBlocked);
 
   const ip = await getClientIp();
   if (!rateLimit(`booking:${ip}`, 6, 10 * 60_000).ok) {
-    return errorState("Too many booking attempts. Please wait a few minutes or call us directly.");
+    return errorState(t.actions.bookingTooMany);
   }
 
-  const parsed = bookingSchema.safeParse({
+  const parsed = makeBookingSchema(t.validation).safeParse({
     fullName: str(formData, "fullName"),
     phone: normalizePhone(str(formData, "countryCode"), str(formData, "phone")),
     email: optStr(formData, "email"),
@@ -67,10 +77,10 @@ export async function createBooking(_prev: FormState<BookingResult>, formData: F
     projectId: optStr(formData, "projectId"),
     source: optStr(formData, "source"),
   });
-  if (!parsed.success) return validationError(parsed.error);
+  if (!parsed.success) return validationError(parsed.error, t.actions.fixFields);
   const input = parsed.data;
 
-  const dateCheck = checkBookableDate(input.visitDate);
+  const dateCheck = checkBookableDate(input.visitDate, lang);
   if (!dateCheck.ok) return errorState(dateCheck.message, { visitDate: [dateCheck.message] });
 
   const { property, project } = await resolveSubject(input.propertyId, input.projectId);
@@ -107,11 +117,10 @@ export async function createBooking(_prev: FormState<BookingResult>, formData: F
     });
   } catch (err) {
     if (err instanceof SlotFullError) {
-      const message = "That time has just been fully booked. Please choose another time.";
-      return errorState(message, { timeSlot: [message] });
+      return errorState(t.actions.slotFull, { timeSlot: [t.actions.slotFull] });
     }
     console.error("[booking] insert failed", err);
-    return errorState("Something went wrong while saving your booking. Please try again or call us.");
+    return errorState(t.actions.bookingFailed);
   }
 
   after(() =>
@@ -135,20 +144,21 @@ export async function createBooking(_prev: FormState<BookingResult>, formData: F
 
   return {
     status: "success",
-    message: "Your visit request has been received.",
+    message: t.actions.bookingReceived,
     data: { reference, visitDate: input.visitDate, timeSlot: input.timeSlot, visitType: input.visitType },
   };
 }
 
 export async function createInquiry(_prev: FormState, formData: FormData): Promise<FormState> {
-  if (str(formData, "website")) return errorState("Your message could not be sent. Please call us instead.");
+  const t = getFormsDict(langOf(formData));
+  if (str(formData, "website")) return errorState(t.actions.inquiryBlocked);
 
   const ip = await getClientIp();
   if (!rateLimit(`inquiry:${ip}`, 6, 10 * 60_000).ok) {
-    return errorState("Too many messages. Please wait a few minutes or call us directly.");
+    return errorState(t.actions.inquiryTooMany);
   }
 
-  const parsed = inquirySchema.safeParse({
+  const parsed = makeInquirySchema(t.validation).safeParse({
     fullName: str(formData, "fullName"),
     phone: normalizePhone(str(formData, "countryCode"), str(formData, "phone")),
     email: optStr(formData, "email"),
@@ -159,7 +169,7 @@ export async function createInquiry(_prev: FormState, formData: FormData): Promi
     projectId: optStr(formData, "projectId"),
     source: optStr(formData, "source"),
   });
-  if (!parsed.success) return validationError(parsed.error);
+  if (!parsed.success) return validationError(parsed.error, t.actions.fixFields);
   const input = parsed.data;
 
   const { property, project } = await resolveSubject(input.propertyId, input.projectId);
@@ -177,7 +187,7 @@ export async function createInquiry(_prev: FormState, formData: FormData): Promi
     });
   } catch (err) {
     console.error("[inquiry] insert failed", err);
-    return errorState("Something went wrong while sending your message. Please try again or call us.");
+    return errorState(t.actions.inquiryFailed);
   }
 
   after(() =>
@@ -196,5 +206,5 @@ export async function createInquiry(_prev: FormState, formData: FormData): Promi
     ),
   );
 
-  return { status: "success", message: "Thank you! Our sales team will contact you shortly." };
+  return { status: "success", message: t.actions.inquiryThanks };
 }

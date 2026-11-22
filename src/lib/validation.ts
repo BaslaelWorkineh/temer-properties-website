@@ -20,8 +20,8 @@ export function errorState(message: string, fieldErrors?: FieldErrors) {
   return { status: "error", message, fieldErrors } as const;
 }
 
-export function validationError(error: z.ZodError) {
-  return errorState("Please correct the highlighted fields.", z.flattenError(error).fieldErrors as FieldErrors);
+export function validationError(error: z.ZodError, message = "Please correct the highlighted fields.") {
+  return errorState(message, z.flattenError(error).fieldErrors as FieldErrors);
 }
 
 /* ------------------------------------------------------------------ */
@@ -118,40 +118,63 @@ export function normalizePhone(countryCode: string, number: string) {
   return `+${cc}${local}`;
 }
 
-const phoneSchema = z
-  .string()
-  .regex(/^\+\d{8,15}$/, "Enter a valid phone number, e.g. 0911 234 567");
+export type PublicFormMessages = {
+  name: string;
+  phone: string;
+  email: string;
+  date: string;
+  time: string;
+  keepUnder: (n: number) => string;
+};
+
+const englishMessages: PublicFormMessages = {
+  name: "Enter your full name",
+  phone: "Enter a valid phone number, e.g. 0911 234 567",
+  email: "Enter a valid email",
+  date: "Choose a visit date",
+  time: "Choose a time",
+  keepUnder: (n) => `Keep this under ${n} characters`,
+};
 
 /* ------------------------------------------------------------------ */
 /* Public forms                                                        */
 /* ------------------------------------------------------------------ */
 
-export const bookingSchema = z.object({
-  fullName: z.string().min(2, "Enter your full name").max(100),
-  phone: phoneSchema,
-  email: z.email("Enter a valid email").max(150).optional(),
-  visitDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Choose a visit date"),
-  timeSlot: z.enum(bookingConfig.slots, { error: "Choose a time" }),
-  visitType: z.enum(VISIT_TYPES),
-  partySize: z.coerce.number().int().min(1).max(bookingConfig.maxPartySize).default(1),
-  message: optionalText(1000),
-  propertyId: optionalId,
-  projectId: optionalId,
-  source: optionalText(300),
-});
+/** The schemas take their messages as a parameter so visitors see errors in their own language. */
+export function makeBookingSchema(m: PublicFormMessages) {
+  const text = (max: number) => z.string().max(max, m.keepUnder(max)).optional();
+  return z.object({
+    fullName: z.string().min(2, m.name).max(100),
+    phone: z.string().regex(/^\+\d{8,15}$/, m.phone),
+    email: z.email(m.email).max(150).optional(),
+    visitDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, m.date),
+    timeSlot: z.enum(bookingConfig.slots, { error: m.time }),
+    visitType: z.enum(VISIT_TYPES),
+    partySize: z.coerce.number().int().min(1).max(bookingConfig.maxPartySize).default(1),
+    message: text(1000),
+    propertyId: optionalId,
+    projectId: optionalId,
+    source: text(300),
+  });
+}
+export const bookingSchema = makeBookingSchema(englishMessages);
 export type BookingInput = z.infer<typeof bookingSchema>;
 
-export const inquirySchema = z.object({
-  fullName: z.string().min(2, "Enter your full name").max(100),
-  phone: phoneSchema,
-  email: z.email("Enter a valid email").max(150).optional(),
-  company: optionalText(120),
-  interest: z.enum(INQUIRY_INTERESTS).default("other"),
-  message: optionalText(1000),
-  propertyId: optionalId,
-  projectId: optionalId,
-  source: optionalText(300),
-});
+export function makeInquirySchema(m: PublicFormMessages) {
+  const text = (max: number) => z.string().max(max, m.keepUnder(max)).optional();
+  return z.object({
+    fullName: z.string().min(2, m.name).max(100),
+    phone: z.string().regex(/^\+\d{8,15}$/, m.phone),
+    email: z.email(m.email).max(150).optional(),
+    company: text(120),
+    interest: z.enum(INQUIRY_INTERESTS).default("other"),
+    message: text(1000),
+    propertyId: optionalId,
+    projectId: optionalId,
+    source: text(300),
+  });
+}
+export const inquirySchema = makeInquirySchema(englishMessages);
 export type InquiryInput = z.infer<typeof inquirySchema>;
 
 export const loginSchema = z.object({
@@ -256,3 +279,29 @@ export const inquiryUpdateSchema = z.object({
   status: z.enum(INQUIRY_STATUSES),
   adminNotes: optionalText(2000),
 });
+
+/**
+ * Reads the `am_<field>` inputs of the Amharic section (see components/admin/amharic-fields.tsx) into the
+ * `translations` value. Empty fields are left out, so they fall back to the English text.
+ */
+export function readAm(
+  fd: FormData,
+  spec: { text?: readonly string[]; lines?: readonly string[]; faqs?: boolean },
+): { am?: Record<string, unknown> } {
+  const am: Record<string, unknown> = {};
+  for (const key of spec.text ?? []) {
+    const v = str(fd, `am_${key}`).replace(/\r\n/g, "\n").trim();
+    if (v) am[key] = v;
+  }
+  for (const key of spec.lines ?? []) {
+    const v = lines(fd, `am_${key}`);
+    if (v.length) am[key] = v;
+  }
+  if (spec.faqs) {
+    const items = json<Array<{ question?: unknown; answer?: unknown }>>(fd, "am_faqs", [])
+      .map((i) => ({ question: String(i.question ?? "").trim(), answer: String(i.answer ?? "").trim() }))
+      .filter((i) => i.question && i.answer);
+    if (items.length) am.faqs = items;
+  }
+  return Object.keys(am).length ? { am } : {};
+}

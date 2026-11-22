@@ -1,6 +1,8 @@
 "use client";
 
 import { Children, useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useLang } from "@/components/site/lang";
+import { getAreasDict } from "@/lib/i18n/dict/areas";
 import { cn } from "@/lib/utils";
 
 /**
@@ -27,6 +29,7 @@ export function SlideCarousel({
   slideClassName: string;
   className?: string;
 }) {
+  const t = getAreasDict(useLang());
   const slides = Children.toArray(children);
   const count = slides.length;
   const pad = count > 1 ? Math.min(2, count) : 0; // repeats on each side; a screen shows at most 3 slides
@@ -162,7 +165,7 @@ export function SlideCarousel({
       <ul
         ref={track}
         tabIndex={0}
-        aria-label={`${label}, scroll sideways`}
+        aria-label={t.common.carouselScroll(label)}
         className="relative flex snap-x snap-mandatory gap-3 overflow-x-auto px-[calc((100%-min(56rem,88vw))/2)] pb-1 [scrollbar-width:none] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand-500 [&::-webkit-scrollbar]:hidden"
       >
         {items.map((item, i) => (
@@ -170,7 +173,7 @@ export function SlideCarousel({
             key={item.key}
             role="group"
             aria-roledescription="slide"
-            aria-label={item.repeat ? undefined : `${i - pad + 1} of ${count}`}
+            aria-label={item.repeat ? undefined : t.common.slideOf(i - pad + 1, count)}
             aria-hidden={item.repeat || undefined}
             inert={item.repeat || undefined}
             className={cn("shrink-0 snap-center snap-always", slideClassName)}
@@ -181,7 +184,7 @@ export function SlideCarousel({
       </ul>
 
       {/* Dots only: the current project is a wide pill, the others shrink the further they are from it. */}
-      <div className="mt-6 flex items-center justify-center gap-2.5" role="group" aria-label="Choose a project">
+      <div className="mt-6 flex items-center justify-center gap-2.5" role="group" aria-label={t.common.chooseProject}>
         {slides.map((_, i) => {
           const distance = Math.min(Math.abs(i - real), count - Math.abs(i - real)); // circular distance
           const size = distance === 0 ? "" : distance <= 3 ? "size-2" : distance === 4 ? "size-1.5" : "size-1";
@@ -190,7 +193,7 @@ export function SlideCarousel({
               key={i}
               type="button"
               onClick={() => goToReal(i)}
-              aria-label={`Go to project ${i + 1}`}
+              aria-label={t.common.goToProject(i + 1)}
               aria-current={i === real ? "true" : undefined}
               className={cn(
                 "shrink-0 rounded-full transition-all duration-300 hover:bg-ink/60",

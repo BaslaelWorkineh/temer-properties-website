@@ -4,7 +4,9 @@ import { randomInt } from "node:crypto";
 import { db } from "@/db";
 import { bookings } from "@/db/schema";
 import { ACTIVE_BOOKING_STATUSES, bookingConfig } from "@/lib/config/booking";
-import { addDays, addisToday, formatSlot, isValidYmd, weekdayOf } from "@/lib/dates";
+import { addDays, addisToday, formatSlot } from "@/lib/dates";
+import { bookableDateIssue, dateIssueMessage } from "@/lib/i18n/dict/forms";
+import type { Locale } from "@/lib/i18n/config";
 
 /** Request-time only (uses the current date). */
 export function bookingWindow() {
@@ -12,15 +14,9 @@ export function bookingWindow() {
   return { min: addDays(today, bookingConfig.minDaysAhead), max: addDays(today, bookingConfig.maxDaysAhead) };
 }
 
-export function checkBookableDate(ymd: string): { ok: true } | { ok: false; message: string } {
-  if (!isValidYmd(ymd)) return { ok: false, message: "Choose a valid date." };
-  const { min, max } = bookingWindow();
-  if (ymd < min) return { ok: false, message: "Visits can be booked from tomorrow onwards." };
-  if (ymd > max) return { ok: false, message: `Visits can be booked up to ${bookingConfig.maxDaysAhead} days ahead.` };
-  if (bookingConfig.closedWeekdays.includes(weekdayOf(ymd))) {
-    return { ok: false, message: "Our office is closed on Sundays. Please choose another day." };
-  }
-  return { ok: true };
+export function checkBookableDate(ymd: string, lang: Locale = "en"): { ok: true } | { ok: false; message: string } {
+  const issue = bookableDateIssue(ymd, addisToday());
+  return issue ? { ok: false, message: dateIssueMessage(issue, lang) } : { ok: true };
 }
 
 export type SlotAvailability = { time: string; label: string; remaining: number; available: boolean };

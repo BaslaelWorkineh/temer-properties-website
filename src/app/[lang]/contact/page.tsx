@@ -1,45 +1,58 @@
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
+import type { Metadata } from "next";
 import { TelegramIcon, WhatsAppIcon } from "@/components/site/brand-icons";
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
 import { InquiryForm } from "@/components/site/inquiry-form";
 import { JsonLd } from "@/components/site/json-ld";
 import { Container, PageHero } from "@/components/site/section";
 import { site, whatsappLink } from "@/lib/config/site";
+import { hasLocale, locales, type Locale } from "@/lib/i18n/config";
+import { getDictionary } from "@/lib/i18n/dictionaries";
+import { getPagesDict } from "@/lib/i18n/dict/pages";
 import { organizationJsonLd } from "@/lib/seo/jsonld";
 import { buildMetadata } from "@/lib/seo/metadata";
 
-export const metadata = buildMetadata({
-  title: "Contact Temer Properties",
-  description: `Call ${site.contact.phoneDisplay}, message us on WhatsApp or Telegram, or visit our office at ${site.address.street}, Addis Ababa. Open ${site.openingHoursText}.`,
-  path: "/contact",
-});
+export async function generateMetadata({ params }: PageProps<"/[lang]/contact">): Promise<Metadata> {
+  const { lang } = await params;
+  const l: Locale = hasLocale(lang) ? lang : "en";
+  const pages = getPagesDict(l);
+  return buildMetadata({
+    title: pages.contact.metaTitle,
+    description: pages.contact.metaDescription(site.contact.phoneDisplay, site.address.street, l === "en" ? site.openingHoursText : pages.hours),
+    path: "/contact",
+    lang: l,
+    translations: locales,
+  });
+}
 
-export default function ContactPage() {
+export default async function ContactPage({ params }: PageProps<"/[lang]/contact">) {
+  const { lang: rawLang } = await params;
+  const lang: Locale = hasLocale(rawLang) ? rawLang : "en";
+  const pages = getPagesDict(lang);
+  const dict = pages.contact;
   const channels = [
-    { icon: Phone, label: "Call sales", value: site.contact.phoneDisplay, href: `tel:${site.contact.phone}` },
+    { icon: Phone, label: dict.callSales, value: site.contact.phoneDisplay, href: `tel:${site.contact.phone}` },
     ...(site.contact.salesPhone
-      ? [{ icon: Phone, label: "Sales line 2", value: site.contact.salesPhoneDisplay, href: `tel:${site.contact.salesPhone}` }]
+      ? [{ icon: Phone, label: dict.salesLine2, value: site.contact.salesPhoneDisplay, href: `tel:${site.contact.salesPhone}` }]
       : []),
-    { icon: WhatsAppIcon, label: "WhatsApp", value: "Chat with us", href: whatsappLink("Hello Temer Properties, I have a question.") },
-    { icon: TelegramIcon, label: "Telegram", value: "Message us", href: site.contact.telegram },
-    { icon: Mail, label: "Email", value: site.contact.email, href: `mailto:${site.contact.email}` },
+    { icon: WhatsAppIcon, label: dict.whatsapp, value: dict.chat, href: whatsappLink(dict.waMessage) },
+    { icon: TelegramIcon, label: dict.telegram, value: dict.messageUs, href: site.contact.telegram },
+    { icon: Mail, label: dict.email, value: site.contact.email, href: `mailto:${site.contact.email}` },
   ];
 
   return (
     <>
       <JsonLd data={organizationJsonLd()} />
       <PageHero>
-        <Breadcrumbs items={[{ name: "Contact", path: "/contact" }]} inverted />
-        <h1 className="mt-4 text-4xl font-bold sm:text-5xl">Contact us</h1>
-        <p className="mt-3 max-w-2xl text-lg text-white/80">
-          Have a question? Let&apos;s find the right place for you. Our sales team replies quickly during office hours.
-        </p>
+        <Breadcrumbs items={[{ name: dict.breadcrumb, path: "/contact" }]} inverted lang={lang} />
+        <h1 className="mt-4 text-4xl font-bold sm:text-5xl">{dict.h1}</h1>
+        <p className="mt-3 max-w-2xl text-lg text-white/80">{dict.intro}</p>
       </PageHero>
       <Container className="grid gap-12 py-14 lg:grid-cols-[22rem_minmax(0,1fr)]">
         <div className="space-y-6">
           <ul className="space-y-3">
             {channels.map((c) => (
-              <li key={c.label}>
+              <li key={c.href}>
                 <a
                   href={c.href}
                   {...(c.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
@@ -58,27 +71,27 @@ export default function ContactPage() {
           </ul>
           <div className="rounded-none bg-soft p-6 ring-1 ring-line">
             <h2 className="flex items-center gap-2 text-xl font-bold">
-              <MapPin className="size-5 text-brand-500" aria-hidden="true" /> Office
+              <MapPin className="size-5 text-brand-500" aria-hidden="true" /> {dict.office}
             </h2>
             <address className="mt-2 not-italic leading-relaxed text-ink/80">
-              {site.name}
+              {lang === "en" ? site.name : pages.brand}
               <br />
-              {site.address.street}
+              {getDictionary(lang).office.street}
               <br />
-              {site.address.locality}, Ethiopia
+              {getDictionary(lang).office.locality}, {pages.ethiopia}
             </address>
             <a href={site.address.mapUrl} target="_blank" rel="noopener noreferrer" className="mt-3 inline-block font-semibold text-brand-700 hover:underline">
-              Get directions
+              {dict.directions}
             </a>
             <h2 className="mt-6 flex items-center gap-2 text-xl font-bold">
-              <Clock className="size-5 text-brand-500" aria-hidden="true" /> Opening hours
+              <Clock className="size-5 text-brand-500" aria-hidden="true" /> {dict.openingHours}
             </h2>
-            <p className="mt-2 text-ink/80">{site.openingHoursText}</p>
+            <p className="mt-2 text-ink/80">{lang === "en" ? site.openingHoursText : pages.hours}</p>
           </div>
         </div>
         <div className="rounded-none p-6 ring-1 ring-line sm:p-8">
-          <h2 className="text-3xl font-bold">Send us a message</h2>
-          <p className="mt-1 text-muted">Tell us what you are looking for and we&apos;ll call you back.</p>
+          <h2 className="text-3xl font-bold">{dict.sendTitle}</h2>
+          <p className="mt-1 text-muted">{dict.sendText}</p>
           <InquiryForm className="mt-8" />
         </div>
       </Container>

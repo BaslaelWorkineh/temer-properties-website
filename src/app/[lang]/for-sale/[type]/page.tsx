@@ -8,10 +8,12 @@ import { PropertyGrid } from "@/components/site/property-card";
 import { Container, PageHero } from "@/components/site/section";
 import { buttonStyles } from "@/components/ui/button";
 import { PROPERTY_TYPES, propertyTypes, typeFromSlug } from "@/lib/config/property-types";
+import { hasLocale, locales, type Locale } from "@/lib/i18n/config";
+import { getAreasDict } from "@/lib/i18n/dict/areas";
+import { getDictionary, localizedAreaName } from "@/lib/i18n/dictionaries";
 import { getTypeCounts, getTypeLocationCombos, searchProperties } from "@/lib/data/properties";
 import { itemListJsonLd } from "@/lib/seo/jsonld";
 import { buildMetadata } from "@/lib/seo/metadata";
-import { pluralize } from "@/lib/utils";
 
 export const ensureStatic = "navigation";
 
@@ -20,49 +22,62 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/for-sale/[type]">): Promise<Metadata> {
-  const { type: typeSlug } = await params;
+  const { type: typeSlug, lang: raw } = await params;
+  const lang: Locale = hasLocale(raw) ? raw : "en";
+  const t = getAreasDict(lang).forSale;
+  const dict = getDictionary(lang);
   const type = typeFromSlug(typeSlug);
-  if (!type) return { title: "Not found", robots: { index: false, follow: true } };
+  if (!type) return { title: t.notFound, robots: { index: false, follow: true } };
   const meta = propertyTypes[type];
   const count = (await getTypeCounts())[type];
   return buildMetadata({
-    title: `${meta.plural} for Sale in Addis Ababa`,
-    description: `${count ? `${pluralize(count, meta.label.toLowerCase())} for sale now. ` : ""}${meta.intro}`,
+    title: t.hubTitle(dict.types[type].plural),
+    description: t.hubDescription(count, dict.types[type].label, t.typeIntro(type)),
     path: `/for-sale/${meta.slug}`,
+    lang,
+    translations: locales,
     // An empty hub is a thin page: keep it out of the index until listings exist.
     noindex: count === 0,
   });
 }
 
 export default async function ForSaleTypePage({ params }: PageProps<"/[lang]/for-sale/[type]">) {
-  const { type: typeSlug } = await params;
+  const { type: typeSlug, lang: raw } = await params;
+  const lang: Locale = hasLocale(raw) ? raw : "en";
+  const t = getAreasDict(lang).forSale;
+  const common = getAreasDict(lang).common;
+  const dict = getDictionary(lang);
   const type = typeFromSlug(typeSlug);
   if (!type) notFound();
   const meta = propertyTypes[type];
+  const plural = dict.types[type].plural;
+  // Only Amharic pages override the call-to-action text; English keeps the component's own defaults.
+  const cta = lang === "am" ? { title: getAreasDict(lang).projects.ctaTitle, text: getAreasDict(lang).projects.ctaText } : {};
 
-  const [result, combos] = await Promise.all([searchProperties({ type, pageSize: 48 }), getTypeLocationCombos()]);
+  const [result, combos] = await Promise.all([searchProperties({ type, pageSize: 48 }, lang), getTypeLocationCombos(lang)]);
   const areas = combos.filter((c) => c.type === type);
 
   return (
     <>
-      <JsonLd data={itemListJsonLd(result.items.map((p) => ({ path: `/properties/${p.slug}`, name: p.title })), `${meta.plural} for sale`)} />
+      <JsonLd data={itemListJsonLd(result.items.map((p) => ({ path: `/properties/${p.slug}`, name: p.title })), t.forSaleLabel(plural))} />
       <PageHero>
         <Breadcrumbs
           items={[
-            { name: "Properties", path: "/properties" },
-            { name: `${meta.plural} for sale`, path: `/for-sale/${meta.slug}` },
+            { name: t.propertiesCrumb, path: "/properties" },
+            { name: t.forSaleLabel(plural), path: `/for-sale/${meta.slug}` },
           ]}
           inverted
+          lang={lang}
         />
-        <h1 className="mt-4 text-4xl font-bold sm:text-5xl">{meta.plural} for sale in Addis Ababa</h1>
-        <p className="mt-3 max-w-3xl text-lg leading-relaxed text-white/80">{meta.intro}</p>
-        <p className="mt-5 text-sm font-semibold text-gold-300">{pluralize(result.total, "listing")} available</p>
+        <h1 className="mt-4 text-4xl font-bold sm:text-5xl">{t.hubH1(plural)}</h1>
+        <p className="mt-3 max-w-3xl text-lg leading-relaxed text-white/80">{t.typeIntro(type)}</p>
+        <p className="mt-5 text-sm font-semibold text-gold-300">{t.available(result.total)}</p>
       </PageHero>
 
       <Container className="py-14">
         {areas.length ? (
-          <nav aria-label={`${meta.plural} by area`} className="mb-10">
-            <h2 className="text-lg font-bold">{meta.plural} by area</h2>
+          <nav aria-label={t.byArea(plural)} className="mb-10">
+            <h2 className="text-lg font-bold">{t.byArea(plural)}</h2>
             <ul className="mt-3 flex flex-wrap gap-2">
               {areas.map((a) => (
                 <li key={a.locationSlug}>
@@ -70,7 +85,7 @@ export default async function ForSaleTypePage({ params }: PageProps<"/[lang]/for
                     href={`/for-sale/${meta.slug}/${a.locationSlug}`}
                     className="inline-block rounded-none bg-brand-50 px-4 py-2 text-sm font-semibold text-brand-800 ring-1 ring-brand-200 hover:bg-brand-100"
                   >
-                    {a.locationName} ({a.count})
+                    {localizedAreaName(lang, a.locationName)} ({a.count})
                   </Link>
                 </li>
               ))}
@@ -79,41 +94,39 @@ export default async function ForSaleTypePage({ params }: PageProps<"/[lang]/for
         ) : null}
 
         {result.items.length ? (
-          <PropertyGrid properties={result.items} eagerCount={3} />
+          <PropertyGrid properties={result.items} eagerCount={3} lang={lang} />
         ) : (
           <div className="rounded-none bg-soft p-10 text-center">
-            <h2 className="text-2xl font-bold">No {meta.plural.toLowerCase()} listed right now</h2>
-            <p className="mx-auto mt-2 max-w-lg text-muted">
-              New units are released regularly. Tell us what you are looking for and our sales team will contact you first.
-            </p>
+            <h2 className="text-2xl font-bold">{t.emptyTitle(plural)}</h2>
+            <p className="mx-auto mt-2 max-w-lg text-muted">{t.emptyText}</p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <Link href="/projects" className={buttonStyles({ variant: "outline" })}>
-                See our projects
+                {common.seeAllProjects}
               </Link>
               <Link href="/contact" className={buttonStyles()}>
-                Register your interest
+                {common.registerInterest}
               </Link>
             </div>
           </div>
         )}
 
-        <nav aria-label="Other property types" className="mt-16 border-t border-line pt-10">
-          <h2 className="text-2xl font-bold">Other property types</h2>
+        <nav aria-label={t.otherTypes} className="mt-16 border-t border-line pt-10">
+          <h2 className="text-2xl font-bold">{t.otherTypes}</h2>
           <ul className="mt-4 flex flex-wrap gap-2">
-            {PROPERTY_TYPES.filter((t) => t !== type).map((t) => (
-              <li key={t}>
+            {PROPERTY_TYPES.filter((x) => x !== type).map((ty) => (
+              <li key={ty}>
                 <Link
-                  href={`/for-sale/${propertyTypes[t].slug}`}
+                  href={`/for-sale/${propertyTypes[ty].slug}`}
                   className="inline-block rounded-none bg-soft px-4 py-2 text-sm font-medium ring-1 ring-line hover:ring-brand-400"
                 >
-                  {propertyTypes[t].plural} for sale
+                  {t.forSaleLabel(dict.types[ty].plural)}
                 </Link>
               </li>
             ))}
           </ul>
         </nav>
       </Container>
-      <CtaBand />
+      <CtaBand {...cta} />
     </>
   );
 }
