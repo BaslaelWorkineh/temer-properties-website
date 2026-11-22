@@ -51,11 +51,11 @@ export function Header({ lang }: { lang: Locale }) {
             ))}
           </ul>
         </nav>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 sm:gap-4 xl:gap-6">
           {/* Wrapper owns the breakpoint: `hidden` on the link itself would clash with the button's inline-flex. */}
           <a
             href={`tel:${site.contact.phone}`}
-            className="hidden items-center gap-2 text-[0.95rem] font-bold text-brand-800 hover:text-brand-600 md:mr-4 md:inline-flex"
+            className="hidden items-center gap-2 whitespace-nowrap text-[0.95rem] font-bold text-brand-800 hover:text-brand-600 md:inline-flex lg:hidden xl:inline-flex"
           >
             <Phone className="size-4" aria-hidden="true" />
             <span className="sr-only">{dict.common.callUs("")}</span>

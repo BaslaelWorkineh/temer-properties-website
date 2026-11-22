@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 export function SlideCarousel({
   children,
   label,
-  interval = 4500,
+  interval = 3000,
   slideClassName,
   className,
 }: {
