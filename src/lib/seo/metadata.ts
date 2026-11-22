@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ImageItem } from "@/db/schema";
 import { site } from "@/lib/config/site";
+import { localePath, ogLocale, type Locale } from "@/lib/i18n/config";
 import { truncate } from "@/lib/utils";
 
 /** Branded fallback share image (1200×630) for pages without their own photo. */
@@ -25,6 +26,14 @@ type BuildMetadataInput = {
   noindex?: boolean;
   publishedTime?: Date | null;
   modifiedTime?: Date | null;
+  /**
+   * Set only on pages that exist in this language. They get a self-referencing canonical and hreflang links to
+   * every translation. Without it the page is treated as the English original: an untranslated /am/... page then
+   * points its canonical at the English URL, so it never competes with it in search.
+   */
+  lang?: Locale;
+  /** Languages this page is available in (default: English only). */
+  translations?: readonly Locale[];
 };
 
 /**
@@ -44,15 +53,26 @@ export function buildMetadata(input: BuildMetadataInput): Metadata {
     .map((img) => ({ url: img.url, width: img.width, height: img.height, alt: img.alt || input.title }));
   const ogImages = images.length ? images : [DEFAULT_OG_IMAGE];
 
+  const lang = input.lang ?? "en";
+  const canonical = localePath(lang, input.path);
+  const translations = input.translations ?? [];
+  const languages =
+    translations.length > 1
+      ? {
+          ...Object.fromEntries(translations.map((l) => [l, localePath(l, input.path)])),
+          "x-default": localePath("en", input.path),
+        }
+      : undefined;
+
   return {
     title: absolute ? { absolute: input.title } : input.title,
     description,
-    alternates: { canonical: input.path },
+    alternates: { canonical, ...(languages ? { languages } : {}) },
     openGraph: {
       type: input.type ?? "website",
-      url: input.path,
+      url: canonical,
       siteName: site.name,
-      locale: site.locale,
+      locale: ogLocale[lang],
       title: fullTitle,
       description,
       images: ogImages,

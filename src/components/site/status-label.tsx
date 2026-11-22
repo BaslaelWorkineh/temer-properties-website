@@ -1,4 +1,6 @@
-import { projectStatusLabels, type ProjectStatus } from "@/lib/config/property-types";
+import type { ProjectStatus } from "@/lib/config/property-types";
+import type { Locale } from "@/lib/i18n/config";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import { cn } from "@/lib/utils";
 
 const fills: Record<ProjectStatus, string> = {
@@ -9,10 +11,10 @@ const fills: Record<ProjectStatus, string> = {
 };
 
 /** Flat, solid label: "For sale", "In progress", "Pre-launch" or "Delivered". Same shape as every other label on a photo. */
-export function StatusLabel({ status, className }: { status: ProjectStatus; className?: string }) {
+export function StatusLabel({ status, className, lang = "en" }: { status: ProjectStatus; className?: string; lang?: Locale }) {
   return (
     <span className={cn("inline-block px-2.5 py-1 text-xs font-semibold leading-tight text-white", fills[status], className)}>
-      {projectStatusLabels[status]}
+      {getDictionary(lang).projectStatus[status]}
     </span>
   );
 }

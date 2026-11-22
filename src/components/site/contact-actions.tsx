@@ -1,6 +1,8 @@
 import { Mail, Phone } from "lucide-react";
 import { TelegramIcon, WhatsAppIcon } from "@/components/site/brand-icons";
 import { site, whatsappLink } from "@/lib/config/site";
+import type { Locale } from "@/lib/i18n/config";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 
 const base =
   "inline-flex size-10 items-center justify-center border transition focus-visible:outline-2 focus-visible:outline-offset-2";
@@ -12,15 +14,26 @@ const darkButton = `${base} border-white/30 bg-white/10 text-white backdrop-blur
  * `relative z-10` lifts them above the card's stretched link so they stay clickable.
  * All contact details come from src/lib/config/site.ts.
  */
-export function ContactActions({ subject, tone = "light", round }: { subject: string; tone?: "light" | "dark"; round?: boolean }) {
+export function ContactActions({
+  subject,
+  tone = "light",
+  round,
+  lang = "en",
+}: {
+  subject: string;
+  tone?: "light" | "dark";
+  round?: boolean;
+  lang?: Locale;
+}) {
+  const dict = getDictionary(lang);
   const button = `${tone === "dark" ? darkButton : lightButton}${round ? " rounded-full" : ""}`;
   const { contact } = site;
   const message = `Hello Temer Properties, I'm interested in: ${subject}`;
   return (
     <div className="relative z-10 flex items-center gap-2" role="group" aria-label={`Contact us about ${subject}`}>
-      <a href={`tel:${contact.phone}`} className={button} title="Call">
+      <a href={`tel:${contact.phone}`} className={button} title={dict.common.call}>
         <Phone className="size-4" aria-hidden="true" />
-        <span className="sr-only">Call {contact.phoneDisplay}</span>
+        <span className="sr-only">{dict.common.call} {contact.phoneDisplay}</span>
       </a>
       <a href={whatsappLink(message)} target="_blank" rel="noopener noreferrer" className={button} title="WhatsApp">
         <WhatsAppIcon className="size-4" />

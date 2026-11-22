@@ -13,11 +13,11 @@ export const metadata: Metadata = {
 export default function GlobalNotFound() {
   return (
     <>
-      <Header />
+      <Header lang="en" />
       <main id="main" className="flex-1">
         <NotFoundContent />
       </main>
-      <Footer />
+      <Footer lang="en" />
       <ContactBar />
     </>
   );

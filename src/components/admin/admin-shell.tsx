@@ -51,7 +51,7 @@ export function AdminShell({
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col bg-brand-950 px-4 py-6 lg:flex">
         <AdminWordmark className="px-3" />
         <div className="mt-8 flex-1 overflow-y-auto">
-          <SidebarNav counts={counts} />
+          <SidebarNav counts={counts} isOwner={admin.role === "admin"} />
         </div>
         <div className="border-t border-white/10 px-1 pt-4">
           <UserBlock admin={admin} />
@@ -60,7 +60,7 @@ export function AdminShell({
 
       <header className="sticky top-0 z-30 flex h-16 items-center justify-between bg-brand-950 px-4 lg:hidden">
         <AdminWordmark />
-        <MobileNav counts={counts} footer={<UserBlock admin={admin} />} />
+        <MobileNav counts={counts} isOwner={admin.role === "admin"} footer={<UserBlock admin={admin} />} />
       </header>
 
       <div className="lg:pl-64">

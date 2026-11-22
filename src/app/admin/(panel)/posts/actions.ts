@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { invalidImageMessage, resolveSlug, toId } from "@/app/admin/_lib/server";
 import { db } from "@/db";
 import { posts, type ImageItem } from "@/db/schema";
-import { requireAdmin } from "@/lib/auth/session";
+import { requireAdmin, requireOwner } from "@/lib/auth/session";
 import { TAGS } from "@/lib/cache-tags";
 import { refreshPublicContent } from "@/lib/revalidate";
 import { bool, errorState, json, optStr, postInputSchema, validationError, type FormState } from "@/lib/validation";
@@ -83,7 +83,7 @@ export async function savePostAction(_prev: FormState<Saved>, formData: FormData
 }
 
 export async function deletePostAction(formData: FormData) {
-  await requireAdmin();
+  await requireOwner();
   const id = toId(formData.get("id"));
   if (!id) return;
   await db.delete(posts).where(eq(posts.id, id));

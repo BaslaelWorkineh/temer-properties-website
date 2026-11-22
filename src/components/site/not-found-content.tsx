@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { Container } from "@/components/site/section";
 import { buttonStyles } from "@/components/ui/button";
 

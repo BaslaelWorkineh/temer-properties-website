@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { cn } from "@/lib/utils";
 
 /** Crawlable pagination: real <a href> links, not buttons. */

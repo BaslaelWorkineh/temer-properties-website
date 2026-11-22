@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { invalidImageMessage, resolveSlug, toId } from "@/app/admin/_lib/server";
 import { db } from "@/db";
 import { bookings, inquiries, projects, properties, type FaqItem, type ImageItem } from "@/db/schema";
-import { requireAdmin } from "@/lib/auth/session";
+import { requireAdmin, requireOwner } from "@/lib/auth/session";
 import { TAGS } from "@/lib/cache-tags";
 import { refreshPublicContent } from "@/lib/revalidate";
 import { bool, errorState, json, lines, optStr, projectInputSchema, str, validationError, type FormState } from "@/lib/validation";
@@ -105,7 +105,7 @@ export async function saveProjectAction(_prev: FormState<Saved>, formData: FormD
 }
 
 export async function deleteProjectAction(formData: FormData) {
-  await requireAdmin();
+  await requireOwner();
   const id = toId(formData.get("id"));
   if (!id) return;
 

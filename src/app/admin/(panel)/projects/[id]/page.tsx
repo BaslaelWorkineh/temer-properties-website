@@ -5,6 +5,7 @@ import { ExternalLink } from "lucide-react";
 import { getLocationOptions, toId } from "@/app/admin/_lib/server";
 import { deleteProjectAction } from "@/app/admin/(panel)/projects/actions";
 import { DeleteButton } from "@/components/admin/form-controls";
+import { OwnerOnly } from "@/components/admin/owner-only";
 import { firstParam } from "@/components/admin/helpers";
 import { ProjectForm } from "@/components/admin/project-form";
 import { Notice, PageHeader } from "@/components/admin/ui";
@@ -50,11 +51,11 @@ export default async function EditProjectPage({ params, searchParams }: PageProp
                 <ExternalLink className="size-4" aria-hidden="true" /> View page
               </a>
             ) : null}
-            <DeleteButton
+            <OwnerOnly><DeleteButton
               action={deleteProjectAction}
               id={project.id}
               confirmMessage={`Delete “${project.name}”? Its page disappears from the website. Linked properties are kept but unlinked.`}
-            />
+            /></OwnerOnly>
           </>
         }
       />

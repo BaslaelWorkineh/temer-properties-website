@@ -5,6 +5,7 @@ import { ExternalLink } from "lucide-react";
 import { toId } from "@/app/admin/_lib/server";
 import { deleteLocationAction } from "@/app/admin/(panel)/locations/actions";
 import { DeleteButton } from "@/components/admin/form-controls";
+import { OwnerOnly } from "@/components/admin/owner-only";
 import { firstParam } from "@/components/admin/helpers";
 import { LocationForm } from "@/components/admin/location-form";
 import { Notice, PageHeader } from "@/components/admin/ui";
@@ -44,11 +45,11 @@ export default async function EditLocationPage({ params, searchParams }: PagePro
                 <ExternalLink className="size-4" aria-hidden="true" /> View page
               </a>
             ) : null}
-            <DeleteButton
+            <OwnerOnly><DeleteButton
               action={deleteLocationAction}
               id={location.id}
               confirmMessage={`Delete “${location.name}”? Its area page disappears. Properties and projects there are kept but unlinked.`}
-            />
+            /></OwnerOnly>
           </>
         }
       />

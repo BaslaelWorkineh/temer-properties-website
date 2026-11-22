@@ -3,7 +3,7 @@ import Link from "next/link";
 import { and, asc, count, desc, eq, gte, inArray, lte } from "drizzle-orm";
 import { Building2, CalendarCheck, CalendarClock, CheckCircle2, Inbox, MessageCircle, Phone, Plus } from "lucide-react";
 import { customerWhatsapp, shortVisitDate } from "@/components/admin/helpers";
-import { Card, EmptyState, PageHeader, StatCard, TableCard, td, th } from "@/components/admin/ui";
+import { Card, EmptyState, Notice, PageHeader, StatCard, TableCard, td, th } from "@/components/admin/ui";
 import { Badge, bookingStatusTone, inquiryStatusTone } from "@/components/ui/badge";
 import { buttonStyles } from "@/components/ui/button";
 import { db } from "@/db";
@@ -15,8 +15,9 @@ import { truncate } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
-export default async function DashboardPage() {
+export default async function DashboardPage({ searchParams }: PageProps<"/admin">) {
   const admin = await requireAdmin();
+  const ownerOnly = (await searchParams).notice === "owner-only";
   const today = addisToday();
   const weekAhead = addDays(today, 7);
 
@@ -67,6 +68,7 @@ export default async function DashboardPage() {
 
   return (
     <>
+      {ownerOnly ? <Notice tone="amber">That page is for admins only. Ask the owner if you need access.</Notice> : null}
       <PageHeader
         title={`Welcome, ${admin.name.split(" ")[0]}`}
         description="Today's visits, new enquiries and your listings at a glance."

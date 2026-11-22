@@ -1,7 +1,9 @@
 import { ArrowUpRight, MapPin } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { ContactActions } from "@/components/site/contact-actions";
+import type { Locale } from "@/lib/i18n/config";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import { ImagePlaceholder } from "@/components/site/image-placeholder";
 import { ImageWatermark } from "@/components/site/image-watermark";
 import { StatusLabel } from "@/components/site/status-label";
@@ -23,10 +25,12 @@ export function ProjectCard({
   project,
   variant = "default",
   compact,
+  lang = "en",
 }: {
   project: ProjectSummary;
   variant?: "default" | "overlay" | "banner";
   compact?: boolean;
+  lang?: Locale;
 }) {
   const p = project;
   const where = p.location?.name ?? "Addis Ababa";
@@ -52,7 +56,7 @@ export function ProjectCard({
         <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/85 via-black/35 via-45% to-transparent to-70%" aria-hidden="true" />
         <ImageWatermark className="left-5 top-4" />
         <div className="absolute right-5 top-5">
-          <StatusLabel status={p.status} />
+          <StatusLabel status={p.status} lang={lang} />
         </div>
         <div className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:gap-4">
           <div className="flex items-center gap-3 sm:contents">
@@ -60,10 +64,10 @@ export function ProjectCard({
               href={`/projects/${p.slug}`}
               className={buttonStyles({ variant: "light", className: "rounded-full px-6 after:absolute after:inset-0 after:content-['']" })}
             >
-              View project
+              {getDictionary(lang).common.viewProject}
             </Link>
             <div className="ml-auto sm:order-last">
-              <ContactActions subject={p.name} tone="dark" round />
+              <ContactActions subject={p.name} tone="dark" round lang={lang} />
             </div>
           </div>
           <p className="min-w-0 flex-1 text-sm leading-snug text-white sm:text-base">

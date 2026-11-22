@@ -87,13 +87,13 @@ export const site = {
 export type SiteConfig = typeof site;
 
 export const mainNav = [
-  { href: "/", label: "Home" },
-  { href: "/properties", label: "Properties" },
-  { href: "/projects", label: "Projects" },
-  { href: "/locations", label: "Locations" },
-  { href: "/about", label: "About" },
-  { href: "/blog", label: "Buying guides" },
-  { href: "/contact", label: "Contact" },
+  { href: "/", label: "Home", key: "home" },
+  { href: "/properties", label: "Properties", key: "properties" },
+  { href: "/projects", label: "Projects", key: "projects" },
+  { href: "/locations", label: "Locations", key: "locations" },
+  { href: "/about", label: "About", key: "about" },
+  { href: "/blog", label: "Buying guides", key: "guides" },
+  { href: "/contact", label: "Contact", key: "contact" },
 ] as const;
 
 export function whatsappLink(message?: string) {

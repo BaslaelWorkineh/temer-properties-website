@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Barlow_Condensed, Inter, Montserrat } from "next/font/google";
+import { Barlow_Condensed, Inter, Montserrat, Noto_Sans_Ethiopic } from "next/font/google";
 import { site, siteUrl } from "@/lib/config/site";
 import "./globals.css";
 
@@ -10,6 +10,9 @@ const barlow = Barlow_Condensed({
   variable: "--font-barlow",
   display: "swap",
 });
+
+/** Amharic (Ethiopic script) glyphs: Inter and Barlow have none. Only loaded where the page uses them. */
+const ethiopic = Noto_Sans_Ethiopic({ subsets: ["ethiopic"], variable: "--font-ethiopic", display: "swap" });
 
 /** Heavy geometric face that matches the Temer logo printed on the photos (used by ImageWatermark only). */
 const montserrat = Montserrat({ subsets: ["latin"], weight: ["800"], variable: "--font-brand", display: "swap" });
@@ -58,7 +61,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${inter.variable} ${barlow.variable} ${montserrat.variable}`}>
+    <html lang="en" className={`${inter.variable} ${barlow.variable} ${montserrat.variable} ${ethiopic.variable}`}>
       <body className="flex min-h-dvh flex-col bg-white font-sans text-ink antialiased">{children}</body>
     </html>
   );

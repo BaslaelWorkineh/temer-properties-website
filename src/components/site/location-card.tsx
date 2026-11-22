@@ -1,8 +1,10 @@
 import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/site/link";
 import type { LocationSummary } from "@/lib/data/locations";
-import { cn, pluralize } from "@/lib/utils";
+import type { Locale } from "@/lib/i18n/config";
+import { getDictionary, localizedAreaName } from "@/lib/i18n/dictionaries";
+import { cn } from "@/lib/utils";
 
 /** Solid backgrounds for areas without a photo. One is picked per card so a row does not look repeated. */
 const TINTS = ["bg-[#143a2b]", "bg-[#0f2a47]", "bg-[#1d4f5c]", "bg-[#3b4a1c]", "bg-[#25395e]", "bg-[#1f3d36]"];
@@ -13,11 +15,22 @@ const TINTS = ["bg-[#143a2b]", "bg-[#0f2a47]", "bg-[#1d4f5c]", "bg-[#3b4a1c]", "
  * clickable, and counts are real (a zero is not printed). `rank` adds a small 01, 02... when areas are sorted
  * by number of listings.
  */
-export function LocationCard({ location, rank, tint = 0 }: { location: LocationSummary; rank?: number; tint?: number }) {
+export function LocationCard({
+  location,
+  rank,
+  tint = 0,
+  lang = "en",
+}: {
+  location: LocationSummary;
+  rank?: number;
+  tint?: number;
+  lang?: Locale;
+}) {
+  const dict = getDictionary(lang);
   const l = location;
   const counts = [
-    l.propertyCount ? pluralize(l.propertyCount, "property", "properties") : null,
-    l.projectCount ? pluralize(l.projectCount, "project") : null,
+    l.propertyCount ? dict.home.propertyCount(l.propertyCount) : null,
+    l.projectCount ? dict.home.projectCount(l.projectCount) : null,
   ]
     .filter(Boolean)
     .join(" · ");
@@ -52,7 +65,7 @@ export function LocationCard({ location, rank, tint = 0 }: { location: LocationS
       </span>
       <h3 className="text-2xl font-bold leading-tight sm:text-3xl">
         <Link href={`/locations/${l.slug}`} className="after:absolute after:inset-0 after:content-[''] focus:outline-none">
-          {l.name}
+          {localizedAreaName(lang, l.name)}
         </Link>
       </h3>
       <p className="mt-1 text-sm font-medium text-white">{counts || l.city}</p>

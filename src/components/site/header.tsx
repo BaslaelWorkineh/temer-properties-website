@@ -1,24 +1,30 @@
-import Link from "next/link";
+import { Phone } from "lucide-react";
+import Link from "@/components/site/link";
 import { buttonStyles } from "@/components/ui/button";
 import { HeaderScroll } from "@/components/site/header-scroll";
 import { Logo } from "@/components/site/logo";
+import { LanguageSwitcher } from "@/components/site/language-switcher";
 import { MobileMenu } from "@/components/site/mobile-menu";
 import { NavLink } from "@/components/site/nav-link";
 import { mainNav, site } from "@/lib/config/site";
+import { getDictionary } from "@/lib/i18n/dictionaries";
+import type { Locale } from "@/lib/i18n/config";
 
 /**
  * 3.5rem white sticky bar with a brand-green bottom line and a soft shadow, so it separates cleanly from any photo below it.
  * The logo sits on a white ribbon that hangs ~1.5rem below the bar (pages leave room for it; see the home hero).
  * Keep the mobile menu's `top-14` in sync with the bar height.
  */
-export function Header() {
+export function Header({ lang }: { lang: Locale }) {
+  const dict = getDictionary(lang);
+  const items = mainNav.map((item) => ({ href: item.href, label: dict.nav[item.key] }));
   return (
     <HeaderScroll className="group sticky top-0 z-40 border-b-2 border-brand-600 bg-white shadow-[0_2px_14px_rgb(2_12_7_/_0.08)]">
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-2 focus:z-50 focus:rounded-none focus:bg-brand-950 focus:px-4 focus:py-1.5 focus:text-white"
       >
-        Skip to content
+        {dict.common.skip}
       </a>
       <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         {/* Reserves the ribbon's width in the bar; the ribbon itself overflows downward. */}
@@ -38,7 +44,7 @@ export function Header() {
         </div>
         <nav aria-label="Main" className="hidden lg:block">
           <ul className="flex items-center gap-1">
-            {mainNav.map((item) => (
+            {items.map((item) => (
               <li key={item.href}>
                 <NavLink href={item.href}>{item.label}</NavLink>
               </li>
@@ -47,12 +53,26 @@ export function Header() {
         </nav>
         <div className="flex items-center gap-3">
           {/* Wrapper owns the breakpoint: `hidden` on the link itself would clash with the button's inline-flex. */}
+          <a
+            href={`tel:${site.contact.phone}`}
+            className="hidden items-center gap-2 text-[0.95rem] font-bold text-brand-800 hover:text-brand-600 md:mr-4 md:inline-flex"
+          >
+            <Phone className="size-4" aria-hidden="true" />
+            <span className="sr-only">{dict.common.callUs("")}</span>
+            {site.contact.phoneDisplay}
+          </a>
           <span className="hidden sm:block">
             <Link href="/book-a-visit" className={buttonStyles({ size: "md", className: "h-10 px-6 text-[0.95rem] font-bold" })}>
-              Book a visit
+              {dict.common.bookVisit}
             </Link>
           </span>
-          <MobileMenu items={mainNav} phone={site.contact.phone} phoneDisplay={site.contact.phoneDisplay} />
+          <LanguageSwitcher switchLabel={dict.common.switchTo} />
+          <MobileMenu
+            items={items}
+            phone={site.contact.phone}
+            phoneDisplay={site.contact.phoneDisplay}
+            labels={{ open: dict.common.openMenu, close: dict.common.closeMenu, bookSiteVisit: dict.common.bookSiteVisit, call: dict.common.call }}
+          />
         </div>
       </div>
     </HeaderScroll>

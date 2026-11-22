@@ -65,6 +65,16 @@ export async function requireAdmin(): Promise<CurrentAdmin> {
   return admin;
 }
 
+/**
+ * Owner-only actions and pages (team management, deleting content). Editors are sent back to the dashboard.
+ * Call it first, like requireAdmin(); the UI also hides these controls from editors.
+ */
+export async function requireOwner(): Promise<CurrentAdmin> {
+  const admin = await requireAdmin();
+  if (admin.role !== "admin") redirect("/admin?notice=owner-only");
+  return admin;
+}
+
 export async function destroySession() {
   const store = await cookies();
   const token = store.get(SESSION_COOKIE)?.value;

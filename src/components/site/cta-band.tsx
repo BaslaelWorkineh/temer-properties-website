@@ -1,5 +1,5 @@
 import { CalendarCheck2, Phone } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { WhatsAppIcon } from "@/components/site/brand-icons";
 import { Container } from "@/components/site/section";
 import { buttonStyles } from "@/components/ui/button";

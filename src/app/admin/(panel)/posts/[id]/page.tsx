@@ -5,6 +5,7 @@ import { ExternalLink } from "lucide-react";
 import { toId } from "@/app/admin/_lib/server";
 import { deletePostAction } from "@/app/admin/(panel)/posts/actions";
 import { DeleteButton } from "@/components/admin/form-controls";
+import { OwnerOnly } from "@/components/admin/owner-only";
 import { firstParam } from "@/components/admin/helpers";
 import { PostForm } from "@/components/admin/post-form";
 import { Notice, PageHeader } from "@/components/admin/ui";
@@ -44,7 +45,7 @@ export default async function EditPostPage({ params, searchParams }: PageProps<"
                 <ExternalLink className="size-4" aria-hidden="true" /> View page
               </a>
             ) : null}
-            <DeleteButton action={deletePostAction} id={post.id} confirmMessage={`Delete “${post.title}”? This cannot be undone.`} />
+            <OwnerOnly><DeleteButton action={deletePostAction} id={post.id} confirmMessage={`Delete “${post.title}”? This cannot be undone.`} /></OwnerOnly>
           </>
         }
       />

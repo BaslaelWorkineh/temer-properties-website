@@ -1,5 +1,5 @@
 import { ChevronRight } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { JsonLd } from "@/components/site/json-ld";
 import { breadcrumbJsonLd, type Crumb } from "@/lib/seo/jsonld";
 import { cn } from "@/lib/utils";

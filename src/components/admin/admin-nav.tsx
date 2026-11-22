@@ -13,6 +13,7 @@ import {
   MapPin,
   Menu,
   Newspaper,
+  Users,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -34,11 +35,12 @@ function isActive(pathname: string, href: string) {
   return href === "/admin" ? pathname === "/admin" : pathname === href || pathname.startsWith(`${href}/`);
 }
 
-function NavLinks({ counts, onNavigate }: { counts: Counts; onNavigate?: () => void }) {
+function NavLinks({ counts, isOwner, onNavigate }: { counts: Counts; isOwner: boolean; onNavigate?: () => void }) {
   const pathname = usePathname();
+  const visible = isOwner ? [...items, { href: "/admin/team", label: "Team", icon: Users } as (typeof items)[number]] : items;
   return (
     <ul className="space-y-1">
-      {items.map(({ href, label, icon: Icon, count }) => {
+      {visible.map(({ href, label, icon: Icon, count }) => {
         const active = isActive(pathname, href);
         const value = count ? counts[count] : 0;
         return (
@@ -78,15 +80,15 @@ function NavLinks({ counts, onNavigate }: { counts: Counts; onNavigate?: () => v
   );
 }
 
-export function SidebarNav({ counts }: { counts: Counts }) {
+export function SidebarNav({ counts, isOwner }: { counts: Counts; isOwner: boolean }) {
   return (
     <nav aria-label="Admin">
-      <NavLinks counts={counts} />
+      <NavLinks counts={counts} isOwner={isOwner} />
     </nav>
   );
 }
 
-export function MobileNav({ counts, footer }: { counts: Counts; footer: React.ReactNode }) {
+export function MobileNav({ counts, footer, isOwner }: { counts: Counts; footer: React.ReactNode; isOwner: boolean }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
@@ -114,7 +116,7 @@ export function MobileNav({ counts, footer }: { counts: Counts; footer: React.Re
       {open ? (
         <div id="admin-mobile-menu" className="absolute inset-x-0 top-full z-40 border-t border-white/10 bg-brand-950 px-4 pb-5 pt-3 shadow-xl">
           <nav aria-label="Admin">
-            <NavLinks counts={counts} onNavigate={() => setOpen(false)} />
+            <NavLinks counts={counts} isOwner={isOwner} onNavigate={() => setOpen(false)} />
           </nav>
           <div className="mt-4 border-t border-white/10 pt-4">{footer}</div>
         </div>

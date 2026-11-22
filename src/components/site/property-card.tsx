@@ -1,12 +1,14 @@
 import { Bath, BedDouble, Camera, MapPin, Ruler } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { CardActions } from "@/components/site/card-actions";
 import { ContactActions } from "@/components/site/contact-actions";
 import { ImagePlaceholder } from "@/components/site/image-placeholder";
 import { ImageWatermark } from "@/components/site/image-watermark";
 import { TypeLabel } from "@/components/site/status-label";
-import { propertyStatusLabels, propertyTypes } from "@/lib/config/property-types";
+import { propertyTypes } from "@/lib/config/property-types";
+import type { Locale } from "@/lib/i18n/config";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import type { PropertyCardData } from "@/lib/data/properties";
 import { discountedPrice, formatArea, formatPrice } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -18,12 +20,16 @@ export function PropertyCard({
   headingLevel = 3,
   eager,
   variant = "default",
+  lang = "en",
 }: {
   property: PropertyCardData;
   headingLevel?: 2 | 3;
   eager?: boolean;
   variant?: CardVariant;
+  /** Language of the card text. Listing titles come from the database and stay as written. */
+  lang?: Locale;
 }) {
+  const dict = getDictionary(lang);
   const p = property;
   const meta = propertyTypes[p.type];
   const Heading = headingLevel === 2 ? "h2" : "h3";
@@ -42,7 +48,8 @@ export function PropertyCard({
             fill
             sizes="(min-width: 640px) 50vw, 100vw"
             loading={eager ? "eager" : "lazy"}
-            className="-z-10 object-cover transition duration-700 group-hover:scale-[1.03]"
+            // Full opacity down to the middle of the photo, then it steps down (80% -> 60% -> 40% -> 20%) to the bottom.
+            className="-z-10 object-cover transition duration-700 [mask-image:linear-gradient(to_bottom,rgb(0_0_0)_50%,rgb(0_0_0/0.8)_55%,rgb(0_0_0/0.6)_70%,rgb(0_0_0/0.4)_85%,rgb(0_0_0/0.2))] group-hover:scale-[1.03]"
           />
         ) : (
           <div className="absolute inset-0 -z-10">
@@ -54,8 +61,8 @@ export function PropertyCard({
         {/* The brand mark starts behind the type label, which sits on top of it. */}
         <ImageWatermark className="left-4 top-7 z-0" />
         <div className="absolute left-4 top-4 z-[2] flex gap-1.5">
-          <TypeLabel>{meta.label}</TypeLabel>
-          {p.status !== "available" ? <TypeLabel className="bg-gold-500 text-brand-950">{propertyStatusLabels[p.status]}</TypeLabel> : null}
+          <TypeLabel>{dict.types[p.type].label}</TypeLabel>
+          {p.status !== "available" ? <TypeLabel className="bg-gold-500 text-brand-950">{dict.propertyStatus[p.status]}</TypeLabel> : null}
         </div>
         {hasDiscount ? (
           <span className="absolute right-4 top-4 z-[2] bg-red-600 px-2.5 py-1 text-xs font-bold text-white">-{p.discountPercent}%</span>
@@ -66,14 +73,15 @@ export function PropertyCard({
             {place}
           </p>
           <Heading className="mt-1 font-sans text-lg font-semibold leading-snug sm:text-xl">{p.title}</Heading>
-          <PriceBlock p={p} className="mt-1 text-white" oldClassName="text-white/65" showPercent />
+          <PriceBlock p={p} className="mt-1 text-white" oldClassName="text-white/65" showPercent lang={lang} />
           <CardSpecs
             p={p}
+            lang={lang}
             residential={meta.residential}
             className="mt-2 border-t-0 pt-0 text-xs text-white/85"
             iconClassName="size-3.5 text-white/70"
           />
-          <CardActions href={`/properties/${p.slug}`}>
+          <CardActions href={`/properties/${p.slug}`} label={dict.common.viewDetails}>
             <ContactActions subject={p.title} tone="dark" />
           </CardActions>
         </div>
@@ -196,12 +204,14 @@ function PriceBlock({
   oldClassName,
   wrapperClassName,
   showPercent,
+  lang = "en",
 }: {
   p: PropertyCardData;
   className?: string;
   oldClassName?: string;
   wrapperClassName?: string;
   showPercent?: boolean;
+  lang?: Locale;
 }) {
   if (p.price && p.discountPercent) {
     return (
@@ -212,7 +222,11 @@ function PriceBlock({
       </div>
     );
   }
-  return <p className={cn("font-display text-2xl font-bold tracking-tight", className, wrapperClassName)}>{formatPrice(p.price)}</p>;
+  return (
+    <p className={cn("font-display text-2xl font-bold tracking-tight", className, wrapperClassName)}>
+      {p.price && p.price > 0 ? formatPrice(p.price) : getDictionary(lang).common.priceOnRequest}
+    </p>
+  );
 }
 
 /** Beds / baths / size row shared by both card variants. */
@@ -221,12 +235,15 @@ function CardSpecs({
   residential,
   className,
   iconClassName,
+  lang = "en",
 }: {
   p: PropertyCardData;
   residential: boolean;
   className?: string;
   iconClassName?: string;
+  lang?: Locale;
 }) {
+  const dict = getDictionary(lang);
   const icon = cn("size-4", iconClassName);
   return (
     <dl className={cn("flex flex-wrap gap-x-5 gap-y-1 border-t pt-4 text-sm", className)}>
@@ -236,7 +253,7 @@ function CardSpecs({
             <BedDouble className={icon} aria-hidden="true" />
             <span className="sr-only">Bedrooms</span>
           </dt>
-          <dd>{p.bedrooms === 0 ? "Studio" : `${p.bedrooms} bed`}</dd>
+          <dd>{p.bedrooms === 0 ? dict.common.studio : `${p.bedrooms} ${dict.common.bed}`}</dd>
         </div>
       ) : null}
       {p.bathrooms != null ? (
@@ -245,7 +262,7 @@ function CardSpecs({
             <Bath className={icon} aria-hidden="true" />
             <span className="sr-only">Bathrooms</span>
           </dt>
-          <dd>{p.bathrooms} {p.bathrooms === 1 ? "toilet" : "toilets"}</dd>
+          <dd>{dict.common.toilets(p.bathrooms)}</dd>
         </div>
       ) : null}
       {p.areaSqm ? (

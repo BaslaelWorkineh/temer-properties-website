@@ -1,7 +1,10 @@
 import { ArrowRight, ChevronDown } from "lucide-react";
-import Form from "next/form";
+import { AutoSubmitForm as Form } from "@/components/site/auto-submit-form";
 import { PRICE_STEPS } from "@/components/site/property-filters";
-import { PROPERTY_TYPES, propertyTypes } from "@/lib/config/property-types";
+import { PROPERTY_TYPES } from "@/lib/config/property-types";
+import type { Locale } from "@/lib/i18n/config";
+import { localePath } from "@/lib/i18n/config";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import { cn } from "@/lib/utils";
 
 const selectStyles =
@@ -26,26 +29,35 @@ function Field({ id, label, children }: { id: string; label: string; children: R
  * still says what it is for), price is included, and Search is a quiet dark button so "View details" on the
  * tiles stays the main action. It submits to /properties (plain GET form, works without JavaScript).
  */
-export function HomeSearch({ locations, className }: { locations: Array<{ slug: string; name: string }>; className?: string }) {
+export function HomeSearch({
+  locations,
+  className,
+  lang = "en",
+}: {
+  locations: Array<{ slug: string; name: string }>;
+  className?: string;
+  lang?: Locale;
+}) {
+  const dict = getDictionary(lang);
   return (
     <Form
-      action="/properties"
+      action={localePath(lang, "/properties")}
       className={cn("grid gap-x-3 gap-y-4 bg-white p-4 ring-1 ring-line sm:grid-cols-2 sm:p-5 lg:grid-cols-[repeat(4,minmax(0,1fr))_auto] lg:items-end", className)}
     >
-      <Field id="home-type" label="Property type">
+      <Field id="home-type" label={dict.search.type}>
         <select id="home-type" name="type" defaultValue="" className={selectStyles}>
-          <option value="">All types</option>
+          <option value="">{dict.search.allTypes}</option>
           {PROPERTY_TYPES.map((t) => (
             <option key={t} value={t}>
-              {propertyTypes[t].plural}
+              {dict.types[t].plural}
             </option>
           ))}
         </select>
       </Field>
 
-      <Field id="home-location" label="Area">
+      <Field id="home-location" label={dict.search.area}>
         <select id="home-location" name="location" defaultValue="" className={selectStyles}>
-          <option value="">All areas</option>
+          <option value="">{dict.search.allAreas}</option>
           {locations.map((l) => (
             <option key={l.slug} value={l.slug}>
               {l.name}
@@ -54,23 +66,23 @@ export function HomeSearch({ locations, className }: { locations: Array<{ slug: 
         </select>
       </Field>
 
-      <Field id="home-bedrooms" label="Bedrooms">
+      <Field id="home-bedrooms" label={dict.search.bedrooms}>
         <select id="home-bedrooms" name="bedrooms" defaultValue="" className={selectStyles}>
-          <option value="">Any</option>
+          <option value="">{dict.search.any}</option>
           {[1, 2, 3, 4].map((n) => (
             <option key={n} value={n}>
-              {n}+ bedrooms
+              {dict.search.nBedrooms(n)}
             </option>
           ))}
         </select>
       </Field>
 
-      <Field id="home-max-price" label="Max price">
+      <Field id="home-max-price" label={dict.search.maxPrice}>
         <select id="home-max-price" name="maxPrice" defaultValue="" className={selectStyles}>
-          <option value="">Any price</option>
+          <option value="">{dict.search.anyPrice}</option>
           {PRICE_STEPS.map((p) => (
             <option key={p} value={p}>
-              Up to ETB {p / 1_000_000}M
+              {dict.search.upTo(p / 1_000_000)}
             </option>
           ))}
         </select>
@@ -80,7 +92,7 @@ export function HomeSearch({ locations, className }: { locations: Array<{ slug: 
         type="submit"
         className="inline-flex h-11 items-center justify-center gap-2 bg-brand-950 px-6 text-sm font-semibold text-white transition hover:bg-brand-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 sm:col-span-2 lg:col-span-1"
       >
-        Search <ArrowRight className="size-4" aria-hidden="true" />
+        {dict.search.search} <ArrowRight className="size-4" aria-hidden="true" />
       </button>
     </Form>
   );

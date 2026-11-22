@@ -5,6 +5,7 @@ import { ExternalLink } from "lucide-react";
 import { getLocationOptions, getProjectOptions, toId } from "@/app/admin/_lib/server";
 import { deletePropertyAction } from "@/app/admin/(panel)/properties/actions";
 import { DeleteButton } from "@/components/admin/form-controls";
+import { OwnerOnly } from "@/components/admin/owner-only";
 import { firstParam } from "@/components/admin/helpers";
 import { PropertyForm } from "@/components/admin/property-form";
 import { Notice, PageHeader } from "@/components/admin/ui";
@@ -51,11 +52,11 @@ export default async function EditPropertyPage({ params, searchParams }: PagePro
                 <ExternalLink className="size-4" aria-hidden="true" /> View page
               </a>
             ) : null}
-            <DeleteButton
+            <OwnerOnly><DeleteButton
               action={deletePropertyAction}
               id={property.id}
               confirmMessage={`Delete “${property.title}”? Its page will disappear from the website. Consider marking it Sold instead to keep the page.`}
-            />
+            /></OwnerOnly>
           </>
         }
       />

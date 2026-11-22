@@ -17,13 +17,13 @@ export default async function AdminLocationsPage({ searchParams }: PageProps<"/a
   const sp = await searchParams;
 
   const propertyCounts = db
-    .select({ locationId: properties.locationId, n: count().as("n") })
+    .select({ locationId: properties.locationId, propertyN: count().as("property_n") })
     .from(properties)
     .where(eq(properties.isPublished, true))
     .groupBy(properties.locationId)
     .as("property_counts");
   const projectCounts = db
-    .select({ locationId: projects.locationId, n: count().as("n") })
+    .select({ locationId: projects.locationId, projectN: count().as("project_n") })
     .from(projects)
     .where(eq(projects.isPublished, true))
     .groupBy(projects.locationId)
@@ -39,8 +39,8 @@ export default async function AdminLocationsPage({ searchParams }: PageProps<"/a
       isPublished: locations.isPublished,
       sortOrder: locations.sortOrder,
       updatedAt: locations.updatedAt,
-      propertyCount: propertyCounts.n,
-      projectCount: projectCounts.n,
+      propertyCount: propertyCounts.propertyN,
+      projectCount: projectCounts.projectN,
     })
     .from(locations)
     .leftJoin(propertyCounts, eq(propertyCounts.locationId, locations.id))

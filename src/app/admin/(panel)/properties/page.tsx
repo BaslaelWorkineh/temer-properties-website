@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Form from "next/form";
+import { AutoSubmitForm as Form } from "@/components/site/auto-submit-form";
 import Link from "next/link";
 import { and, count, desc, eq, like, type SQL } from "drizzle-orm";
 import { Building2, ExternalLink, Plus, Search } from "lucide-react";
@@ -173,7 +173,7 @@ export default async function AdminPropertiesPage({ searchParams }: PageProps<"/
                       <Badge tone={propertyStatusTone[p.status]}>{propertyStatusLabels[p.status]}</Badge>
                     </td>
                     <td className={td}>
-                      <YesNo value={p.isPublished} yes="Published" no="Hidden" />
+                      <YesNo value={p.isPublished} yes="Published" no="Draft" />
                       {p.isFeatured ? <span className="mt-1 block text-xs font-medium text-[#6b5016]">★ Featured</span> : null}
                     </td>
                     <td className={`${td} whitespace-nowrap text-muted`}>{formatDate(p.updatedAt, { dateStyle: "medium" })}</td>

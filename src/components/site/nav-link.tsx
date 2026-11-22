@@ -1,12 +1,13 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { usePathname } from "next/navigation";
+import { stripLocale } from "@/lib/i18n/config";
 import { cn } from "@/lib/utils";
 
 /** Header link. The current page gets a solid underline; other links get a faint one on hover. */
 export function NavLink({ href, children, className }: { href: string; children: React.ReactNode; className?: string }) {
-  const pathname = usePathname();
+  const pathname = stripLocale(usePathname());
   const active = href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
   return (
     <Link

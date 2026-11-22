@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/site/link";
 import logoColor from "@/assets/brand/logo-color.png";
 import logoWhite from "@/assets/brand/logo-white.png";
 import { site } from "@/lib/config/site";

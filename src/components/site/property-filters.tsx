@@ -1,5 +1,5 @@
 import { Search } from "lucide-react";
-import Form from "next/form";
+import { AutoSubmitForm as Form } from "@/components/site/auto-submit-form";
 import { buttonStyles } from "@/components/ui/button";
 import { inputStyles } from "@/components/ui/form";
 import { PROPERTY_TYPES, propertyTypes } from "@/lib/config/property-types";

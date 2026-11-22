@@ -1,17 +1,28 @@
 "use client";
 
 import { Menu, Phone, X } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useState } from "react";
 import { buttonStyles } from "@/components/ui/button";
+import { stripLocale } from "@/lib/i18n/config";
 import { cn } from "@/lib/utils";
 
 type Item = { href: string; label: string };
 
-export function MobileMenu({ items, phone, phoneDisplay }: { items: readonly Item[]; phone: string; phoneDisplay: string }) {
+export function MobileMenu({
+  items,
+  phone,
+  phoneDisplay,
+  labels,
+}: {
+  items: readonly Item[];
+  phone: string;
+  phoneDisplay: string;
+  labels: { open: string; close: string; bookSiteVisit: string; call: string };
+}) {
   const [open, setOpen] = useState(false);
-  const pathname = usePathname();
+  const pathname = stripLocale(usePathname());
   const panelId = useId();
 
   // Close after navigating (the layout, and this component, persist across pages).
@@ -42,7 +53,7 @@ export function MobileMenu({ items, phone, phoneDisplay }: { items: readonly Ite
         className="grid size-10 place-items-center rounded-full text-ink hover:bg-soft"
       >
         {open ? <X className="size-6" aria-hidden="true" /> : <Menu className="size-6" aria-hidden="true" />}
-        <span className="sr-only">{open ? "Close menu" : "Open menu"}</span>
+        <span className="sr-only">{open ? labels.close : labels.open}</span>
       </button>
       <div
         id={panelId}
@@ -73,10 +84,10 @@ export function MobileMenu({ items, phone, phoneDisplay }: { items: readonly Ite
         </nav>
         <div className="mt-6 grid gap-3">
           <Link href="/book-a-visit" onClick={() => setOpen(false)} className={buttonStyles({ size: "lg" })}>
-            Book a site visit
+            {labels.bookSiteVisit}
           </Link>
           <a href={`tel:${phone}`} className={buttonStyles({ variant: "outline", size: "lg" })}>
-            <Phone className="size-4" aria-hidden="true" /> Call {phoneDisplay}
+            <Phone className="size-4" aria-hidden="true" /> {labels.call} {phoneDisplay}
           </a>
         </div>
       </div>

@@ -26,7 +26,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const contentUpdated = latest([...onMarket.map((p) => p.updatedAt), ...projects.map((p) => p.updatedAt)]);
 
   const staticPages: MetadataRoute.Sitemap = [
-    { url: absoluteUrl("/"), lastModified: contentUpdated },
+    // The home page exists in English and Amharic; each URL lists the other as its alternate (hreflang).
+    { url: absoluteUrl("/"), lastModified: contentUpdated, alternates: { languages: { en: absoluteUrl("/"), am: absoluteUrl("/am") } } },
+    { url: absoluteUrl("/am"), lastModified: contentUpdated, alternates: { languages: { en: absoluteUrl("/"), am: absoluteUrl("/am") } } },
     { url: absoluteUrl("/properties"), lastModified: latest(onMarket.map((p) => p.updatedAt)) },
     { url: absoluteUrl("/projects"), lastModified: latest(projects.map((p) => p.updatedAt)) },
     { url: absoluteUrl("/locations"), lastModified: latest(locations.map((l) => l.updatedAt)) },
