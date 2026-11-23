@@ -72,8 +72,9 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
       {/*
         Hero: sized to its content, directly below the thin header. The header's logo tab hangs ~4rem into it,
         so the wordmark starts below that.
-        The background is a 3D render of Temer towers at dusk, anchored to the top (just right of centre, where the
-        towers are) so the rooftops stay in view and only the street at the bottom is cropped; it is the only hero image and is preloaded. A big "TEMER / PROPERTIES" wordmark sits in the sky at
+        The background is a 3D render of Temer towers at dusk (4K, right edge trimmed so the towers sit right of
+        centre; see scripts/generate-brand-assets.ts), anchored to the top so the rooftops stay in view and only the
+        street at the bottom is cropped; it is the only hero image and is preloaded. A big "TEMER / PROPERTIES" wordmark sits in the sky at
         the top left; the copy sits low over the city, with one primary action.
         The wordmark is the start of the H1 ("Temer Properties: apartments, homes & shops for sale in Addis Ababa"),
         so the page's main heading names the brand people search for. The H1 spans the whole left column: wordmark
@@ -83,9 +84,9 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
           the 3.5rem gold bar), so the fold lands on the gold bar's bottom edge instead of showing a sliver of the
           white search panel. Never shorter than its content (36rem). Phones keep the content height: their
           fixed contact bar covers the bottom of the screen anyway. */}
-      <section className="hero-split relative isolate flex min-h-[30rem] flex-col overflow-hidden bg-brand-950 text-white sm:min-h-[36rem] lg:min-h-[max(36rem,calc(100svh-7rem-2px))]">
-        {/* The photo is the background of the whole hero, towers in the centre. Desktop: the text sits on the left,
-            beside the towers, over a darkened left edge (.hero-split in globals.css). */}
+      <section className="hero-split relative isolate flex min-h-[30rem] flex-col overflow-hidden bg-logo-green text-white sm:min-h-[36rem] lg:min-h-[max(36rem,calc(100svh-7rem-2px))]">
+        {/* The photo is the background of the whole hero, towers in the centre. Desktop: the text sits in a green
+            card on the left, beside the towers (.hero-split in globals.css). */}
         <div className="absolute inset-0 -z-10">
           <Image
             src={heroTowers}
@@ -95,41 +96,39 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
             quality={90}
             sizes="100vw"
             placeholder="blur"
-            className="object-cover object-[55%_top] lg:object-[50.5%_top]"
+            className="object-cover object-[64%_top] lg:object-left-top"
           />
         </div>
         <div
-          className="absolute inset-0 -z-10 bg-gradient-to-br from-brand-950/75 via-brand-950/25 to-transparent lg:hidden"
+          className="absolute inset-0 -z-10 bg-gradient-to-br from-logo-green/80 via-logo-green/30 to-transparent lg:hidden"
           aria-hidden="true"
         />
-        {/* Desktop: darker left edge behind the text; the towers and the right side stay clear. */}
+        {/* Phones: green fade behind the bottom copy. Desktop has no tint: the photo shows in full colour and the
+            text sits in its own green card instead. */}
         <div
-          className="absolute inset-0 -z-10 hidden bg-[linear-gradient(to_right,var(--color-brand-950)_0%,color-mix(in_oklab,var(--color-brand-950)_70%,transparent)_22%,transparent_38%)] lg:block"
-          aria-hidden="true"
-        />
-        <div
-          className="absolute inset-x-0 bottom-0 -z-10 h-2/3 bg-gradient-to-t from-brand-950 via-brand-950/75 to-transparent"
+          className="absolute inset-x-0 bottom-0 -z-10 h-2/3 bg-gradient-to-t from-logo-green via-logo-green/75 to-transparent lg:hidden"
           aria-hidden="true"
         />
         <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 pb-14 pt-12 sm:px-6 sm:pb-16 sm:pt-14 lg:max-w-none">
-          {/* Desktop: the wordmark sits on the left, centred vertically, and the headline, intro and buttons bottom
-              right, both beside the towers. The H1 (wordmark + headline) stays one element: a subgrid over all rows. */}
-          <div className="grid flex-1 lg:grid-cols-[var(--hero-text)_minmax(0,1fr)_var(--hero-text)] lg:grid-rows-[1fr_auto_auto] lg:gap-x-12">
-            <div className="flex flex-col lg:contents">
-              <h1 className="flex flex-1 flex-col items-start lg:col-span-3 lg:col-start-1 lg:row-span-3 lg:row-start-1 lg:grid lg:grid-cols-subgrid lg:grid-rows-subgrid">
-                <span className="hero-wordmark lg:col-start-1 lg:row-span-3 lg:row-start-1 lg:self-center">
+          {/* Desktop: wordmark, headline and buttons sit in a white card in the left column, centred vertically beside
+              the towers, with a logo-green card offset behind it (a hard box-shadow). The H1 (wordmark + headline)
+              stays one element. */}
+          <div className="grid flex-1 lg:grid-cols-[var(--hero-text)_minmax(0,1fr)_var(--hero-text)] lg:grid-rows-[1fr_auto_1fr] lg:gap-x-12">
+            <div className="flex flex-col lg:col-start-1 lg:row-start-2 lg:bg-white lg:p-8 lg:text-ink lg:shadow-[1.25rem_1.25rem_0_0_var(--color-logo-green)]">
+              <h1 className="flex flex-1 flex-col items-start lg:flex-none">
+                <span className="hero-wordmark">
                   <span className="hero-wordmark__name">{dict.brand.name}</span>{" "}
                   <span className="hero-wordmark__sub">{dict.brand.sub}</span>
                 </span>{" "}
-                <span className="mt-auto block max-w-2xl pt-8 text-4xl font-bold leading-[1.05] sm:pt-12 sm:text-5xl lg:col-start-3 lg:row-start-2 lg:mt-0 lg:max-w-none lg:pt-0 lg:text-[clamp(2.25rem,3.2vw,3rem)]">
+                <span className="mt-auto block max-w-2xl pt-8 text-4xl font-bold leading-[1.05] sm:pt-12 sm:text-5xl lg:mt-0 lg:max-w-none lg:pt-10 lg:text-[clamp(2.25rem,3.2vw,3.75rem)]">
                   {dict.home.h1}
                 </span>
               </h1>
-              <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3 lg:col-start-3 lg:row-start-3">
-                <Link href="/properties" className={buttonStyles({ variant: "gold", size: "lg" })}>
+              <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3 lg:gap-x-5">
+                <Link href="/properties" className={buttonStyles({ variant: "gold", size: "lg", className: "lg:h-11 lg:px-5 lg:text-sm" })}>
                   {dict.home.browse} <ArrowRight className="size-4" aria-hidden="true" />
                 </Link>
-                <Link href="/book-a-visit" className="inline-flex items-center gap-1.5 font-semibold text-white underline-offset-4 hover:underline">
+                <Link href="/book-a-visit" className="inline-flex items-center gap-1.5 whitespace-nowrap font-semibold text-white underline-offset-4 hover:underline lg:text-sm lg:text-logo-green">
                   {dict.common.bookSiteVisit} <ArrowRight className="size-4" aria-hidden="true" />
                 </Link>
               </div>

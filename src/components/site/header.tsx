@@ -27,8 +27,9 @@ export function Header({ lang }: { lang: Locale }) {
         {dict.common.skip}
       </a>
       <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-        {/* Reserves the ribbon's width in the bar; the ribbon itself overflows downward. */}
-        <div className="relative h-full w-[5.5rem] shrink-0">
+        {/* Reserves the ribbon's width in the bar; the ribbon itself overflows downward. Wider than the 80rem bar, the
+            logo moves halfway out towards the screen's left edge (half of the side margin plus the 2rem padding). */}
+        <div className="relative h-full w-[5.5rem] shrink-0 min-[80rem]:-translate-x-[calc((100vw-80rem)/4+1rem)]">
           {/* Bookmark ribbon: clip-path cuts the V-notch; it would also clip a box-shadow, so the shadow is a
               drop-shadow filter on the unclipped wrapper (it follows the notch). On scroll the ribbon rolls up
               into the bar (scale-y from the top) and its shadow fades, while the logo shrinks to fit the bar. */}

@@ -4,7 +4,8 @@
  *   - src/assets/brand/logo-color.png, logo-white.png: transparent cut-outs for the header/footer
  *   - src/app favicon.ico, icon.png, apple-icon.png and public/images/icon-*.png
  *   - public/images/logo.png (structured data) and og-default.jpg (default share image)
- * and the home hero background (src/assets/hero/city-sunset-green.jpg) from brand/city-view-sunset.avif.
+ * the old green hero background (src/assets/hero/city-sunset-green.jpg) from brand/city-view-sunset.avif,
+ * and the current home hero (src/assets/hero/towers-dusk.jpg) from the Sarbet City Plus dusk render.
  * Re-run after replacing a source file:
  *   npx tsx scripts/generate-brand-assets.ts
  */
@@ -29,6 +30,29 @@ const appDir = path.resolve("src/app");
 mkdirSync(publicImages, { recursive: true });
 mkdirSync(brandAssets, { recursive: true });
 mkdirSync(heroAssets, { recursive: true });
+
+/**
+ * Current home hero (src/assets/hero/towers-dusk.jpg): the Sarbet City Plus dusk render, at 4K width.
+ * The only copy we have of the render is 1280×720 (public/images/gallery/sarbet-city-plus-dusk.jpg), so
+ * TOWERS_SOURCE is a 4× AI upscale of it (Real-ESRGAN, realesrgan-x4plus model, 5120×2880), which redraws edges
+ * and windows crisply. The right edge is trimmed so the towers sit further right, clear of the text card on the left.
+ * When the full-resolution render from the visualiser is available, point TOWERS_SOURCE at it and re-run.
+ */
+const TOWERS_SOURCE = path.resolve("brand/sarbet-city-plus-dusk-upscaled.jpg");
+const TOWERS_TRIM_RIGHT = 0.18;
+const TOWERS_WIDTH = 3840;
+
+async function towersHero() {
+  const { width = 0, height = 0 } = await sharp(TOWERS_SOURCE).metadata();
+  const keep = Math.round(width * (1 - TOWERS_TRIM_RIGHT));
+  const outHeight = Math.round((TOWERS_WIDTH * height) / keep);
+  await sharp(TOWERS_SOURCE)
+    .extract({ left: 0, top: 0, width: keep, height })
+    .resize({ width: TOWERS_WIDTH, kernel: "lanczos3" })
+    .jpeg({ quality: 88, mozjpeg: true })
+    .toFile(path.join(heroAssets, "towers-dusk.jpg"));
+  return { width: TOWERS_WIDTH, height: outHeight };
+}
 
 /**
  * Green version of the sunset skyline: a gradient map (deep forest → brand green → logo lime → pale
@@ -193,6 +217,9 @@ async function main() {
 
   const hero = await greenHero();
   console.log(`✓ Hero background ${hero.width}×${hero.height} → src/assets/hero/city-sunset-green.jpg`);
+
+  const towers = await towersHero();
+  console.log(`✓ Home hero ${towers.width}×${towers.height} → src/assets/hero/towers-dusk.jpg`);
 }
 
 main().catch((err) => {

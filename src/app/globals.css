@@ -15,6 +15,10 @@
   --color-brand-900: #183326;
   --color-brand-950: #102219;
 
+  /* The logo's green (darkest end of its #597318 → #a7d33e gradient): the home hero's wordmark, card offset and phone
+     tint. 5.4:1 against white either way round. */
+  --color-logo-green: #597318;
+
   --color-gold-100: #f6edd6;
   --color-gold-300: #dfc488;
   --color-gold-400: #d4b26a;
@@ -96,7 +100,7 @@
 }
 
 /*
- * Home hero wordmark, top left in the sky: solid "TEMER" over an outline-only "PROPERTIES".
+ * Home hero wordmark: solid "TEMER" over a solid gold "PROPERTIES".
  * Sizes are in em of the wrapper so the two lines stay proportional; letter-spacing stretches
  * PROPERTIES to roughly the width of TEMER (Inter 800).
  */
@@ -107,12 +111,23 @@
    * Keep in sync with the grid in src/app/[lang]/page.tsx (columns var(--hero-text) / 1fr).
    */
   @media (min-width: 64rem) {
+    /* The card reaches across to the building. On desktop the photo is width-bound, so the towers' left edge sits at
+       ~44vw at every size; the card (1.5rem from the left) plus its 1.25rem green offset ends at 42.5vw, just short of it. */
     .hero-split {
-      --hero-text: min(36rem, calc(35vw - 3rem));
+      --hero-text: calc(42.5vw - 2.75rem);
     }
-    /* Smaller wordmark on narrower laptops so it fits the text column (TEMER is ~3.4em wide). */
+    /* The wordmark sits in the white card: logo green, no shadow, and sized to fit the column minus the card's
+       2rem side padding (uppercase TEMER is ~4em wide, measured). */
     .hero-split .hero-wordmark {
-      font-size: min(9.5rem, 8.5vw);
+      font-size: min(10rem, calc((var(--hero-text) - 4rem) / 4.1));
+      color: var(--color-logo-green);
+      filter: none;
+    }
+    .hero-split .hero-wordmark__sub {
+      color: var(--color-gold-600);
+    }
+    .hero-split .hero-wordmark:lang(am) .hero-wordmark__sub {
+      color: var(--color-gold-600);
     }
   }
 
@@ -137,8 +152,7 @@
     letter-spacing: -0.02em;
     margin-left: -0.02em;
   }
-  /* Outline text needs a static font: variable Inter's overlapping glyph contours show up as stray
-     lines inside the stroked letters, so this line uses the (static) Barlow Condensed display face. */
+  /* PROPERTIES: spaced-out Barlow Condensed capitals with a solid gold fill. */
   .hero-wordmark__sub {
     margin-top: 0.14em;
     font-family: var(--font-barlow), ui-sans-serif, system-ui, sans-serif;
@@ -147,8 +161,7 @@
     letter-spacing: 0.45em;
     margin-right: -0.45em; /* cancel the trailing letter-spacing so both lines end flush */
     padding-left: 0.1em; /* lands PROPERTIES where TEMER's ink used to start; see the note above */
-    color: transparent;
-    -webkit-text-stroke: max(1px, 0.03em) var(--color-gold-400);
+    color: var(--color-gold-400);
   }
 }
 
