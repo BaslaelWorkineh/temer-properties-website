@@ -7,7 +7,7 @@ temerpropertiesapartment.com and temerpropertiessales.com with one site:
 - **Site-visit booking**: in-person or video-call visits, live slot availability, capacity limits.
 - **Admin panel** (`/admin`): listings, projects, areas, guides, bookings and enquiries, with photo uploads.
 - **Database**: Postgres (Neon) through Drizzle ORM and node-postgres. Use a Neon dev branch locally and the production branch on Vercel.
-
+ 
 Stack: Next.js 16 (App Router, Cache Components), React 19, TypeScript, Tailwind CSS 4, Drizzle ORM, Zod.
 
 ## Quick start
