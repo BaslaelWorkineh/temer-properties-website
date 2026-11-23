@@ -17,6 +17,9 @@ import { requireAdmin } from "@/lib/auth/session";
 import { siteUrl } from "@/lib/config/site";
 import { formatDateTime } from "@/lib/format";
 
+// Admin pages are per-request and authenticated; they are allowed to block (see the panel layout).
+export const instant = false;
+
 export const metadata: Metadata = { title: "Edit location" };
 
 export default async function EditLocationPage({ params, searchParams }: PageProps<"/admin/locations/[id]">) {

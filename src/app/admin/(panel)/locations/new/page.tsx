@@ -4,6 +4,9 @@ import { PageHeader } from "@/components/admin/ui";
 import { requireAdmin } from "@/lib/auth/session";
 import { siteUrl } from "@/lib/config/site";
 
+// Admin pages are per-request and authenticated; they are allowed to block (see the panel layout).
+export const instant = false;
+
 export const metadata: Metadata = { title: "New location" };
 
 export default async function NewLocationPage() {

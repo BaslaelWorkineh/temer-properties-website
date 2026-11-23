@@ -17,6 +17,9 @@ import { requireAdmin } from "@/lib/auth/session";
 import { bookingStatusLabels, visitTypeLabels, type BookingStatus } from "@/lib/config/booking";
 import { formatDateTime, formatSlot, formatVisitDate } from "@/lib/format";
 
+// Admin pages are per-request and authenticated; they are allowed to block (see the panel layout).
+export const instant = false;
+
 export const metadata: Metadata = { title: "Booking" };
 
 function QuickStatus({ id, status, label, icon, variant = "outline" }: { id: number; status: BookingStatus; label: string; icon: React.ReactNode; variant?: ButtonVariant }) {

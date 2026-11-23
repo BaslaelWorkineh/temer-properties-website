@@ -11,6 +11,9 @@ import { requireAdmin } from "@/lib/auth/session";
 import { ACTIVE_BOOKING_STATUSES, bookingStatusLabels, visitTypeLabels } from "@/lib/config/booking";
 import { addisToday, formatSlot } from "@/lib/format";
 
+// Admin pages are per-request and authenticated; they are allowed to block (see the panel layout).
+export const instant = false;
+
 export const metadata: Metadata = { title: "Bookings" };
 
 const VIEWS = ["upcoming", "pending", "past", "all"] as const;

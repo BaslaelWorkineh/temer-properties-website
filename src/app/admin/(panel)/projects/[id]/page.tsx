@@ -18,6 +18,9 @@ import { projectStatusLabels } from "@/lib/config/property-types";
 import { siteUrl } from "@/lib/config/site";
 import { formatDateTime } from "@/lib/format";
 
+// Admin pages are per-request and authenticated; they are allowed to block (see the panel layout).
+export const instant = false;
+
 export const metadata: Metadata = { title: "Edit project" };
 
 export default async function EditProjectPage({ params, searchParams }: PageProps<"/admin/projects/[id]">) {

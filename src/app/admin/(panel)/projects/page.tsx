@@ -14,6 +14,9 @@ import { deleteProjectAction } from "./actions";
 import { projectStatusLabels } from "@/lib/config/property-types";
 import { formatDate } from "@/lib/format";
 
+// Admin pages are per-request and authenticated; they are allowed to block (see the panel layout).
+export const instant = false;
+
 export const metadata: Metadata = { title: "Projects" };
 
 export default async function AdminProjectsPage({ searchParams }: PageProps<"/admin/projects">) {

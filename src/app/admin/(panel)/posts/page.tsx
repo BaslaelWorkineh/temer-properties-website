@@ -13,6 +13,9 @@ import { BulkDelete, RowCheckbox, SelectAllCheckbox } from "@/components/admin/b
 import { deletePostAction } from "./actions";
 import { formatDate } from "@/lib/format";
 
+// Admin pages are per-request and authenticated; they are allowed to block (see the panel layout).
+export const instant = false;
+
 export const metadata: Metadata = { title: "Guides" };
 
 export default async function AdminPostsPage({ searchParams }: PageProps<"/admin/posts">) {

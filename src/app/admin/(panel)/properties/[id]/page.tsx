@@ -18,6 +18,9 @@ import { propertyStatusLabels } from "@/lib/config/property-types";
 import { siteUrl } from "@/lib/config/site";
 import { formatDateTime } from "@/lib/format";
 
+// Admin pages are per-request and authenticated; they are allowed to block (see the panel layout).
+export const instant = false;
+
 export const metadata: Metadata = { title: "Edit property" };
 
 export default async function EditPropertyPage({ params, searchParams }: PageProps<"/admin/properties/[id]">) {

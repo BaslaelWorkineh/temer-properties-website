@@ -7,6 +7,9 @@ import { adminUsers } from "@/db/schema";
 import { requireOwner } from "@/lib/auth/session";
 import { formatDate } from "@/lib/format";
 
+// Admin pages are per-request and authenticated; they are allowed to block (see the panel layout).
+export const instant = false;
+
 export const metadata: Metadata = { title: "Team" };
 
 export default async function TeamPage() {

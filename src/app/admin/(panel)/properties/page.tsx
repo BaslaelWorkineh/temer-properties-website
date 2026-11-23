@@ -16,6 +16,9 @@ import { deletePropertyAction } from "./actions";
 import { PROPERTY_STATUSES, PROPERTY_TYPES, propertyStatusLabels, propertyTypes, type PropertyStatus, type PropertyType } from "@/lib/config/property-types";
 import { formatDate, formatPriceCompact } from "@/lib/format";
 
+// Admin pages are per-request and authenticated; they are allowed to block (see the panel layout).
+export const instant = false;
+
 export const metadata: Metadata = { title: "Properties" };
 
 export default async function AdminPropertiesPage({ searchParams }: PageProps<"/admin/properties">) {

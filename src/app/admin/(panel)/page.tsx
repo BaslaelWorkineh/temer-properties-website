@@ -13,6 +13,9 @@ import { ACTIVE_BOOKING_STATUSES, bookingStatusLabels, inquiryInterestLabels, in
 import { addDays, addisToday, formatDateTime, formatSlot } from "@/lib/format";
 import { truncate } from "@/lib/utils";
 
+// Admin pages are per-request and authenticated; they are allowed to block (see the panel layout).
+export const instant = false;
+
 export const metadata: Metadata = { title: "Dashboard" };
 
 export default async function DashboardPage({ searchParams }: PageProps<"/admin">) {

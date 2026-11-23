@@ -12,6 +12,9 @@ import { INQUIRY_STATUSES, inquiryInterestLabels, inquiryStatusLabels, type Inqu
 import { formatDateTime } from "@/lib/format";
 import { truncate } from "@/lib/utils";
 
+// Admin pages are per-request and authenticated; they are allowed to block (see the panel layout).
+export const instant = false;
+
 export const metadata: Metadata = { title: "Enquiries" };
 
 export default async function AdminInquiriesPage({ searchParams }: PageProps<"/admin/inquiries">) {
