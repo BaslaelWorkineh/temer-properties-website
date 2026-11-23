@@ -1,10 +1,8 @@
 import "./load-env";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { createClient } from "@libsql/client";
 import { eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/libsql";
-import { databaseUrl, ensureLocalDbDir } from "../src/db/url";
+import { closeDb, db } from "./db";
 import { locations, posts, projects, properties } from "../src/db/schema";
 
 /**
@@ -21,9 +19,6 @@ function load(name: string): Record<string, Record<string, unknown>> {
 }
 
 async function main() {
-  ensureLocalDbDir(databaseUrl);
-  const client = createClient({ url: databaseUrl, authToken: process.env.DATABASE_AUTH_TOKEN });
-  const db = drizzle(client);
 
   const tables = [
     { label: "properties", file: "am-properties.json", table: properties },
@@ -51,7 +46,7 @@ async function main() {
     }
     console.log(`✓ ${label}: ${updated} records${missing.length ? ` (not found: ${missing.join(", ")})` : ""}`);
   }
-  client.close();
+  await closeDb();
 }
 
 main().catch((err) => {

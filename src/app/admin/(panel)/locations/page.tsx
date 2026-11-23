@@ -2,18 +2,21 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { asc, count, eq } from "drizzle-orm";
 import { ExternalLink, MapPin, Plus } from "lucide-react";
-import { firstParam } from "@/components/admin/helpers";
+import { deletedMessage } from "@/components/admin/helpers";
 import { EmptyState, Notice, PageHeader, TableCard, Thumb, YesNo, td, th } from "@/components/admin/ui";
 import { buttonStyles } from "@/components/ui/button";
 import { db } from "@/db";
 import { locations, projects, properties } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth/session";
+import { BulkDelete, RowCheckbox, SelectAllCheckbox } from "@/components/admin/bulk-delete";
+import { deleteLocationAction } from "./actions";
 import { formatDate } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Locations" };
 
 export default async function AdminLocationsPage({ searchParams }: PageProps<"/admin/locations">) {
-  await requireAdmin();
+  const me = await requireAdmin();
+  const canDelete = me.role === "admin";
   const sp = await searchParams;
 
   const propertyCounts = db
@@ -58,7 +61,7 @@ export default async function AdminLocationsPage({ searchParams }: PageProps<"/a
           </Link>
         }
       />
-      {firstParam(sp.deleted) ? <Notice>The location was deleted. Its properties and projects were kept and unlinked.</Notice> : null}
+      {deletedMessage(sp.deleted, "location", "locations") ? <Notice>{deletedMessage(sp.deleted, "location", "locations", "Their properties and projects were kept and unlinked.")}</Notice> : null}
 
       {rows.length === 0 ? (
         <EmptyState
@@ -72,10 +75,16 @@ export default async function AdminLocationsPage({ searchParams }: PageProps<"/a
           }
         />
       ) : (
-        <TableCard>
+        <BulkDelete key={rows.map((r) => r.id).join()} enabled={canDelete} action={deleteLocationAction} singular="location" plural="locations">
+          <TableCard>
           <table className="min-w-full divide-y divide-line">
             <thead className="bg-soft/60">
               <tr>
+                {canDelete ? (
+                  <th scope="col" className={`${th} w-10`}>
+                    <SelectAllCheckbox />
+                  </th>
+                ) : null}
                 <th scope="col" className={th}>Location</th>
                 <th scope="col" className={th}>Listings</th>
                 <th scope="col" className={th}>Projects</th>
@@ -91,6 +100,11 @@ export default async function AdminLocationsPage({ searchParams }: PageProps<"/a
                 const hasContent = (l.propertyCount ?? 0) + (l.projectCount ?? 0) > 0;
                 return (
                   <tr key={l.id} className="hover:bg-soft/50">
+                    {canDelete ? (
+                      <td className={`${td} w-10`}>
+                        <RowCheckbox id={l.id} label={l.name} />
+                      </td>
+                    ) : null}
                     <td className={td}>
                       <div className="flex min-w-48 items-center gap-3">
                         <Thumb src={l.image?.url} />
@@ -122,6 +136,7 @@ export default async function AdminLocationsPage({ searchParams }: PageProps<"/a
             </tbody>
           </table>
         </TableCard>
+          </BulkDelete>
       )}
     </>
   );

@@ -39,7 +39,7 @@ export function Header({ lang }: { lang: Locale }) {
             <div className="h-[5rem] origin-top bg-white transition-transform duration-300 ease-out [clip-path:polygon(0_0,100%_0,100%_100%,50%_calc(100%-0.75rem),0_100%)] group-data-[scrolled]:scale-y-0" />
           </div>
           <div className="absolute left-0 top-0 w-full origin-top px-3 pt-1.5 transition-transform duration-300 ease-out group-data-[scrolled]:translate-y-1 group-data-[scrolled]:scale-[0.68]">
-            <Logo height={58} />
+            <Logo height={58} className="justify-center" />
           </div>
         </div>
         <nav aria-label="Main" className="hidden lg:block">

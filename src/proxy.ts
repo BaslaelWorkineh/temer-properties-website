@@ -13,7 +13,12 @@ export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
   if (pathname === "/admin" || pathname.startsWith("/admin/")) {
-    if (pathname === "/admin/login" || request.cookies.has(SESSION_COOKIE)) return NextResponse.next();
+    if (pathname === "/admin/login" || request.cookies.has(SESSION_COOKIE)) {
+      // Never keep admin pages in the browser cache, so they can't be shown again after signing out.
+      const response = NextResponse.next();
+      response.headers.set("Cache-Control", "private, no-store, max-age=0");
+      return response;
+    }
     const url = request.nextUrl.clone();
     url.pathname = "/admin/login";
     url.search = pathname === "/admin" ? "" : `?next=${encodeURIComponent(pathname + search)}`;

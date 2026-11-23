@@ -38,12 +38,22 @@ export const legacyRedirects: Redirect[] = [
   r("/summit-real-estate", "/locations"),
   r("/temer-properties", "/about"),
   r("/apartments-for-sale-addis-ababa", "/for-sale/apartments"),
-  r("/villas-for-sale-addis-ababa", "/for-sale/villas"),
-  r("/homes-for-sale-addis-ababa", "/for-sale/villas"),
-  r("/luxury-homes-addis-ababa", "/for-sale/villas"),
+  // To /properties while there are no villa listings: /for-sale/villas is noindex until it has listings, and a
+  // 301 to a noindex page throws away the old page's ranking. Point these at /for-sale/villas once villas are listed.
+  r("/villas-for-sale-addis-ababa", "/properties"),
+  r("/homes-for-sale-addis-ababa", "/properties"),
+  r("/luxury-homes-addis-ababa", "/properties"),
   r("/real-estate-investment-addis-ababa", "/blog"),
   r("/property-management", "/contact"),
   r("/real-estate-consultancy", "/contact"),
   r("/property-valuation", "/contact"),
   r("/terms-of-service", "/terms"),
+
+  // temerpropertiessales.com as it is now (see its sitemap): /en and /am home pages, /{lang}/listings,
+  // /{lang}/listings/{slug} and /{lang}/contact. It ranks for "temer properties" today, so none of these may
+  // 404. Its listing slugs don't match ours, so every listing goes to the list. /en and /en/contact need no
+  // entry: the proxy already redirects /en/... to the unprefixed English URL.
+  r("/en/listings/:path*", "/properties"),
+  r("/am/listings/:path*", "/am/properties"),
+  r("/listings/:path*", "/properties"),
 ];

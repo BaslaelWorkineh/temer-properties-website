@@ -154,7 +154,8 @@ Temer Properties delivered the AG Trading building in Atena Tera.`,
 type ProjectSeed = {
   name: string;
   slug: string;
-  location: string;
+  /** Area slug; omitted when the area has no page of its own yet (e.g. Lycee). */
+  location?: string;
   status: "pre_launch" | "under_construction" | "selling" | "delivered";
   category: string | null;
   summary: string;
@@ -261,6 +262,76 @@ The project suits owner-occupiers who want a central address and investors looki
     category: "Commercial shops",
     summary: "Commercial shop units for sale at the Gelan site, on the growing south-eastern edge of Addis Ababa.",
     unitTypes: ["Commercial shops"],
+    imageCount: 1,
+  },
+  // Buildings from Temer's own marketing posters (name, area and floor configuration as printed on them).
+  // Status is not stated on the posters: confirm with the sales team.
+  {
+    name: "Achante",
+    slug: "achante-ayat",
+    location: "ayat",
+    status: "selling",
+    category: "Residential apartments",
+    summary: "Achante is a B+G+10 apartment building (basement, ground floor and 10 upper floors) by Temer Properties in Ayat.",
+    unitTypes: ["Apartments"],
+    imageCount: 1,
+  },
+  {
+    name: "Feresbet",
+    slug: "feresbet-ayat",
+    location: "ayat",
+    status: "selling",
+    category: "Residential apartments",
+    summary: "Feresbet is a 2B+G+16 apartment building (two basements, ground floor and 16 upper floors) by Temer Properties in Ayat.",
+    unitTypes: ["Apartments"],
+    imageCount: 1,
+  },
+  {
+    name: "Ayat New Road",
+    slug: "ayat-new-road",
+    location: "ayat",
+    status: "selling",
+    category: "Residential apartments",
+    summary: "A 3B+G+22 apartment tower (three basements, ground floor and 22 upper floors) by Temer Properties on the new road in Ayat.",
+    unitTypes: ["Apartments"],
+    imageCount: 1,
+  },
+  {
+    name: "Ayat Two Center",
+    slug: "ayat-two-center",
+    location: "ayat",
+    status: "selling",
+    category: "Residential apartments",
+    summary: "Two Center is a 3B+G+15 apartment building (three basements, ground floor and 15 upper floors) by Temer Properties in Ayat.",
+    unitTypes: ["Apartments"],
+    imageCount: 1,
+  },
+  {
+    name: "Blue Point Zuhra",
+    slug: "blue-point-zuhra-sarbet",
+    location: "sarbet",
+    status: "selling",
+    category: "Residential apartments",
+    summary: "Blue Point Zuhra is a B+G+21+T apartment tower (basement, ground floor, 21 upper floors and a terrace) by Temer Properties in Sarbet.",
+    unitTypes: ["Apartments", "3-bedroom apartments"],
+    imageCount: 1,
+  },
+  {
+    name: "Lycee Burat",
+    slug: "lycee-burat",
+    status: "selling",
+    category: "Residential apartments",
+    summary: "Burat is a B+G+22 apartment tower (basement, ground floor and 22 upper floors) by Temer Properties at Lycee, Addis Ababa.",
+    unitTypes: ["Apartments"],
+    imageCount: 1,
+  },
+  {
+    name: "Lycee Seken",
+    slug: "lycee-seken",
+    status: "selling",
+    category: "Residential apartments",
+    summary: "Seken is a B+G+19+T apartment tower (basement, ground floor, 19 upper floors and a terrace) by Temer Properties at Lycee, Addis Ababa.",
+    unitTypes: ["Apartments"],
     imageCount: 1,
   },
   { name: "Maw", slug: "maw-ayat", location: "ayat", status: "delivered", category: null, summary: "A completed Temer Properties building at our Ayat site, handed over to its owners.", unitTypes: [], imageCount: 1 },

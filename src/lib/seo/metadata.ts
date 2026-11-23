@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ImageItem } from "@/db/schema";
 import { site } from "@/lib/config/site";
 import { localePath, ogLocale, type Locale } from "@/lib/i18n/config";
+import { brandedTitle } from "@/lib/seo/title";
 import { truncate } from "@/lib/utils";
 
 /** Branded fallback share image (1200×630) for pages without their own photo. */
@@ -13,7 +14,7 @@ export const DEFAULT_OG_IMAGE = {
 };
 
 type BuildMetadataInput = {
-  /** Page title without the brand suffix (the root layout template appends " | Temer Properties"). */
+  /** Page title without the brand suffix: buildMetadata adds " | Temer Properties" or " | Temer" when it fits. */
   title: string;
   /** Use the title exactly as given (home page). */
   absoluteTitle?: boolean;
@@ -43,10 +44,7 @@ type BuildMetadataInput = {
  */
 export function buildMetadata(input: BuildMetadataInput): Metadata {
   const description = truncate(input.description, 160);
-  // Google shows ~60 characters: drop the brand suffix rather than lose the page's own words.
-  const branded = `${input.title} | ${site.name}`;
-  const absolute = input.absoluteTitle || branded.length > 65;
-  const fullTitle = absolute ? input.title : branded;
+  const fullTitle = input.absoluteTitle ? input.title : brandedTitle(input.title);
   const images = (input.images ?? [])
     .filter((img): img is ImageItem => Boolean(img?.url))
     .slice(0, 4)
@@ -65,7 +63,7 @@ export function buildMetadata(input: BuildMetadataInput): Metadata {
       : undefined;
 
   return {
-    title: absolute ? { absolute: input.title } : input.title,
+    title: { absolute: fullTitle },
     description,
     alternates: { canonical, ...(languages ? { languages } : {}) },
     openGraph: {

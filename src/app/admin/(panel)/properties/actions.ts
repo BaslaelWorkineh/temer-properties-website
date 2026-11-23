@@ -1,9 +1,9 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
-import { invalidImageMessage, resolveSlug, toId } from "@/app/admin/_lib/server";
+import { invalidImageMessage, resolveSlug, toId, toIds } from "@/app/admin/_lib/server";
 import { db } from "@/db";
 import { bookings, inquiries, locations, properties, type ImageItem } from "@/db/schema";
 import { requireAdmin, requireOwner } from "@/lib/auth/session";
@@ -171,16 +171,16 @@ async function persistProperty(formData: FormData, mode: "save" | "draft"): Prom
 
 export async function deletePropertyAction(formData: FormData) {
   await requireOwner();
-  const id = toId(formData.get("id"));
-  if (!id) return;
+  const ids = toIds(formData);
+  if (!ids.length) return;
 
   // Keep booking/enquiry history; just detach it from the deleted listing.
-  await db.batch([
-    db.update(bookings).set({ propertyId: null }).where(eq(bookings.propertyId, id)),
-    db.update(inquiries).set({ propertyId: null }).where(eq(inquiries.propertyId, id)),
-    db.delete(properties).where(eq(properties.id, id)),
-  ]);
+  await db.transaction(async (tx) => {
+    await tx.update(bookings).set({ propertyId: null }).where(inArray(bookings.propertyId, ids));
+    await tx.update(inquiries).set({ propertyId: null }).where(inArray(inquiries.propertyId, ids));
+    await tx.delete(properties).where(inArray(properties.id, ids));
+  });
 
   refreshPublicContent(TAGS.properties, TAGS.locations, TAGS.projects);
-  redirect("/admin/properties?deleted=1");
+  redirect(`/admin/properties?deleted=${ids.length}`);
 }

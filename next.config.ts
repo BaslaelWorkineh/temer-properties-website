@@ -10,12 +10,21 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  // Prerendering reads the database (Neon). Fewer workers and pages in parallel keep the build from opening dozens of
+  // connections at once (which timed out against a waking Neon database); failed pages are retried.
+  experimental: {
+    staticGenerationRetryCount: 3,
+    staticGenerationMaxConcurrency: 4,
+    staticGenerationMinPagesPerWorker: 60,
+  },
   partialPrefetching: true,
   poweredByHeader: false,
-  // Native libSQL bindings must not be bundled.
-  serverExternalPackages: ["@libsql/client", "libsql", "sharp"],
+  // Loaded from node_modules at runtime instead of being bundled (pg has optional native bindings).
+  serverExternalPackages: ["pg", "sharp"],
   images: {
     formats: ["image/avif", "image/webp"],
+    // 75 for everything; 90 only for the full-screen home hero, where compression blur shows most.
+    qualities: [75, 90],
     // Uploaded media get random, never-reused file names, so optimized variants can be cached for a long time.
     minimumCacheTTL: 60 * 60 * 24 * 30,
     localPatterns: [
@@ -44,7 +53,7 @@ const nextConfig: NextConfig = {
       // Filtered /properties views are consolidated with rel=canonical (-> /properties) rather than
       // noindex: Google advises against combining noindex with a canonical that points elsewhere.
       // Uploaded media never change once written.
-      { source: "/media/:path*", headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }] },
+      { source: "/media/:path*", headers: [{ key: "Cache-Control", value: "public, max-age=31536000, s-maxage=31536000, immutable" }] },
     ];
   },
 };

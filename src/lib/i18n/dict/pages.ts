@@ -135,7 +135,7 @@ const en: PagesDict = {
     h1: "About Temer Properties",
     hero: "A licensed and verified real estate developer building apartments, homes and shops across Addis Ababa since",
     whoTitle: "Who we are",
-    p1: "Founded in {founded}, Temer Properties develops residential and mixed-use buildings in some of Addis Ababa's fastest-growing neighbourhoods, including Sarbet, Megenagna, Ayat, Haile Garment, Piassa and Bulgaria. We sell directly to buyers, so you deal with the same company that designs, builds and hands over your home.",
+    p1: "Temer Properties, also known as Temer Real Estate (ቴምር ሪል እስቴት), was founded in {founded} and develops residential and mixed-use buildings in some of Addis Ababa's fastest-growing neighbourhoods, including Sarbet, Megenagna, Ayat, Haile Garment, Piassa and Bulgaria. We sell directly to buyers, so you deal with the same company that designs, builds and hands over your home.",
     p2: "Our buyers include first-time homeowners, growing families, business owners looking for a shop of their own, and Ethiopians abroad investing back home. For every one of them we aim for the same thing: a well-built property, a fair price and a payment plan that works.",
     p3: {
       pre: "",
@@ -155,11 +155,11 @@ const en: PagesDict = {
     deliveredTitle: "Projects we have delivered",
   },
   contact: {
-    metaTitle: "Contact Temer Properties",
+    metaTitle: "Contact Temer Properties: Phone, WhatsApp & Office",
     metaDescription: (phone, street, hours) =>
       `Call ${phone}, message us on WhatsApp or Telegram, or visit our office at ${street}, Addis Ababa. Open ${hours}.`,
     breadcrumb: "Contact",
-    h1: "Contact us",
+    h1: "Contact Temer Properties",
     intro: "Have a question? Let's find the right place for you. Our sales team replies quickly during office hours.",
     callSales: "Call sales",
     salesLine2: "Sales line 2",
@@ -274,7 +274,7 @@ const am: PagesDict = {
     h1: "ስለ ቴምር ፕሮፐርቲስ",
     hero: "ከ2010 ዓ.ም ጀምሮ በአዲስ አበባ አፓርታማዎችን፣ ቤቶችንና ሱቆችን እየገነባ ያለ ፈቃድ ያለውና የተረጋገጠ የሪል እስቴት ገንቢ",
     whoTitle: "እኛ ማን ነን",
-    p1: "በ{founded} የተመሠረተው ቴምር ፕሮፐርቲስ በአዲስ አበባ በፍጥነት እያደጉ ባሉ አካባቢዎች ማለትም በሳርቤት፣ በመገናኛ፣ በአያት፣ በሃይሌ ጋርመንት፣ በፒያሳና በቡልጋሪያ የመኖሪያና ባለብዙ አገልግሎት ሕንፃዎችን ይገነባል። የምንሸጠው በቀጥታ ለገዢዎች ነው፤ ስለዚህ ቤትዎን ከሚቀርጸው፣ ከሚገነባውና ከሚያስረክበው ድርጅት ጋር ብቻ ይገናኛሉ።",
+    p1: "ቴምር ሪል እስቴት በመባልም የሚታወቀውና በ{founded} የተመሠረተው ቴምር ፕሮፐርቲስ (Temer Properties) በአዲስ አበባ በፍጥነት እያደጉ ባሉ አካባቢዎች ማለትም በሳርቤት፣ በመገናኛ፣ በአያት፣ በሃይሌ ጋርመንት፣ በፒያሳና በቡልጋሪያ የመኖሪያና ባለብዙ አገልግሎት ሕንፃዎችን ይገነባል። የምንሸጠው በቀጥታ ለገዢዎች ነው፤ ስለዚህ ቤትዎን ከሚቀርጸው፣ ከሚገነባውና ከሚያስረክበው ድርጅት ጋር ብቻ ይገናኛሉ።",
     p2: "ገዢዎቻችን የመጀመሪያ ቤት ባለቤቶችን፣ እያደጉ ያሉ ቤተሰቦችን፣ የራሳቸውን ሱቅ የሚፈልጉ ነጋዴዎችንና በአገራቸው ኢንቨስት የሚያደርጉ በውጭ የሚኖሩ ኢትዮጵያውያንን ያካትታሉ። ለሁሉም የምንፈልገው አንድ ነገር ነው፦ በጥራት የተገነባ ንብረት፣ ተገቢ ዋጋና የሚሠራ የክፍያ ዕቅድ።",
     p3: {
       pre: "",
@@ -294,11 +294,11 @@ const am: PagesDict = {
     deliveredTitle: "ያስረከብናቸው ፕሮጀክቶች",
   },
   contact: {
-    metaTitle: "ቴምር ፕሮፐርቲስን ያግኙ",
+    metaTitle: "ቴምር ፕሮፐርቲስን ያግኙ፦ ስልክ፣ ዋትስአፕና ቢሮ",
     metaDescription: (phone, street, hours) =>
       `ይደውሉ ${phone}፣ በዋትስአፕ ወይም በቴሌግራም መልዕክት ይላኩልን፣ ወይም ቢሮአችንን ${street}፣ አዲስ አበባ ይጎብኙ። የሥራ ሰዓት፦ ${hours}።`,
     breadcrumb: "አግኙን",
-    h1: "ያግኙን",
+    h1: "ቴምር ፕሮፐርቲስን ያግኙ",
     intro: "ጥያቄ አለዎት? ለእርስዎ ተስማሚውን ቦታ አብረን እንፈልግ። የሽያጭ ቡድናችን በሥራ ሰዓት ፈጥኖ ይመልሳል።",
     callSales: "ለሽያጭ ይደውሉ",
     salesLine2: "ሁለተኛ የሽያጭ መስመር",

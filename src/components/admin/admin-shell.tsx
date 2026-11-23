@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { LogOut } from "lucide-react";
-import { logoutAction } from "@/app/admin/(panel)/actions";
+import { UserCog } from "lucide-react";
 import { MobileNav, SidebarNav } from "@/components/admin/admin-nav";
+import { LogoutButton, SessionLock } from "@/components/admin/session-lock";
 import type { CurrentAdmin } from "@/lib/auth/session";
 
 export function AdminWordmark({ className = "" }: { className?: string }) {
@@ -23,16 +23,15 @@ function UserBlock({ admin }: { admin: CurrentAdmin }) {
         <p className="truncate text-sm font-semibold text-white">{admin.name}</p>
         <p className="truncate text-xs text-white/60">{admin.email}</p>
       </div>
-      <form action={logoutAction}>
-        <button
-          type="submit"
-          className="inline-flex size-9 items-center justify-center rounded-xl text-white/70 hover:bg-white/10 hover:text-white"
-          title="Sign out"
-        >
-          <LogOut className="size-4.5" aria-hidden="true" />
-          <span className="sr-only">Sign out</span>
-        </button>
-      </form>
+      <Link
+        href="/admin/account"
+        className="inline-flex size-9 items-center justify-center rounded-xl text-white/70 hover:bg-white/10 hover:text-white"
+        title="My account: change email or password"
+      >
+        <UserCog className="size-4.5" aria-hidden="true" />
+        <span className="sr-only">My account</span>
+      </Link>
+      <LogoutButton />
     </div>
   );
 }
@@ -48,6 +47,7 @@ export function AdminShell({
 }) {
   return (
     <div className="min-h-dvh bg-soft">
+      <SessionLock />
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col bg-brand-950 px-4 py-6 lg:flex">
         <AdminWordmark className="px-3" />
         <div className="mt-8 flex-1 overflow-y-auto">

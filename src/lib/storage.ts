@@ -1,17 +1,36 @@
 import "server-only";
+import { get, put } from "@vercel/blob";
 import { randomBytes } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import sharp from "sharp";
 
 /**
  * Uploaded images live outside /public (Next.js only serves files that exist
- * in /public at build time) and are served by src/app/media/[...path]/route.ts.
- * On serverless hosts, swap this module for S3/R2/Blob storage.
+ * in /public at build time) and are served by src/app/media/[...path]/route.ts
+ * at /media/<yyyy>/<mm>/<name>.
+ *
+ * Where the files are kept:
+ * - Vercel (BLOB_READ_WRITE_TOKEN set, added automatically when a Blob store is connected to the project):
+ *   Vercel Blob. Serverless disks are read-only and temporary, so local files would be lost.
+ * - Local development / a single VPS: UPLOAD_DIR on disk (must be persistent and backed up).
+ * The public URL is /media/... in both cases, so switching storage never changes saved image URLs.
  */
 // turbopackIgnore: a runtime data directory, not source code; don't trace it into the build output.
 export const UPLOAD_DIR = path.resolve(/* turbopackIgnore: true */ process.env.UPLOAD_DIR || "./storage/uploads");
 export const MEDIA_BASE_PATH = "/media";
+
+function blobStorageEnabled() {
+  return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+}
+
+export const MEDIA_CONTENT_TYPES: Record<string, string> = {
+  ".webp": "image/webp",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".png": "image/png",
+  ".avif": "image/avif",
+};
 
 export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 const MAX_DIMENSION = 2400;
@@ -57,8 +76,18 @@ export async function writeMedia(data: Buffer, ext: string, width: number, heigh
   const now = new Date();
   const folder = `${now.getUTCFullYear()}/${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
   const name = `${randomBytes(12).toString("hex")}.${ext}`;
-  await mkdir(path.join(UPLOAD_DIR, folder), { recursive: true });
-  await writeFile(path.join(UPLOAD_DIR, folder, name), data);
+  if (blobStorageEnabled()) {
+    // Public like every image on the website; served through /media so URLs stay on our own domain.
+    await put(`${folder}/${name}`, data, {
+      access: "public",
+      contentType: MEDIA_CONTENT_TYPES[`.${ext}`] ?? "application/octet-stream",
+      addRandomSuffix: false,
+      cacheControlMaxAge: 60 * 60 * 24 * 365,
+    });
+  } else {
+    await mkdir(path.join(UPLOAD_DIR, folder), { recursive: true });
+    await writeFile(path.join(UPLOAD_DIR, folder, name), data);
+  }
   return { url: `${MEDIA_BASE_PATH}/${folder}/${name}`, width, height };
 }
 
@@ -67,4 +96,31 @@ export function resolveMediaPath(segments: string[]) {
   if (segments.some((s) => !s || s === "." || s === ".." || s.includes("\\") || s.includes("\0"))) return null;
   const filePath = path.resolve(UPLOAD_DIR, ...segments);
   return filePath.startsWith(UPLOAD_DIR + path.sep) ? filePath : null;
+}
+
+export type MediaFile = { body: BodyInit; contentType: string; size: number };
+
+/** Reads an uploaded image from Vercel Blob or UPLOAD_DIR. Null when the path is invalid, not an image, or missing. */
+export async function readMedia(segments: string[]): Promise<MediaFile | null> {
+  const filePath = resolveMediaPath(segments);
+  const contentType = filePath ? MEDIA_CONTENT_TYPES[path.extname(filePath).toLowerCase()] : undefined;
+  if (!filePath || !contentType) return null;
+
+  if (blobStorageEnabled()) {
+    try {
+      const result = await get(segments.join("/"), { access: "public" });
+      if (!result || result.statusCode !== 200) return null;
+      return { body: result.stream, contentType, size: result.blob.size };
+    } catch (err) {
+      console.error("[media] Vercel Blob read failed", err);
+      return null;
+    }
+  }
+
+  try {
+    const data = await readFile(/* turbopackIgnore: true */ filePath);
+    return { body: new Uint8Array(data), contentType, size: data.byteLength };
+  } catch {
+    return null;
+  }
 }

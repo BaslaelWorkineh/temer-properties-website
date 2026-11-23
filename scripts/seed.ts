@@ -8,22 +8,17 @@
  * Placeholder photos are generated (clearly labelled "Sample image") into UPLOAD_DIR/seed.
  */
 import "./load-env";
-import { createClient } from "@libsql/client";
 import { count, eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/libsql";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import sharp from "sharp";
 import * as schema from "../src/db/schema";
-import { databaseUrl, ensureLocalDbDir } from "../src/db/url";
+import { closeDb, db, describeDb } from "./db";
 import { hashPassword } from "../src/lib/auth/password";
 import { locationSeeds, postSeeds, projectSeeds, propertySeeds } from "./seed-content";
 
 const { adminUsers, bookings, inquiries, locations, posts, projects, properties, sessions } = schema;
 
-ensureLocalDbDir(databaseUrl);
-const client = createClient({ url: databaseUrl, authToken: process.env.DATABASE_AUTH_TOKEN });
-const db = drizzle(client, { schema });
 
 const UPLOAD_DIR = path.resolve(process.env.UPLOAD_DIR || "./storage/uploads");
 const reset = process.argv.includes("--reset");
@@ -115,9 +110,9 @@ async function seedContent() {
     locationIds.set(l.slug, { id: row.id, name: l.name, city });
   }
 
-  const projectIds = new Map<string, { id: number; locationId: number; location: string; paymentPlan?: string }>();
+  const projectIds = new Map<string, { id: number; locationId: number | null; location: string; paymentPlan?: string }>();
   for (const [i, p] of projectSeeds.entries()) {
-    const loc = locationIds.get(p.location)!;
+    const loc = (p.location && locationIds.get(p.location)) || { id: null, name: "Addis Ababa", city: "Ethiopia" };
     const images: schema.ImageItem[] = [];
     for (let n = 1; n <= p.imageCount; n++) {
       const view = n === 1 ? "building exterior" : n === 2 ? "street view" : "entrance";
@@ -241,8 +236,8 @@ async function main() {
   await seedAdmin();
   // Sanity check for the person running the script.
   const [{ value: listed }] = await db.select({ value: count() }).from(properties).where(eq(properties.isPublished, true));
-  console.log(`  ${listed} published listings in ${databaseUrl.startsWith("file:") ? databaseUrl : "remote database"}`);
-  client.close();
+  console.log(`  ${listed} published listings in ${describeDb()}`);
+  await closeDb();
 }
 
 main().catch((err) => {

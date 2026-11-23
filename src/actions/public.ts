@@ -1,16 +1,12 @@
 "use server";
 
 import { and, eq, inArray, sql } from "drizzle-orm";
-import { after } from "next/server";
 import { db } from "@/db";
 import { bookings, inquiries, projects, properties } from "@/db/schema";
 import { checkBookableDate, generateBookingReference } from "@/lib/booking";
-import { ACTIVE_BOOKING_STATUSES, bookingConfig, inquiryInterestLabels, visitTypeLabels } from "@/lib/config/booking";
-import { absoluteUrl } from "@/lib/config/site";
-import { formatSlot, formatVisitDate } from "@/lib/dates";
+import { ACTIVE_BOOKING_STATUSES, bookingConfig } from "@/lib/config/booking";
 import { hasLocale, type Locale } from "@/lib/i18n/config";
 import { getFormsDict } from "@/lib/i18n/dict/forms";
-import { notifyTeam } from "@/lib/notify";
 import { getClientIp, rateLimit } from "@/lib/rate-limit";
 import {
   errorState,
@@ -87,8 +83,10 @@ export async function createBooking(_prev: FormState<BookingResult>, formData: F
   const reference = generateBookingReference();
 
   try {
-    // BEGIN IMMEDIATE (libSQL "write" transaction): the capacity check and insert are atomic.
+    // The capacity check and insert must be atomic. Postgres' default isolation would let two simultaneous requests
+    // both see a free place, so take a lock on this date + slot first (released when the transaction ends).
     await db.transaction(async (tx) => {
+      await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${`booking:${input.visitDate}:${input.timeSlot}`}))`);
       const [{ count }] = await tx
         .select({ count: sql<number>`count(*)` })
         .from(bookings)
@@ -123,24 +121,6 @@ export async function createBooking(_prev: FormState<BookingResult>, formData: F
     return errorState(t.actions.bookingFailed);
   }
 
-  after(() =>
-    notifyTeam(
-      "New site visit request",
-      {
-        Reference: reference,
-        Name: input.fullName,
-        Phone: input.phone,
-        Email: input.email,
-        When: `${formatVisitDate(input.visitDate)} at ${formatSlot(input.timeSlot)}`,
-        Type: visitTypeLabels[input.visitType],
-        People: input.partySize,
-        Property: property?.title,
-        Project: project?.name,
-        Message: input.message,
-      },
-      absoluteUrl("/admin/bookings"),
-    ),
-  );
 
   return {
     status: "success",
@@ -190,21 +170,6 @@ export async function createInquiry(_prev: FormState, formData: FormData): Promi
     return errorState(t.actions.inquiryFailed);
   }
 
-  after(() =>
-    notifyTeam(
-      "New website enquiry",
-      {
-        Name: input.fullName,
-        Phone: input.phone,
-        Email: input.email,
-        Interest: inquiryInterestLabels[input.interest],
-        Property: property?.title,
-        Project: project?.name,
-        Message: input.message,
-      },
-      absoluteUrl("/admin/inquiries"),
-    ),
-  );
 
   return { status: "success", message: t.actions.inquiryThanks };
 }

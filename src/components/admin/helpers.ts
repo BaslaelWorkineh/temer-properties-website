@@ -29,3 +29,10 @@ export function pageFromParam(value: string | string[] | undefined) {
   const page = Number(firstParam(value));
   return Number.isInteger(page) && page > 0 ? page : 1;
 }
+
+/** Message for `?deleted=N` after deleting one item or several at once (null when nothing was deleted). */
+export function deletedMessage(param: string | string[] | undefined, one: string, many: string, after = "") {
+  const n = Number(firstParam(param));
+  if (!Number.isInteger(n) || n < 1) return null;
+  return `${n === 1 ? `The ${one} was deleted.` : `${n} ${many} were deleted.`}${after ? ` ${after}` : ""}`;
+}

@@ -101,6 +101,21 @@
  * PROPERTIES to roughly the width of TEMER (Inter 800).
  */
 @layer components {
+  /*
+   * Home hero, desktop (lg+): the photo fills the whole hero with the towers in the centre; the text column sits
+   * on the left, narrower than the space beside the towers (~35vw).
+   * Keep in sync with the grid in src/app/[lang]/page.tsx (columns var(--hero-text) / 1fr).
+   */
+  @media (min-width: 64rem) {
+    .hero-split {
+      --hero-text: min(36rem, calc(35vw - 3rem));
+    }
+    /* Smaller wordmark on narrower laptops so it fits the text column (TEMER is ~3.4em wide). */
+    .hero-split .hero-wordmark {
+      font-size: min(9.5rem, 8.5vw);
+    }
+  }
+
   .hero-wordmark {
     display: inline-flex;
     flex-direction: column;
@@ -109,6 +124,8 @@
     font-size: clamp(3.5rem, 11vw, 9.5rem);
     line-height: 0.9;
     color: #fff;
+    /* Capitals are styling only: the H1's text stays "Temer Properties" for search engines and screen readers. */
+    text-transform: uppercase;
     user-select: none;
     filter: drop-shadow(0 0.04em 0.25em rgb(2 12 7 / 0.35));
   }

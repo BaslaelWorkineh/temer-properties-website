@@ -10,16 +10,13 @@
  * /admin later replace these.
  */
 import "./load-env";
-import { createClient } from "@libsql/client";
 import { eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/libsql";
 import sharp from "sharp";
 import path from "node:path";
 import * as schema from "../src/db/schema";
-import { databaseUrl } from "../src/db/url";
+import { closeDb, db } from "./db";
 
 const { projects, properties, locations } = schema;
-const db = drizzle(createClient({ url: databaseUrl, authToken: process.env.DATABASE_AUTH_TOKEN }), { schema });
 
 /** A photo under public/images, with an optional description (otherwise "<project>, <area>"). */
 type Photo = string | { file: string; alt: string };
@@ -51,13 +48,18 @@ const PROJECT_PHOTOS: Record<string, Photo[]> = {
     { file: "gallery/sarbet-city-plus-bathroom.jpg", alt: "Bathroom of a Sarbet City Plus apartment (3D render)" },
     { file: "gallery/sarbet-city-plus-night.jpg", alt: "Sarbet City Plus towers at night (3D render)" },
     { file: "gallery/sarbet-city-plus-dusk.jpg", alt: "Sarbet City Plus towers at dusk (3D render)" },
+    { file: "gallery/sarbet-city-plus-1-bedroom.jpg", alt: "One-bedroom apartment at Sarbet City Plus (3D render)" },
+    { file: "gallery/sarbet-city-plus-2-bedroom.jpg", alt: "Two-bedroom apartment at Sarbet City Plus (3D render)" },
+    { file: "gallery/sarbet-city-plus-3-bedroom.jpg", alt: "Bedroom of a three-bedroom apartment at Sarbet City Plus (3D render)" },
   ],
   "megenagna-diaspora-site": ["areas/megenagna.jpg", ...interiors(0)],
   "aware-megenagna": [
-    { file: "gallery/aware-1.jpg", alt: "Aware Site apartment tower from street level (3D render)" },
-    { file: "gallery/aware-2.jpg", alt: "Aware Site apartment tower seen across the neighbourhood (3D render)" },
+    { file: "gallery/aware-1.jpg", alt: "Aware Site (Sumeya) apartment tower from street level (3D render)" },
+    { file: "gallery/aware-2.jpg", alt: "Aware Site (Sumeya) apartment tower seen across the neighbourhood (3D render)" },
+    { file: "gallery/aware-sumeya.jpg", alt: "Sumeya, the 2B+G+21+T apartment tower at Aware (3D render)" },
     { file: "gallery/aware-3.jpg", alt: "Aerial view of the Aware Site building and its roof track (3D render)" },
-    ...interiors(1),
+    { file: "gallery/aware-sumeya-1-bedroom.jpg", alt: "One-bedroom apartment at Sumeya, Aware (3D render)" },
+    { file: "gallery/aware-sumeya-3-bedroom.jpg", alt: "Three-bedroom apartment at Sumeya, Aware (3D render)" },
   ],
   "haile-garment-apartments": [
     "sample/project-2.jpg", // "Garment site"
@@ -65,8 +67,16 @@ const PROJECT_PHOTOS: Record<string, Photo[]> = {
     { file: "gallery/haile-garment-bathroom.jpg", alt: "Bathroom with a glass shower in a Haile Garment apartment (3D render)" },
     ...interiors(2),
   ],
-  "ayat-49": ["sample/project-4.jpg", "sample/project-1.jpg", ...interiors(0)], // both exteriors captioned Ayat
-  "ajewa-bulgaria": ["areas/bulgaria.jpg", ...interiors(1)],
+  "ayat-49": [
+    { file: "gallery/ayat-49-poster.jpg", alt: "Ayat 49 apartment building, Temer Properties sales poster (3D render)" },
+    "sample/project-4.jpg", // "Ayat sites" aerial
+    ...interiors(0),
+  ],
+  "ajewa-bulgaria": [
+    "areas/bulgaria.jpg",
+    { file: "gallery/ajewa-bulgaria-progress.jpg", alt: "Construction progress at the Bulgaria site, Temer Properties update poster" },
+    ...interiors(1),
+  ],
   "piassa-empire": [
     "areas/piassa.jpg",
     { file: "gallery/piassa-empire-1.jpg", alt: "Piassa Empire building seen from the street (3D render)" },
@@ -76,10 +86,43 @@ const PROJECT_PHOTOS: Record<string, Photo[]> = {
   ],
   "gelan-shops": [
     "areas/gelan.jpg",
+    { file: "gallery/gelan-commercial-center.jpg", alt: "Gelan Commercial Center, a B+G+7 shopping building (3D render)" },
     { file: "gallery/gelan-1.jpg", alt: "Gelan shopping building facade with ground-floor shops (3D render)" },
     { file: "gallery/gelan-2.jpg", alt: "Gelan shopping building seen from the corner (3D render)" },
     { file: "gallery/gelan-3.jpg", alt: "Glass front of the Gelan shopping building (3D render)" },
     { file: "gallery/gelan-4.jpg", alt: "Street level view of the Gelan shopping building (3D render)" },
+  ],
+  "achante-ayat": [
+    { file: "gallery/achante.jpg", alt: "Achante, a B+G+10 apartment building in Ayat (3D render)" },
+    { file: "sample/project-4.jpg", alt: "Aerial view of Temer's Ayat sites with Achante marked" },
+    ...interiors(1),
+  ],
+  "feresbet-ayat": [
+    { file: "gallery/feresbet.jpg", alt: "Feresbet, a 2B+G+16 apartment building in Ayat (3D render)" },
+    { file: "sample/project-1.jpg", alt: "Aerial view of the Feresbet site in Ayat" },
+    ...interiors(2),
+  ],
+  "ayat-new-road": [
+    { file: "gallery/ayat-new-road.jpg", alt: "Ayat New Road, a 3B+G+22 apartment tower (3D render)" },
+    ...interiors(0),
+  ],
+  "ayat-two-center": [
+    { file: "gallery/ayat-two-center.jpg", alt: "Ayat Two Center, a 3B+G+15 apartment building (3D render)" },
+    { file: "sample/project-4.jpg", alt: "Aerial view of Temer's Ayat sites with Two Center marked" },
+    ...interiors(1),
+  ],
+  "blue-point-zuhra-sarbet": [
+    { file: "gallery/blue-point-zuhra.jpg", alt: "Blue Point Zuhra, a B+G+21+T apartment tower in Sarbet (3D render)" },
+    { file: "gallery/blue-point-3-bedroom.jpg", alt: "Three-bedroom apartment at Blue Point, Sarbet (3D render)" },
+    ...interiors(2),
+  ],
+  "lycee-burat": [
+    { file: "gallery/lycee-burat.jpg", alt: "Burat, a B+G+22 apartment tower at Lycee (3D render)" },
+    ...interiors(0),
+  ],
+  "lycee-seken": [
+    { file: "gallery/lycee-seken.jpg", alt: "Seken, a B+G+19+T apartment tower at Lycee (3D render)" },
+    ...interiors(1),
   ],
   "maw-ayat": ["sample/site-5.jpg", "sample/project-4.jpg", ...interiors(2)], // MAW building, then the Ayat aerial that marks MAW
   "2ma-lebu": ["sample/site-4.jpg", ...interiors(0)], // "2MA"
@@ -147,7 +190,9 @@ async function main() {
   console.log(`✓ Photos matched to ${projectRows.length} projects and ${propertyRows.length} properties${missing ? ` (${missing} without a photo)` : ""}`);
 }
 
-main().catch((e) => {
+main()
+  .then(() => closeDb())
+  .catch((e) => {
   console.error(e);
   process.exit(1);
 });

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { AutoSubmitForm as Form } from "@/components/site/auto-submit-form";
 import Link from "next/link";
-import { and, count, desc, eq, like, type SQL } from "drizzle-orm";
+import { and, count, desc, eq, ilike, type SQL } from "drizzle-orm";
 import { Building2, ExternalLink, Plus, Search } from "lucide-react";
-import { PAGE_SIZE, firstParam, pageFromParam } from "@/components/admin/helpers";
+import { PAGE_SIZE, deletedMessage, firstParam, pageFromParam } from "@/components/admin/helpers";
 import { EmptyState, Notice, PageHeader, Pagination, TableCard, Thumb, YesNo, td, th } from "@/components/admin/ui";
 import { Badge, propertyStatusTone } from "@/components/ui/badge";
 import { buttonStyles } from "@/components/ui/button";
@@ -11,13 +11,16 @@ import { inputStyles } from "@/components/ui/form";
 import { db } from "@/db";
 import { locations, projects, properties } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth/session";
+import { BulkDelete, RowCheckbox, SelectAllCheckbox } from "@/components/admin/bulk-delete";
+import { deletePropertyAction } from "./actions";
 import { PROPERTY_STATUSES, PROPERTY_TYPES, propertyStatusLabels, propertyTypes, type PropertyStatus, type PropertyType } from "@/lib/config/property-types";
 import { formatDate, formatPriceCompact } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Properties" };
 
 export default async function AdminPropertiesPage({ searchParams }: PageProps<"/admin/properties">) {
-  await requireAdmin();
+  const me = await requireAdmin();
+  const canDelete = me.role === "admin";
   const sp = await searchParams;
   const q = firstParam(sp.q)?.trim() ?? "";
   const statusParam = firstParam(sp.status);
@@ -27,7 +30,7 @@ export default async function AdminPropertiesPage({ searchParams }: PageProps<"/
   const page = pageFromParam(sp.page);
 
   const filters: SQL[] = [];
-  if (q) filters.push(like(properties.title, `%${q}%`));
+  if (q) filters.push(ilike(properties.title, `%${q}%`));
   if (status) filters.push(eq(properties.status, status));
   if (type) filters.push(eq(properties.type, type));
   const where = filters.length ? and(...filters) : undefined;
@@ -82,7 +85,7 @@ export default async function AdminPropertiesPage({ searchParams }: PageProps<"/
         }
       />
 
-      {firstParam(sp.deleted) ? <Notice>The property was deleted.</Notice> : null}
+      {deletedMessage(sp.deleted, "property", "properties") ? <Notice>{deletedMessage(sp.deleted, "property", "properties")}</Notice> : null}
 
       <Form action="/admin/properties" className="mb-5 grid gap-3 rounded-2xl bg-white p-4 shadow-xs ring-1 ring-line sm:grid-cols-[1fr_auto_auto_auto]">
         <label className="sr-only" htmlFor="q">
@@ -135,10 +138,16 @@ export default async function AdminPropertiesPage({ searchParams }: PageProps<"/
         />
       ) : (
         <>
+          <BulkDelete key={rows.map((r) => r.id).join()} enabled={canDelete} action={deletePropertyAction} singular="property" plural="properties">
           <TableCard>
             <table className="min-w-full divide-y divide-line">
               <thead className="bg-soft/60">
                 <tr>
+                {canDelete ? (
+                  <th scope="col" className={`${th} w-10`}>
+                    <SelectAllCheckbox />
+                  </th>
+                ) : null}
                   <th scope="col" className={th}>Property</th>
                   <th scope="col" className={th}>Location / project</th>
                   <th scope="col" className={th}>Price</th>
@@ -153,6 +162,11 @@ export default async function AdminPropertiesPage({ searchParams }: PageProps<"/
               <tbody className="divide-y divide-line">
                 {rows.map((p) => (
                   <tr key={p.id} className="hover:bg-soft/50">
+                    {canDelete ? (
+                      <td className={`${td} w-10`}>
+                        <RowCheckbox id={p.id} label={p.title} />
+                      </td>
+                    ) : null}
                     <td className={td}>
                       <div className="flex min-w-64 items-center gap-3">
                         <Thumb src={p.images[0]?.url} />
@@ -189,6 +203,7 @@ export default async function AdminPropertiesPage({ searchParams }: PageProps<"/
               </tbody>
             </table>
           </TableCard>
+          </BulkDelete>
           <Pagination page={page} total={total} pageSize={PAGE_SIZE} hrefFor={hrefFor} />
         </>
       )}
