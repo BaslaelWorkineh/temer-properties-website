@@ -1,12 +1,14 @@
-import { mkdirSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+/**
+ * Postgres connection string, shared by the app, drizzle-kit and scripts so they always hit the same database.
+ * Neon: use the pooled connection string (host contains "-pooler") with ?sslmode=require.
+ */
+export const databaseUrl = process.env.DATABASE_URL?.trim() ?? "";
 
-/** Shared by the app, drizzle-kit and scripts so they always hit the same database. */
-export const databaseUrl = process.env.DATABASE_URL?.trim() || "file:./data/temer.db";
-
-export function ensureLocalDbDir(url: string) {
-  if (!url.startsWith("file:")) return;
-  const filePath = url.slice("file:".length);
-  if (!filePath || filePath === ":memory:") return;
-  mkdirSync(dirname(resolve(filePath)), { recursive: true });
+export function requireDatabaseUrl() {
+  if (!/^postgres(ql)?:\/\//.test(databaseUrl)) {
+    throw new Error(
+      "DATABASE_URL must be a Postgres connection string, e.g. the Neon one: postgresql://user:password@ep-xxx-pooler.region.aws.neon.tech/neondb?sslmode=require",
+    );
+  }
+  return databaseUrl;
 }

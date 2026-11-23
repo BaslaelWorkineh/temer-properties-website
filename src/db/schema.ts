@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { index, integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { boolean, doublePrecision, index, integer, jsonb, pgTable, real, text, timestamp } from "drizzle-orm/pg-core";
 // Relative imports (not "@/…") so drizzle-kit and tsx scripts can load this file directly.
 import { PROJECT_STATUSES, PROPERTY_STATUSES, PROPERTY_TYPES } from "../lib/config/property-types";
 import { BOOKING_STATUSES, INQUIRY_INTERESTS, INQUIRY_STATUSES, VISIT_TYPES } from "../lib/config/booking";
@@ -45,12 +45,12 @@ export type PostAm = { title?: string; excerpt?: string; content?: string };
 export type Translations<A> = { am?: A };
 
 const timestamps = {
-  createdAt: integer("created_at", { mode: "timestamp" })
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
     .notNull()
-    .default(sql`(unixepoch())`),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
     .notNull()
-    .default(sql`(unixepoch())`)
+    .defaultNow()
     .$onUpdate(() => new Date()),
 };
 
@@ -59,10 +59,10 @@ const seo = {
   seoDescription: text("seo_description"),
 };
 
-export const locations = sqliteTable(
+export const locations = pgTable(
   "locations",
   {
-    id: integer("id").primaryKey({ autoIncrement: true }),
+    id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
     name: text("name").notNull(),
     slug: text("slug").notNull().unique(),
     city: text("city").notNull().default("Addis Ababa"),
@@ -70,24 +70,24 @@ export const locations = sqliteTable(
     summary: text("summary"),
     /** Long-form area guide in Markdown. Unique content is what makes area pages rank. */
     description: text("description"),
-    highlights: text("highlights", { mode: "json" }).$type<string[]>().notNull().default(sql`'[]'`),
-    faqs: text("faqs", { mode: "json" }).$type<FaqItem[]>().notNull().default(sql`'[]'`),
-    image: text("image", { mode: "json" }).$type<ImageItem | null>(),
-    latitude: real("latitude"),
-    longitude: real("longitude"),
+    highlights: jsonb("highlights").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+    faqs: jsonb("faqs").$type<FaqItem[]>().notNull().default(sql`'[]'::jsonb`),
+    image: jsonb("image").$type<ImageItem | null>(),
+    latitude: doublePrecision("latitude"),
+    longitude: doublePrecision("longitude"),
     sortOrder: integer("sort_order").notNull().default(0),
-    isPublished: integer("is_published", { mode: "boolean" }).notNull().default(true),
-    translations: text("translations", { mode: "json" }).$type<Translations<LocationAm>>().notNull().default(sql`'{}'`),
+    isPublished: boolean("is_published").notNull().default(true),
+    translations: jsonb("translations").$type<Translations<LocationAm>>().notNull().default(sql`'{}'::jsonb`),
     ...seo,
     ...timestamps,
   },
   (t) => [index("locations_published_idx").on(t.isPublished)],
 );
 
-export const projects = sqliteTable(
+export const projects = pgTable(
   "projects",
   {
-    id: integer("id").primaryKey({ autoIncrement: true }),
+    id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
     name: text("name").notNull(),
     slug: text("slug").notNull().unique(),
     locationId: integer("location_id").references(() => locations.id, { onDelete: "set null" }),
@@ -98,31 +98,31 @@ export const projects = sqliteTable(
     description: text("description"),
     totalUnits: integer("total_units"),
     floors: integer("floors"),
-    unitTypes: text("unit_types", { mode: "json" }).$type<string[]>().notNull().default(sql`'[]'`),
-    amenities: text("amenities", { mode: "json" }).$type<string[]>().notNull().default(sql`'[]'`),
+    unitTypes: jsonb("unit_types").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+    amenities: jsonb("amenities").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
     paymentPlan: text("payment_plan"),
     /** Free text such as "Q4 2027" or "Delivered 2015 E.C." */
     completion: text("completion"),
     address: text("address"),
-    latitude: real("latitude"),
-    longitude: real("longitude"),
-    images: text("images", { mode: "json" }).$type<ImageItem[]>().notNull().default(sql`'[]'`),
+    latitude: doublePrecision("latitude"),
+    longitude: doublePrecision("longitude"),
+    images: jsonb("images").$type<ImageItem[]>().notNull().default(sql`'[]'::jsonb`),
     videoUrl: text("video_url"),
-    faqs: text("faqs", { mode: "json" }).$type<FaqItem[]>().notNull().default(sql`'[]'`),
-    isFeatured: integer("is_featured", { mode: "boolean" }).notNull().default(false),
-    isPublished: integer("is_published", { mode: "boolean" }).notNull().default(true),
+    faqs: jsonb("faqs").$type<FaqItem[]>().notNull().default(sql`'[]'::jsonb`),
+    isFeatured: boolean("is_featured").notNull().default(false),
+    isPublished: boolean("is_published").notNull().default(true),
     sortOrder: integer("sort_order").notNull().default(0),
-    translations: text("translations", { mode: "json" }).$type<Translations<ProjectAm>>().notNull().default(sql`'{}'`),
+    translations: jsonb("translations").$type<Translations<ProjectAm>>().notNull().default(sql`'{}'::jsonb`),
     ...seo,
     ...timestamps,
   },
   (t) => [index("projects_location_idx").on(t.locationId), index("projects_status_idx").on(t.status)],
 );
 
-export const properties = sqliteTable(
+export const properties = pgTable(
   "properties",
   {
-    id: integer("id").primaryKey({ autoIncrement: true }),
+    id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
     title: text("title").notNull(),
     slug: text("slug").notNull().unique(),
     type: text("type", { enum: PROPERTY_TYPES }).notNull().default("apartment"),
@@ -144,14 +144,14 @@ export const properties = sqliteTable(
     completion: text("completion"),
     summary: text("summary"),
     description: text("description"),
-    features: text("features", { mode: "json" }).$type<string[]>().notNull().default(sql`'[]'`),
+    features: jsonb("features").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
     paymentPlan: text("payment_plan"),
-    images: text("images", { mode: "json" }).$type<ImageItem[]>().notNull().default(sql`'[]'`),
+    images: jsonb("images").$type<ImageItem[]>().notNull().default(sql`'[]'::jsonb`),
     videoUrl: text("video_url"),
-    isFeatured: integer("is_featured", { mode: "boolean" }).notNull().default(false),
-    isPublished: integer("is_published", { mode: "boolean" }).notNull().default(true),
+    isFeatured: boolean("is_featured").notNull().default(false),
+    isPublished: boolean("is_published").notNull().default(true),
     sortOrder: integer("sort_order").notNull().default(0),
-    translations: text("translations", { mode: "json" }).$type<Translations<PropertyAm>>().notNull().default(sql`'{}'`),
+    translations: jsonb("translations").$type<Translations<PropertyAm>>().notNull().default(sql`'{}'::jsonb`),
     ...seo,
     ...timestamps,
   },
@@ -163,30 +163,30 @@ export const properties = sqliteTable(
   ],
 );
 
-export const posts = sqliteTable(
+export const posts = pgTable(
   "posts",
   {
-    id: integer("id").primaryKey({ autoIncrement: true }),
+    id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
     title: text("title").notNull(),
     slug: text("slug").notNull().unique(),
     excerpt: text("excerpt"),
     /** Markdown */
     content: text("content").notNull().default(""),
-    coverImage: text("cover_image", { mode: "json" }).$type<ImageItem | null>(),
+    coverImage: jsonb("cover_image").$type<ImageItem | null>(),
     authorName: text("author_name").notNull().default("Temer Properties"),
-    isPublished: integer("is_published", { mode: "boolean" }).notNull().default(false),
-    publishedAt: integer("published_at", { mode: "timestamp" }),
-    translations: text("translations", { mode: "json" }).$type<Translations<PostAm>>().notNull().default(sql`'{}'`),
+    isPublished: boolean("is_published").notNull().default(false),
+    publishedAt: timestamp("published_at", { withTimezone: true, mode: "date" }),
+    translations: jsonb("translations").$type<Translations<PostAm>>().notNull().default(sql`'{}'::jsonb`),
     ...seo,
     ...timestamps,
   },
   (t) => [index("posts_published_idx").on(t.isPublished, t.publishedAt)],
 );
 
-export const bookings = sqliteTable(
+export const bookings = pgTable(
   "bookings",
   {
-    id: integer("id").primaryKey({ autoIncrement: true }),
+    id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
     /** Human-friendly reference given to the customer, e.g. TP-7K3Q9M */
     reference: text("reference").notNull().unique(),
     propertyId: integer("property_id").references(() => properties.id, { onDelete: "set null" }),
@@ -210,10 +210,10 @@ export const bookings = sqliteTable(
   (t) => [index("bookings_slot_idx").on(t.visitDate, t.timeSlot), index("bookings_status_idx").on(t.status)],
 );
 
-export const inquiries = sqliteTable(
+export const inquiries = pgTable(
   "inquiries",
   {
-    id: integer("id").primaryKey({ autoIncrement: true }),
+    id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
     fullName: text("full_name").notNull(),
     phone: text("phone").notNull(),
     email: text("email"),
@@ -230,17 +230,17 @@ export const inquiries = sqliteTable(
   (t) => [index("inquiries_status_idx").on(t.status)],
 );
 
-export const adminUsers = sqliteTable("admin_users", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const adminUsers = pgTable("admin_users", {
+  id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
   email: text("email").notNull().unique(),
   name: text("name").notNull(),
   passwordHash: text("password_hash").notNull(),
   role: text("role", { enum: ["admin", "editor"] }).notNull().default("admin"),
-  lastLoginAt: integer("last_login_at", { mode: "timestamp" }),
+  lastLoginAt: timestamp("last_login_at", { withTimezone: true, mode: "date" }),
   ...timestamps,
 });
 
-export const sessions = sqliteTable(
+export const sessions = pgTable(
   "sessions",
   {
     /** SHA-256 of the session token (the raw token only lives in the cookie). */
@@ -248,10 +248,10 @@ export const sessions = sqliteTable(
     userId: integer("user_id")
       .notNull()
       .references(() => adminUsers.id, { onDelete: "cascade" }),
-    expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
-    createdAt: integer("created_at", { mode: "timestamp" })
+    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
       .notNull()
-      .default(sql`(unixepoch())`),
+      .defaultNow(),
   },
   (t) => [index("sessions_user_idx").on(t.userId)],
 );

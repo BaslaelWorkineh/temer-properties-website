@@ -4,6 +4,7 @@ import { CtaBand } from "@/components/site/cta-band";
 import { JsonLd } from "@/components/site/json-ld";
 import { ProjectCard } from "@/components/site/project-card";
 import { Container, PageHero, SectionHeading } from "@/components/site/section";
+import { SlideCarousel } from "@/components/site/slide-carousel";
 import { getProjects } from "@/lib/data/projects";
 import { hasLocale, locales, type Locale } from "@/lib/i18n/config";
 import { getAreasDict } from "@/lib/i18n/dict/areas";
@@ -41,14 +42,13 @@ export default async function ProjectsPage({ params }: PageProps<"/[lang]/projec
         <section className="py-14">
           <Container>
             <SectionHeading title={t.currentTitle} description={t.currentDesc} />
-            <ul className="mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-              {current.map((p) => (
-                <li key={p.id}>
-                  <ProjectCard project={p} lang={lang} />
-                </li>
-              ))}
-            </ul>
           </Container>
+          {/* Full-bleed, self-scrolling row (same as the home page). Every card is still server-rendered HTML. */}
+          <SlideCarousel className="mt-8" label={t.currentTitle} slideClassName="h-[26rem] w-[min(56rem,88vw)] sm:h-[30rem]">
+            {current.map((p) => (
+              <ProjectCard key={p.id} project={p} variant="banner" lang={lang} />
+            ))}
+          </SlideCarousel>
         </section>
       ) : null}
 
@@ -56,14 +56,18 @@ export default async function ProjectsPage({ params }: PageProps<"/[lang]/projec
         <section className="bg-soft py-14">
           <Container>
             <SectionHeading title={t.deliveredTitle} description={t.deliveredDesc} />
-            <ul className="mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-              {delivered.map((p) => (
-                <li key={p.id}>
-                  <ProjectCard project={p} lang={lang} />
-                </li>
-              ))}
-            </ul>
           </Container>
+          {/* A slightly different pace, so the two rows don't move in lockstep. */}
+          <SlideCarousel
+            className="mt-8"
+            label={t.deliveredTitle}
+            interval={3600}
+            slideClassName="h-[26rem] w-[min(56rem,88vw)] sm:h-[30rem]"
+          >
+            {delivered.map((p) => (
+              <ProjectCard key={p.id} project={p} variant="banner" lang={lang} />
+            ))}
+          </SlideCarousel>
         </section>
       ) : null}
 

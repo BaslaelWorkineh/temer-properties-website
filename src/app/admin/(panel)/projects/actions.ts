@@ -1,9 +1,9 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
-import { invalidImageMessage, resolveSlug, toId } from "@/app/admin/_lib/server";
+import { invalidImageMessage, resolveSlug, toId, toIds } from "@/app/admin/_lib/server";
 import { db } from "@/db";
 import { bookings, inquiries, projects, properties, type FaqItem, type ImageItem } from "@/db/schema";
 import { requireAdmin, requireOwner } from "@/lib/auth/session";
@@ -111,16 +111,16 @@ export async function saveProjectAction(_prev: FormState<Saved>, formData: FormD
 
 export async function deleteProjectAction(formData: FormData) {
   await requireOwner();
-  const id = toId(formData.get("id"));
-  if (!id) return;
+  const ids = toIds(formData);
+  if (!ids.length) return;
 
-  await db.batch([
-    db.update(properties).set({ projectId: null }).where(eq(properties.projectId, id)),
-    db.update(bookings).set({ projectId: null }).where(eq(bookings.projectId, id)),
-    db.update(inquiries).set({ projectId: null }).where(eq(inquiries.projectId, id)),
-    db.delete(projects).where(eq(projects.id, id)),
-  ]);
+  await db.transaction(async (tx) => {
+    await tx.update(properties).set({ projectId: null }).where(inArray(properties.projectId, ids));
+    await tx.update(bookings).set({ projectId: null }).where(inArray(bookings.projectId, ids));
+    await tx.update(inquiries).set({ projectId: null }).where(inArray(inquiries.projectId, ids));
+    await tx.delete(projects).where(inArray(projects.id, ids));
+  });
 
   refreshPublicContent(TAGS.projects, TAGS.properties, TAGS.locations);
-  redirect("/admin/projects?deleted=1");
+  redirect(`/admin/projects?deleted=${ids.length}`);
 }

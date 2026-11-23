@@ -1,9 +1,9 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
-import { invalidImageMessage, resolveSlug, toId } from "@/app/admin/_lib/server";
+import { invalidImageMessage, resolveSlug, toId, toIds } from "@/app/admin/_lib/server";
 import { db } from "@/db";
 import { posts, type ImageItem } from "@/db/schema";
 import { requireAdmin, requireOwner } from "@/lib/auth/session";
@@ -85,9 +85,9 @@ export async function savePostAction(_prev: FormState<Saved>, formData: FormData
 
 export async function deletePostAction(formData: FormData) {
   await requireOwner();
-  const id = toId(formData.get("id"));
-  if (!id) return;
-  await db.delete(posts).where(eq(posts.id, id));
+  const ids = toIds(formData);
+  if (!ids.length) return;
+  await db.delete(posts).where(inArray(posts.id, ids));
   refreshPublicContent(TAGS.posts);
-  redirect("/admin/posts?deleted=1");
+  redirect(`/admin/posts?deleted=${ids.length}`);
 }

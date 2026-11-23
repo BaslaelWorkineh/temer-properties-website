@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ArrowRight, CalendarCheck2, Clock, MapPin, Phone } from "lucide-react";
 import Image from "next/image";
 import Link from "@/components/site/link";
-import citySunset from "@/assets/hero/city-sunset-green.jpg";
+import heroTowers from "@/assets/hero/towers-dusk.jpg";
 import { WhatsAppIcon } from "@/components/site/brand-icons";
 import { FaqList } from "@/components/site/faq-list";
 import { JsonLd } from "@/components/site/json-ld";
@@ -53,7 +53,6 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
     getPublishedPosts(3, lang),
   ]);
   const activeProjects = projects.filter((p) => p.status !== "delivered");
-  const deliveredProjects = projects.filter((p) => p.status === "delivered");
   // Two columns: keep an even count so every row is full (up to 12 -> 6 rows).
   const latest = featured.slice(0, featured.length - (featured.length % 2));
   const areas = locations.filter(isLocationIndexable).slice(0, 8);
@@ -71,45 +70,60 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
       {/*
         Hero: sized to its content, directly below the thin header. The header's logo tab hangs ~4rem into it,
         so the wordmark starts below that.
-        The green sunset (baked by scripts/generate-brand-assets.ts) is anchored to the top so only its bottom
-        is cropped; it is the only hero image and is preloaded. A big "TEMER / PROPERTIES" wordmark sits in the sky at
-        the top left (decorative: the logo and H1 carry the name for assistive tech); the copy sits low over the city,
-        with one primary action.
+        The background is a 3D render of Temer towers at dusk, anchored to the top (just right of centre, where the
+        towers are) so the rooftops stay in view and only the street at the bottom is cropped; it is the only hero image and is preloaded. A big "TEMER / PROPERTIES" wordmark sits in the sky at
+        the top left; the copy sits low over the city, with one primary action.
+        The wordmark is the start of the H1 ("Temer Properties: apartments, homes & shops for sale in Addis Ababa"),
+        so the page's main heading names the brand people search for. The H1 spans the whole left column: wordmark
+        at the top, headline pushed to the bottom.
       */}
-      <section className="relative isolate flex min-h-[30rem] flex-col overflow-hidden bg-brand-950 text-white sm:min-h-[36rem]">
-        <Image
-          src={citySunset}
-          alt=""
-          fill
-          preload
-          sizes="100vw"
-          placeholder="blur"
-          className="-z-10 object-cover object-[72%_top]"
-        />
+      {/* On desktop, hero + gold title bar fill exactly one screen (100svh minus the 3.5rem header, its 2px line and
+          the 3.5rem gold bar), so the fold lands on the gold bar's bottom edge instead of showing a sliver of the
+          white search panel. Never shorter than its content (36rem). Phones keep the content height: their
+          fixed contact bar covers the bottom of the screen anyway. */}
+      <section className="hero-split relative isolate flex min-h-[30rem] flex-col overflow-hidden bg-brand-950 text-white sm:min-h-[36rem] lg:min-h-[max(36rem,calc(100svh-7rem-2px))]">
+        {/* The photo is the background of the whole hero, towers in the centre. Desktop: the text sits on the left,
+            beside the towers, over a darkened left edge (.hero-split in globals.css). */}
+        <div className="absolute inset-0 -z-10">
+          <Image
+            src={heroTowers}
+            alt=""
+            fill
+            preload
+            quality={90}
+            sizes="100vw"
+            placeholder="blur"
+            className="object-cover object-[55%_top] lg:object-[50.5%_top]"
+          />
+        </div>
         <div
-          className="absolute inset-0 -z-10 bg-gradient-to-br from-brand-950/75 via-brand-950/25 to-transparent"
+          className="absolute inset-0 -z-10 bg-gradient-to-br from-brand-950/75 via-brand-950/25 to-transparent lg:hidden"
+          aria-hidden="true"
+        />
+        {/* Desktop: darker left edge behind the text; the towers and the right side stay clear. */}
+        <div
+          className="absolute inset-0 -z-10 hidden bg-[linear-gradient(to_right,var(--color-brand-950)_0%,color-mix(in_oklab,var(--color-brand-950)_70%,transparent)_22%,transparent_38%)] lg:block"
           aria-hidden="true"
         />
         <div
           className="absolute inset-x-0 bottom-0 -z-10 h-2/3 bg-gradient-to-t from-brand-950 via-brand-950/75 to-transparent"
           aria-hidden="true"
         />
-        <Container className="pt-12 sm:pt-14">
-          <p className="hero-wordmark" aria-hidden="true">
-            <span className="hero-wordmark__name">{dict.brand.name}</span>
-            <span className="hero-wordmark__sub">{dict.brand.sub}</span>
-          </p>
-        </Container>
-        <Container className="flex flex-1 flex-col justify-end pb-14 pt-8 sm:pb-16 sm:pt-12">
-          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-12">
-            <div className="max-w-2xl">
-              <h1 className="text-4xl font-bold leading-[1.05] sm:text-5xl">
-                {dict.home.h1}
+        <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 pb-14 pt-12 sm:px-6 sm:pb-16 sm:pt-14 lg:max-w-none">
+          {/* Desktop: the wordmark sits on the left, centred vertically, and the headline, intro and buttons bottom
+              right, both beside the towers. The H1 (wordmark + headline) stays one element: a subgrid over all rows. */}
+          <div className="grid flex-1 lg:grid-cols-[var(--hero-text)_minmax(0,1fr)_var(--hero-text)] lg:grid-rows-[1fr_auto_auto] lg:gap-x-12">
+            <div className="flex flex-col lg:contents">
+              <h1 className="flex flex-1 flex-col items-start lg:col-span-3 lg:col-start-1 lg:row-span-3 lg:row-start-1 lg:grid lg:grid-cols-subgrid lg:grid-rows-subgrid">
+                <span className="hero-wordmark lg:col-start-1 lg:row-span-3 lg:row-start-1 lg:self-center">
+                  <span className="hero-wordmark__name">{dict.brand.name}</span>{" "}
+                  <span className="hero-wordmark__sub">{dict.brand.sub}</span>
+                </span>{" "}
+                <span className="mt-auto block max-w-2xl pt-8 text-4xl font-bold leading-[1.05] sm:pt-12 sm:text-5xl lg:col-start-3 lg:row-start-2 lg:mt-0 lg:max-w-none lg:pt-0 lg:text-[clamp(2.25rem,3.2vw,3rem)]">
+                  {dict.home.h1}
+                </span>
               </h1>
-              <p className="mt-4 max-w-xl text-lg leading-relaxed text-white/80">
-                {dict.home.lead(site.name)}
-              </p>
-              <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
+              <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3 lg:col-start-3 lg:row-start-3">
                 <Link href="/properties" className={buttonStyles({ variant: "gold", size: "lg" })}>
                   {dict.home.browse} <ArrowRight className="size-4" aria-hidden="true" />
                 </Link>
@@ -118,16 +132,8 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
                 </Link>
               </div>
             </div>
-            <dl className="grid grid-cols-3 gap-4 border-t border-white/15 pt-6 lg:gap-10 lg:border-t-0 lg:border-l lg:pl-10 lg:pt-0">
-              {site.stats.map((s, i) => (
-                <div key={s.label} className="flex flex-col">
-                  <dt className="text-xs text-white/65 sm:text-sm">{[dict.stats.customers, dict.stats.projects, dict.stats.units][i] ?? s.label}</dt>
-                  <dd className="order-first font-display text-3xl font-bold text-gold-400 sm:text-4xl">{s.value}</dd>
-                </div>
-              ))}
-            </dl>
           </div>
-        </Container>
+        </div>
       </section>
 
       {/*
@@ -136,23 +142,25 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
         "Browse by type" grid is gone: the filter covers it, and the footer still links every /for-sale/* hub.
       */}
       <section className="pb-12 sm:pb-14">
-        {/* Heading, search and tiles share one edge (12px from the screen), like the tiles themselves. */}
-        <div className="px-3 pb-6 pt-10 sm:pt-12">
-          <SectionHeading
-            title={dict.home.latestTitle}
-            description={dict.home.latestCount(listingCount.total)}
-            action={
-              <Link href="/properties" className={buttonStyles({ variant: "outline" })}>
-                {dict.common.allProperties} <ArrowRight className="size-4" aria-hidden="true" />
-              </Link>
-            }
-          />
-          <HomeSearch locations={areas} className="mt-6" lang={lang} />
+        {/* Gold title bar, sized like the header (h-14) and flush with the hero, so it reads as this section's nav
+            bar. Heading, search and tiles share one edge (12px from the screen), like the tiles themselves. */}
+        <div className="bg-gold-500 text-brand-950">
+          <div className="flex h-14 items-center justify-between gap-4 px-3">
+            <div className="flex min-w-0 items-baseline gap-3">
+              <h2 className="truncate text-2xl font-bold sm:text-3xl">{dict.home.latestTitle}</h2>
+              <p className="hidden text-sm font-medium text-brand-950/75 sm:block">
+                {dict.home.latestCount(listingCount.total)}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="p-3">
+          <HomeSearch locations={areas} lang={lang} />
         </div>
         {latest.length ? (
           <ul className="grid gap-3 px-3 sm:grid-cols-2">
             {latest.map((p, i) => (
-              <li key={p.id} className="aspect-[4/3] sm:aspect-[16/10] xl:aspect-[16/9]">
+              <li key={p.id} className="aspect-[5/4]">
                 <PropertyCard property={p} variant="tile" eager={i < 2} lang={lang} />
               </li>
             ))}
@@ -233,28 +241,38 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
               </Link>
             }
           />
-          {/* Photo cards: a real photo on top, a black body below with the step, its text and its next action. */}
-          <ol className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Ranked photo cards: a huge outlined step number stands outside each card's left edge and runs behind it,
+              so the card covers its right side. The number is decoration (the <ol> and the sr-only label carry
+              the order); a real photo on top, a black body below with the text and its next action. */}
+          <ol className="mt-8 grid gap-x-3 gap-y-6 sm:grid-cols-2 lg:grid-cols-4">
             {steps.map((step, i) => (
-              <li key={step.title} className="group flex flex-col overflow-hidden bg-[#0b0d0c] text-white">
-                <div className="relative aspect-[16/10] overflow-hidden">
-                  <Image
-                    src={step.image.src}
-                    alt={step.image.alt}
-                    fill
-                    sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-                    className="object-cover transition duration-700 group-hover:scale-[1.06]"
-                  />
-                  <span className="absolute bottom-0 left-0 bg-[#0b0d0c] px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-white">
-                    {dict.home.step(i + 1)}
-                  </span>
-                </div>
-                <div className="flex flex-1 flex-col p-5">
-                  <h3 className="font-display text-3xl font-bold leading-tight">{step.title}</h3>
-                  <p className="mt-2 flex-1 text-[0.95rem] leading-relaxed text-white/75">{step.text}</p>
-                  <Link href={step.href} className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-gold-400 hover:text-white">
-                    {step.cta} <ArrowRight className="size-4 transition group-hover:translate-x-1" aria-hidden="true" />
-                  </Link>
+              <li key={step.title} className="group relative isolate flex pl-14 sm:pl-16">
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute bottom-[0.04em] left-0 -z-10 select-none font-display text-[11rem] font-extrabold leading-[0.74] tracking-tighter text-white transition-colors duration-500 [-webkit-text-stroke:3px_var(--color-ink)] [paint-order:stroke_fill] group-hover:text-gold-400 sm:text-[13rem] xl:text-[15rem]"
+                >
+                  {i + 1}
+                </span>
+                <div className="flex flex-1 flex-col overflow-hidden bg-[#0b0d0c] text-white shadow-[-12px_0_24px_-12px_rgb(0_0_0/0.45)]">
+                  <div className="relative aspect-[16/10] overflow-hidden">
+                    <Image
+                      src={step.image.src}
+                      alt={step.image.alt}
+                      fill
+                      sizes="(min-width: 1024px) 22vw, (min-width: 640px) 45vw, 90vw"
+                      className="object-cover transition duration-700 group-hover:scale-[1.06]"
+                    />
+                  </div>
+                  <div className="flex flex-1 flex-col p-5">
+                    <h3 className="font-display text-3xl font-bold leading-tight">
+                      <span className="sr-only">{dict.home.step(i + 1)}: </span>
+                      {step.title}
+                    </h3>
+                    <p className="mt-2 flex-1 text-[0.95rem] leading-relaxed text-white/75">{step.text}</p>
+                    <Link href={step.href} className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-gold-400 hover:text-white">
+                      {step.cta} <ArrowRight className="size-4 transition group-hover:translate-x-1" aria-hidden="true" />
+                    </Link>
+                  </div>
                 </div>
               </li>
             ))}
@@ -273,29 +291,19 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
         </div>
       </section>
 
-      {deliveredProjects.length ? (
-        <section className="bg-brand-950 py-16 text-white sm:py-20">
-          <Container>
-            <SectionHeading
-              title={<span className="text-white">{dict.home.deliveredTitle}</span>}
-              description={<span className="text-white/75">{dict.home.deliveredDesc}</span>}
-            />
-            <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-              {deliveredProjects.map((p) => (
-                <li key={p.id}>
-                  <Link
-                    href={`/projects/${p.slug}`}
-                    className="block rounded-none bg-white/5 p-5 ring-1 ring-white/10 transition hover:bg-white/10"
-                  >
-                    <span className="font-display text-xl font-bold">{p.name}</span>
-                    <span className="mt-1 block text-sm text-white/70">{p.location?.name ? localizedAreaName(lang, p.location.name) : lang === "am" ? "አዲስ አበባ" : "Addis Ababa"}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </Container>
-        </section>
-      ) : null}
+      {/* Company track record (site.stats). */}
+      <section className="bg-brand-950 py-12 text-white sm:py-16">
+        <Container>
+          <dl className="grid grid-cols-3 gap-4 sm:gap-10">
+            {site.stats.map((s, i) => (
+              <div key={s.label} className="flex flex-col items-center text-center">
+                <dt className="text-xs text-white/65 sm:text-sm">{[dict.stats.customers, dict.stats.projects, dict.stats.units][i] ?? s.label}</dt>
+                <dd className="order-first font-display text-3xl font-bold text-gold-400 sm:text-5xl lg:text-6xl">{s.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </Container>
+      </section>
 
       {posts.length ? (
         <section className="py-16 sm:py-20">

@@ -8,16 +8,13 @@
  * Re-running is safe. Photos uploaded later in /admin replace these.
  */
 import "./load-env";
-import { createClient } from "@libsql/client";
 import { eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/libsql";
 import sharp from "sharp";
 import path from "node:path";
 import * as schema from "../src/db/schema";
-import { databaseUrl } from "../src/db/url";
+import { closeDb, db } from "./db";
 
 const { locations } = schema;
-const db = drizzle(createClient({ url: databaseUrl, authToken: process.env.DATABASE_AUTH_TOKEN }), { schema });
 
 /** area slug -> file in public/images/areas. Areas not listed here get no photo (tinted card). */
 const PHOTOS: Record<string, string> = {
@@ -54,7 +51,9 @@ async function main() {
   console.log(`✓ ${withPhoto} areas have a real photo, ${rows.length - withPhoto} use the tinted fallback`);
 }
 
-main().catch((e) => {
+main()
+  .then(() => closeDb())
+  .catch((e) => {
   console.error(e);
   process.exit(1);
 });

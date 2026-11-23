@@ -6,7 +6,7 @@ temerpropertiesapartment.com and temerpropertiessales.com with one site:
 - **Public site**: properties, projects, area guides, keyword landing pages, buyer guides, FAQ, contact.
 - **Site-visit booking**: in-person or video-call visits, live slot availability, capacity limits.
 - **Admin panel** (`/admin`): listings, projects, areas, guides, bookings and enquiries, with photo uploads.
-- **Database**: SQLite through Drizzle ORM and libSQL. It is a local file in development and on a VPS, or Turso in serverless setups.
+- **Database**: Postgres (Neon) through Drizzle ORM and node-postgres. Use a Neon dev branch locally and the production branch on Vercel.
 
 Stack: Next.js 16 (App Router, Cache Components), React 19, TypeScript, Tailwind CSS 4, Drizzle ORM, Zod.
 
@@ -17,7 +17,7 @@ Requires Node.js 22.12+.
 ```bash
 npm install
 cp .env.example .env.local        # then set ADMIN_EMAIL / ADMIN_PASSWORD
-npm run setup                     # creates ./data/temer.db, applies migrations, seeds content + admin
+npm run setup                     # applies migrations to DATABASE_URL, seeds content + admin
 npm run dev                       # http://localhost:3000, admin at /admin
 ```
 
@@ -102,7 +102,7 @@ The form works without JavaScript. With JavaScript it shows live availability fr
 capacity check and insert run in one write transaction, so a slot can't be overbooked. Customers get a reference such
 as `TP-7K3Q9M`. Spam protection is a honeypot field plus per-IP rate limits.
 
-New bookings and enquiries can alert the sales team in Telegram: set `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`.
+New bookings and enquiries appear in /admin (Bookings, Enquiries); the sidebar shows how many need attention.
 
 ## Admin
 
@@ -143,21 +143,26 @@ scripts/               migrate, seed, create-admin, generate-brand-assets
 `npm ci && npm run db:migrate && npm run build && npm start`.
 - Put it behind Nginx or Caddy with HTTPS.
 - Run it under a process manager (pm2 or systemd).
-- `./data` (SQLite) and `./storage` (photos) must be on persistent disk and **backed up daily**.
+- Point `DATABASE_URL` at Postgres (Neon or your own). `./storage` (photos) must be on persistent disk and **backed up daily**.
 
-**Option B: serverless (e.g. Vercel).**
-- Set `DATABASE_URL=libsql://…` and `DATABASE_AUTH_TOKEN` (Turso).
-- Swap `src/lib/storage.ts` and `src/app/media` for S3, Cloudflare R2 or Vercel Blob; serverless disks are ephemeral.
-- Replace the in-memory rate limiter (`src/lib/rate-limit.ts`) with Redis/Upstash.
+**Option B: Vercel.**
+- Database: Neon. Set `DATABASE_URL` on Vercel to the production branch's pooled connection string.
+  `npm run db:migrate` creates the tables; the old SQLite content (`data/temer.db`) was moved once with
+  `npm run db:copy` (see `scripts/copy-db.ts`).
+- Photos: connect a Vercel Blob store (public) to the project. Vercel adds `BLOB_READ_WRITE_TOKEN`, and uploads then
+  go to Blob instead of the read-only serverless disk. Image URLs stay `/media/…`.
+- The in-memory rate limiter (`src/lib/rate-limit.ts`) is per instance there: best effort only. Use Redis/Upstash
+  for strict limits.
 
 Environment variables are documented in `.env.example`.
 
 ## Before launch: decisions for the business
 
-1. **One canonical domain.**
-   - The sales site's canonical and sitemap point to temerproperties.com while it is served on temerpropertiessales.com.
-   - Choose one domain for the new site and set `NEXT_PUBLIC_SITE_URL` to it.
-   - 301-redirect the other domains to it, path for path.
+1. **One canonical domain, and the brand pointing at it.**
+   - Google treats temerproperties.com (the company's WordPress site) as Temer's official website: the X account and the Betoch and GoAfrica directory listings link there. Searches for "Temer" and "Temer Properties" will keep showing it first until those links move.
+   - The new site's domain is **buytemerproperties.com**: set `NEXT_PUBLIC_SITE_URL=https://buytemerproperties.com` in production and 301 `www.buytemerproperties.com` to it. If the company ever retires temerproperties.com, 301-redirecting it here is the surest way to rank first for "Temer".
+   - 301-redirect the other domains to it, path for path. temerpropertiessales.com and temerpropertiesapartment.com both rank for "temer properties" today; `src/lib/config/legacy-redirects.ts` maps their URLs.
+   - Change the website link on the Google Business Profile, Facebook, Instagram, TikTok, YouTube, X and the directory pages in `site.profiles` to the new domain.
 2. **Consistent NAP.**
    - The old sites list different phones (0904 192 923 / 0913 455 624), emails, offices (Sarbet vs Bole Road) and founding years (2010 E.C. vs 2015).
    - Confirm the real details in `src/lib/config/site.ts` and use them identically on Google Business Profile.

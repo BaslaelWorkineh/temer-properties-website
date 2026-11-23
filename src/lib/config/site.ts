@@ -12,7 +12,7 @@ const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/+$/, "");
 if (!rawSiteUrl && process.env.NODE_ENV === "production") {
   // A wrong canonical domain silently wrecks SEO, so fail loudly.
   throw new Error(
-    "NEXT_PUBLIC_SITE_URL is not set. Set it to the canonical production origin, e.g. https://temerproperties.com",
+    "NEXT_PUBLIC_SITE_URL is not set. Set it to the canonical production origin, https://buytemerproperties.com",
   );
 }
 
@@ -20,8 +20,14 @@ export const siteUrl = rawSiteUrl || "http://localhost:3000";
 
 export const site = {
   name: "Temer Properties",
+  /** The one-word name people search for. Short title suffix when the full name doesn't fit (see buildMetadata). */
+  shortName: "Temer",
   legalName: "Eyerus Temer Properties",
-  alternateNames: ["Temer Real Estate", "Temer Properties Addis Ababa"],
+  /**
+   * Other names people search for, most common first (structured data alternateName). The YouTube and X
+   * accounts are called "Temer Real Estate", and Amharic listing sites write ቴምር ሪል እስቴት.
+   */
+  alternateNames: ["Temer", "Temer Real Estate", "Temer Properties Addis Ababa", "ቴምር ፕሮፐርቲስ", "ቴምር ሪል እስቴት"],
   tagline: "Apartments, homes & shops for sale in Addis Ababa",
   description:
     "Licensed real estate developer in Addis Ababa. Buy apartments, modern homes and commercial shops with flexible payment plans, and book a site visit online.",
@@ -75,6 +81,19 @@ export const site = {
     youtube: "https://www.youtube.com/@TemerProperties",
     x: "https://x.com/TemerProperties",
   },
+
+  /**
+   * Directory and partner pages about the business (structured data sameAs), which tie this site to the
+   * "Temer" brand that Google already knows. Those that list a website link to temerproperties.com today:
+   * ask each one to switch to this site's URL at launch, and remove any entry that is not this business.
+   */
+  profiles: [
+    "https://www.2merkato.com/directory/41080-temer-real-estate-s",
+    "https://www.betoch.com/developers/temer-properties",
+    "https://www.goafricaonline.com/et/1197540-temer-properties-agences-immobilieres-addis-abeba-ethiopia",
+    "https://ethiopiapropertycentre.com/agents/temer-realestate-1009",
+    "https://shebamiles.ethiopianairlines.com/partners/real-estate-partners/TEMER-PROPERTIES",
+  ],
 
   /** Company claims from the current website. Keep only what can be backed up. */
   stats: [

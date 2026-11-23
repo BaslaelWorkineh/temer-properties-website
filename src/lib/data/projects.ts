@@ -7,7 +7,18 @@ import { TAGS } from "@/lib/cache-tags";
 import type { Locale } from "@/lib/i18n/config";
 import { isTranslated, localizeRow } from "@/lib/i18n/localize";
 
-const availableUnits = sql<number>`(select count(*) from ${properties} where ${properties.projectId} = "projects"."id" and ${properties.isPublished} = 1 and ${properties.status} != 'sold')`;
+const availableUnits = sql<number>`(select count(*) from ${properties} where ${properties.projectId} = "projects"."id" and ${properties.isPublished} = true and ${properties.status} != 'sold')`;
+
+const hasDescription = sql<number>`(${projects.description} is not null and trim(${projects.description}) <> '')`;
+
+/**
+ * The Amharic page stands on its own (self-canonical + hreflang, listed in the sitemap) when the name and summary are
+ * translated, plus the description if the English page has one. The list (sitemap) and the detail page (canonical)
+ * must use this same rule, or the sitemap lists /am pages whose canonical points to English.
+ */
+function projectTranslated(translations: Parameters<typeof isTranslated>[0], withDescription: boolean) {
+  return isTranslated(translations, withDescription ? ["name", "summary", "description"] : ["name", "summary"]);
+}
 
 /** Selling projects first, delivered last. */
 const statusOrder = sql`case ${projects.status} when 'selling' then 0 when 'under_construction' then 1 when 'pre_launch' then 2 else 3 end`;
@@ -30,6 +41,7 @@ const summaryColumns = {
   translations: projects.translations,
   locationTranslations: locations.translations,
   availableUnits,
+  hasDescription,
 };
 
 function summaryQuery() {
@@ -37,7 +49,7 @@ function summaryQuery() {
 }
 
 function toSummary(r: Awaited<ReturnType<typeof summaryQuery>>[number], lang: Locale = "en"): ProjectSummary {
-  const { locationName, locationSlug, images, availableUnits: units, translations, locationTranslations, ...rest } = r;
+  const { locationName, locationSlug, images, availableUnits: units, translations, locationTranslations, hasDescription: described, ...rest } = r;
   const text = localizeRow(rest, translations, lang);
   const placeName = locationName ? localizeRow({ name: locationName }, locationTranslations, lang).name : null;
   return {
@@ -45,7 +57,7 @@ function toSummary(r: Awaited<ReturnType<typeof summaryQuery>>[number], lang: Lo
     image: images[0] ?? null,
     images,
     availableUnits: Number(units),
-    translated: isTranslated(translations, ["name", "summary"]),
+    translated: projectTranslated(translations, Boolean(Number(described))),
     location: locationSlug && placeName ? { name: placeName, slug: locationSlug } : null,
   };
 }
@@ -108,7 +120,7 @@ export async function getProjectBySlug(slug: string, lang: Locale = "en") {
   return {
     ...localizeRow(row.project, row.project.translations, lang),
     availableUnits: Number(row.availableUnits),
-    translated: isTranslated(row.project.translations, ["name", "description"]),
+    translated: projectTranslated(row.project.translations, Boolean(row.project.description?.trim())),
     location: row.location?.id ? { ...localizeRow(row.location, row.location.translations, lang) } : null,
   };
 }

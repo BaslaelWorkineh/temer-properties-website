@@ -2,6 +2,7 @@ import type { FaqItem, ImageItem } from "@/db/schema";
 import { absoluteUrl, site, siteUrl } from "@/lib/config/site";
 import { propertyTypes, type PropertyStatus, type PropertyType } from "@/lib/config/property-types";
 import { formatFloor } from "@/lib/format";
+import { locales } from "@/lib/i18n/config";
 import { DEFAULT_OG_IMAGE } from "@/lib/seo/metadata";
 
 /**
@@ -73,7 +74,7 @@ export function organizationJsonLd(): JsonLdObject {
         availableLanguage: ["English", "Amharic"],
       },
     ],
-    sameAs: Object.values(site.social),
+    sameAs: [...Object.values(site.social), ...site.profiles],
   };
 }
 
@@ -85,7 +86,7 @@ export function websiteJsonLd(): JsonLdObject {
     name: site.name,
     alternateName: site.alternateNames,
     description: site.description,
-    inLanguage: "en",
+    inLanguage: [...locales],
     publisher: { "@id": ORG_ID },
   };
 }

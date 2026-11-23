@@ -12,15 +12,17 @@
     "db:migrate": "tsx scripts/migrate.ts",
     "db:seed": "tsx scripts/seed.ts",
     "db:seed-am": "tsx scripts/seed-amharic.ts",
+    "db:copy": "tsx scripts/copy-db.ts",
     "db:studio": "drizzle-kit studio",
     "admin:create": "tsx scripts/create-admin.ts",
     "setup": "npm run db:migrate && npm run db:seed"
   },
   "dependencies": {
-    "@libsql/client": "^0.18.0",
+    "@vercel/blob": "^2.9.0",
     "drizzle-orm": "^0.45.4",
     "lucide-react": "^1.75.0",
     "next": "16.4.6",
+    "pg": "^8.23.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-markdown": "^10.1.0",
@@ -30,8 +32,10 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@libsql/client": "^0.18.0",
     "@tailwindcss/turbopack": "4.3.3",
     "@types/node": "^20",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "drizzle-kit": "^0.31.11",

@@ -2,19 +2,22 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { desc } from "drizzle-orm";
 import { ExternalLink, Newspaper, Plus } from "lucide-react";
-import { firstParam } from "@/components/admin/helpers";
+import { deletedMessage } from "@/components/admin/helpers";
 import { EmptyState, Notice, PageHeader, TableCard, Thumb, td, th } from "@/components/admin/ui";
 import { Badge } from "@/components/ui/badge";
 import { buttonStyles } from "@/components/ui/button";
 import { db } from "@/db";
 import { posts } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth/session";
+import { BulkDelete, RowCheckbox, SelectAllCheckbox } from "@/components/admin/bulk-delete";
+import { deletePostAction } from "./actions";
 import { formatDate } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Guides" };
 
 export default async function AdminPostsPage({ searchParams }: PageProps<"/admin/posts">) {
-  await requireAdmin();
+  const me = await requireAdmin();
+  const canDelete = me.role === "admin";
   const sp = await searchParams;
 
   const rows = await db
@@ -41,7 +44,7 @@ export default async function AdminPostsPage({ searchParams }: PageProps<"/admin
           </Link>
         }
       />
-      {firstParam(sp.deleted) ? <Notice>The guide was deleted.</Notice> : null}
+      {deletedMessage(sp.deleted, "guide", "guides") ? <Notice>{deletedMessage(sp.deleted, "guide", "guides")}</Notice> : null}
 
       {rows.length === 0 ? (
         <EmptyState
@@ -55,10 +58,16 @@ export default async function AdminPostsPage({ searchParams }: PageProps<"/admin
           }
         />
       ) : (
-        <TableCard>
+        <BulkDelete key={rows.map((r) => r.id).join()} enabled={canDelete} action={deletePostAction} singular="guide" plural="guides">
+          <TableCard>
           <table className="min-w-full divide-y divide-line">
             <thead className="bg-soft/60">
               <tr>
+                {canDelete ? (
+                  <th scope="col" className={`${th} w-10`}>
+                    <SelectAllCheckbox />
+                  </th>
+                ) : null}
                 <th scope="col" className={th}>Guide</th>
                 <th scope="col" className={th}>Status</th>
                 <th scope="col" className={th}>Published</th>
@@ -71,6 +80,11 @@ export default async function AdminPostsPage({ searchParams }: PageProps<"/admin
             <tbody className="divide-y divide-line">
               {rows.map((p) => (
                 <tr key={p.id} className="hover:bg-soft/50">
+                    {canDelete ? (
+                      <td className={`${td} w-10`}>
+                        <RowCheckbox id={p.id} label={p.title} />
+                      </td>
+                    ) : null}
                   <td className={td}>
                     <div className="flex min-w-64 items-center gap-3">
                       <Thumb src={p.coverImage?.url} />
@@ -94,6 +108,7 @@ export default async function AdminPostsPage({ searchParams }: PageProps<"/admin
             </tbody>
           </table>
         </TableCard>
+          </BulkDelete>
       )}
     </>
   );

@@ -1,5 +1,5 @@
 import "server-only";
-import { asc, sql } from "drizzle-orm";
+import { and, asc, eq, ne } from "drizzle-orm";
 import { db } from "@/db";
 import { locations, posts, projects, properties, type ImageItem } from "@/db/schema";
 import { slugify } from "@/lib/utils";
@@ -9,11 +9,11 @@ export type SluggedTable = keyof typeof sluggedTables;
 
 async function slugTaken(table: SluggedTable, slug: string, excludeId?: number) {
   const t = sluggedTables[table];
-  const rows = await db.all<{ id: number }>(
-    excludeId
-      ? sql`select ${t.id} as id from ${t} where ${t.slug} = ${slug} and ${t.id} <> ${excludeId} limit 1`
-      : sql`select ${t.id} as id from ${t} where ${t.slug} = ${slug} limit 1`,
-  );
+  const rows = await db
+    .select({ id: t.id })
+    .from(t)
+    .where(excludeId ? and(eq(t.slug, slug), ne(t.id, excludeId)) : eq(t.slug, slug))
+    .limit(1);
   return rows.length > 0;
 }
 
@@ -59,4 +59,9 @@ export function getProjectOptions() {
 export function toId(value: unknown) {
   const id = Number(value);
   return Number.isInteger(id) && id > 0 ? id : null;
+}
+
+/** Every valid `id` in a form (one from a Delete button, several from a multi-select list), without duplicates. */
+export function toIds(formData: FormData) {
+  return [...new Set(formData.getAll("id").map(toId).filter((id): id is number => id !== null))].slice(0, 500);
 }

@@ -292,7 +292,7 @@ export async function getTypeLocationCombos(lang: Locale = "en") {
       locationName: locations.name,
       locationTranslations: locations.translations,
       count: sql<number>`count(*)`,
-      updatedAt: sql<number>`max(${properties.updatedAt})`,
+      updatedAt: sql<Date>`max(${properties.updatedAt})`.mapWith(properties.updatedAt),
     })
     .from(properties)
     .innerJoin(locations, eq(properties.locationId, locations.id))
@@ -303,6 +303,6 @@ export async function getTypeLocationCombos(lang: Locale = "en") {
     ...r,
     locationName: localizeRow({ name: r.locationName }, locationTranslations, lang).name,
     count: Number(r.count),
-    updatedAt: new Date(Number(r.updatedAt) * 1000),
+    updatedAt: r.updatedAt,
   }));
 }

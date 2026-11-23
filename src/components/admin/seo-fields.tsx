@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Field, inputStyles } from "@/components/ui/form";
+import { brandedTitle } from "@/lib/seo/title";
 import { cn } from "@/lib/utils";
 
 function Counter({ length, ideal, max }: { length: number; ideal: number; max: number }) {
@@ -36,7 +37,7 @@ export function SeoFields({
   const [title, setTitle] = useState(seoTitle ?? "");
   const [description, setDescription] = useState(seoDescription ?? "");
 
-  const shownTitle = `${title || fallbackTitle || "Page title"} | Temer Properties`;
+  const shownTitle = brandedTitle(title || fallbackTitle || "Page title");
   const shownDescription = description || fallbackDescription || "Google will pick text from the page when no description is set.";
   const crumbs = url.replace(/^https?:\/\//, "").replace(/\/$/, "").split("/");
 

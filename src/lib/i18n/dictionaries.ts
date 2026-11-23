@@ -7,7 +7,7 @@ import type { Locale } from "@/lib/i18n/config";
  * The Amharic text is a first draft: have a native speaker review it before launch.
  */
 export type Dictionary = {
-  /** Big hero wordmark: the brand name split over two lines. */
+  /** Big hero wordmark: the brand name split over two lines, at the start of the home page's H1 (CSS sets the capitals). */
   brand: { name: string; sub: string; full: string };
   /** Office address as printed on the site (the map link and phone stay in site.ts). */
   office: { street: string; locality: string };
@@ -26,6 +26,8 @@ export type Dictionary = {
     language: string;
     switchTo: string;
     quickContact: string;
+    contactOptions: string;
+    closeContactOptions: string;
     viewDetails: string;
     viewProject: string;
     showContact: string;
@@ -114,7 +116,7 @@ export type Dictionary = {
 };
 
 const en: Dictionary = {
-  brand: { name: "TEMER", sub: "PROPERTIES", full: "Temer Properties" },
+  brand: { name: "Temer", sub: "Properties", full: "Temer Properties" },
   office: { street: "Woldemaryam Building, Sarbet to Kera Road", locality: "Addis Ababa" },
   nav: { home: "Home", properties: "Properties", projects: "Projects", locations: "Locations", about: "About", guides: "Buying guides", contact: "Contact" },
   common: {
@@ -131,6 +133,8 @@ const en: Dictionary = {
     language: "Language",
     switchTo: "Switch to Amharic",
     quickContact: "Quick contact",
+    contactOptions: "Contact us: call, WhatsApp or Telegram",
+    closeContactOptions: "Close contact options",
     viewDetails: "View details",
     viewProject: "View project",
     showContact: "Show contact options",
@@ -158,7 +162,7 @@ const en: Dictionary = {
   stats: { customers: "Happy customers", projects: "Major projects completed", units: "Units delivered" },
   footer: {
     description:
-      "Licensed real estate developer in Addis Ababa. Buy apartments, modern homes and commercial shops with flexible payment plans, and book a site visit online.",
+      "Temer Properties is a licensed real estate developer in Addis Ababa. Buy apartments, modern homes and commercial shops with flexible payment plans, and book a site visit online.",
     buy: "Buy",
     forSale: (plural) => `${plural} for sale`,
     ourProjects: "Our projects",
@@ -250,6 +254,8 @@ const am: Dictionary = {
     language: "ቋንቋ",
     switchTo: "ወደ እንግሊዝኛ ቀይር",
     quickContact: "ፈጣን ግንኙነት",
+    contactOptions: "ያግኙን፦ ስልክ፣ ዋትስአፕ ወይም ቴሌግራም",
+    closeContactOptions: "የመገናኛ አማራጮችን ዝጋ",
     viewDetails: "ዝርዝር ይመልከቱ",
     viewProject: "ፕሮጀክቱን ይመልከቱ",
     showContact: "የመገናኛ አማራጮችን አሳይ",
@@ -277,7 +283,7 @@ const am: Dictionary = {
   stats: { customers: "ደስተኛ ደንበኞች", projects: "የተጠናቀቁ ዋና ፕሮጀክቶች", units: "የተረከቡ ክፍሎች" },
   footer: {
     description:
-      "በአዲስ አበባ ፈቃድ ያለው የሪል እስቴት ገንቢ። አፓርታማዎችን፣ ዘመናዊ ቤቶችንና የንግድ ሱቆችን በተመቻቸ የክፍያ ዕቅድ ይግዙ፣ የቦታ ጉብኝትም በኢንተርኔት ይያዙ።",
+      "ቴምር ፕሮፐርቲስ በአዲስ አበባ ፈቃድ ያለው የሪል እስቴት ገንቢ ነው። አፓርታማዎችን፣ ዘመናዊ ቤቶችንና የንግድ ሱቆችን በተመቻቸ የክፍያ ዕቅድ ይግዙ፣ የቦታ ጉብኝትም በኢንተርኔት ይያዙ።",
     buy: "ግዙ",
     forSale: (plural) => `ለሽያጭ የቀረቡ ${plural}`,
     ourProjects: "ፕሮጀክቶቻችን",

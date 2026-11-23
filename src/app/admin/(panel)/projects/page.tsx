@@ -2,20 +2,23 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { asc, count, desc, eq } from "drizzle-orm";
 import { ExternalLink, Layers, Plus } from "lucide-react";
-import { firstParam } from "@/components/admin/helpers";
+import { deletedMessage } from "@/components/admin/helpers";
 import { EmptyState, Notice, PageHeader, TableCard, Thumb, YesNo, td, th } from "@/components/admin/ui";
 import { Badge, projectStatusTone } from "@/components/ui/badge";
 import { buttonStyles } from "@/components/ui/button";
 import { db } from "@/db";
 import { locations, projects, properties } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth/session";
+import { BulkDelete, RowCheckbox, SelectAllCheckbox } from "@/components/admin/bulk-delete";
+import { deleteProjectAction } from "./actions";
 import { projectStatusLabels } from "@/lib/config/property-types";
 import { formatDate } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Projects" };
 
 export default async function AdminProjectsPage({ searchParams }: PageProps<"/admin/projects">) {
-  await requireAdmin();
+  const me = await requireAdmin();
+  const canDelete = me.role === "admin";
   const sp = await searchParams;
 
   const unitCounts = db
@@ -54,7 +57,7 @@ export default async function AdminProjectsPage({ searchParams }: PageProps<"/ad
           </Link>
         }
       />
-      {firstParam(sp.deleted) ? <Notice>The project was deleted. Its properties were kept and unlinked.</Notice> : null}
+      {deletedMessage(sp.deleted, "project", "projects") ? <Notice>{deletedMessage(sp.deleted, "project", "projects", "Their properties were kept and unlinked.")}</Notice> : null}
 
       {rows.length === 0 ? (
         <EmptyState
@@ -68,10 +71,16 @@ export default async function AdminProjectsPage({ searchParams }: PageProps<"/ad
           }
         />
       ) : (
-        <TableCard>
+        <BulkDelete key={rows.map((r) => r.id).join()} enabled={canDelete} action={deleteProjectAction} singular="project" plural="projects">
+          <TableCard>
           <table className="min-w-full divide-y divide-line">
             <thead className="bg-soft/60">
               <tr>
+                {canDelete ? (
+                  <th scope="col" className={`${th} w-10`}>
+                    <SelectAllCheckbox />
+                  </th>
+                ) : null}
                 <th scope="col" className={th}>Project</th>
                 <th scope="col" className={th}>Location</th>
                 <th scope="col" className={th}>Status</th>
@@ -86,6 +95,11 @@ export default async function AdminProjectsPage({ searchParams }: PageProps<"/ad
             <tbody className="divide-y divide-line">
               {rows.map((p) => (
                 <tr key={p.id} className="hover:bg-soft/50">
+                    {canDelete ? (
+                      <td className={`${td} w-10`}>
+                        <RowCheckbox id={p.id} label={p.name} />
+                      </td>
+                    ) : null}
                   <td className={td}>
                     <div className="flex min-w-56 items-center gap-3">
                       <Thumb src={p.images[0]?.url} />
@@ -119,6 +133,7 @@ export default async function AdminProjectsPage({ searchParams }: PageProps<"/ad
             </tbody>
           </table>
         </TableCard>
+          </BulkDelete>
       )}
     </>
   );

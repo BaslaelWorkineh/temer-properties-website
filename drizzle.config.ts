@@ -1,17 +1,12 @@
 import "./scripts/load-env";
 import { defineConfig } from "drizzle-kit";
-import { databaseUrl, ensureLocalDbDir } from "./src/db/url";
-
-ensureLocalDbDir(databaseUrl);
+import { databaseUrl } from "./src/db/url";
 
 export default defineConfig({
-  dialect: "turso",
+  dialect: "postgresql",
   schema: "./src/db/schema.ts",
   out: "./drizzle",
-  dbCredentials: {
-    url: databaseUrl,
-    authToken: process.env.DATABASE_AUTH_TOKEN,
-  },
+  dbCredentials: { url: databaseUrl },
   strict: true,
   verbose: true,
 });
