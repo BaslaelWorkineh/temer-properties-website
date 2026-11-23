@@ -12,6 +12,8 @@ import { getPagesDict } from "@/lib/i18n/dict/pages";
 import { organizationJsonLd } from "@/lib/seo/jsonld";
 import { buildMetadata } from "@/lib/seo/metadata";
 
+export const ensureStatic = "navigation";
+
 export async function generateMetadata({ params }: PageProps<"/[lang]/contact">): Promise<Metadata> {
   const { lang } = await params;
   const l: Locale = hasLocale(lang) ? lang : "en";

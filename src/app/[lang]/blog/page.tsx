@@ -12,6 +12,8 @@ import { buildMetadata } from "@/lib/seo/metadata";
 
 // Post titles, excerpts and covers come from the database in English, so the page stays an English page for search
 // engines: no `lang` here means the canonical (also for /am/blog) is the English URL. Only the surrounding UI is translated.
+export const ensureStatic = "navigation";
+
 export const metadata = buildMetadata({
   title: "Property Buyer Guides for Addis Ababa",
   description:

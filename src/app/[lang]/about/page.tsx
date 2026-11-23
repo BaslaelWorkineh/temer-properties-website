@@ -15,6 +15,8 @@ import { buildMetadata } from "@/lib/seo/metadata";
 
 const valueIcons = [Sparkles, Heart, Handshake];
 
+export const ensureStatic = "navigation";
+
 export async function generateMetadata({ params }: PageProps<"/[lang]/about">): Promise<Metadata> {
   const { lang } = await params;
   const l: Locale = hasLocale(lang) ? lang : "en";

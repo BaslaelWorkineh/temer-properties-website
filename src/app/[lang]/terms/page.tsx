@@ -6,6 +6,8 @@ import { hasLocale, locales, type Locale } from "@/lib/i18n/config";
 import { getPagesDict } from "@/lib/i18n/dict/pages";
 import { buildMetadata } from "@/lib/seo/metadata";
 
+export const ensureStatic = "navigation";
+
 export async function generateMetadata({ params }: PageProps<"/[lang]/terms">): Promise<Metadata> {
   const { lang } = await params;
   const l: Locale = hasLocale(lang) ? lang : "en";

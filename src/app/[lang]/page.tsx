@@ -25,6 +25,8 @@ import { getDictionary, localizedAreaName } from "@/lib/i18n/dictionaries";
 import { buildMetadata } from "@/lib/seo/metadata";
 import { organizationJsonLd, websiteJsonLd } from "@/lib/seo/jsonld";
 
+export const ensureStatic = "navigation";
+
 export async function generateMetadata({ params }: PageProps<"/[lang]">): Promise<Metadata> {
   const { lang } = await params;
   const l: Locale = hasLocale(lang) ? lang : "en";

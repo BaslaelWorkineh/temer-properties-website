@@ -10,6 +10,8 @@ import { getAreasDict } from "@/lib/i18n/dict/areas";
 import { itemListJsonLd } from "@/lib/seo/jsonld";
 import { buildMetadata } from "@/lib/seo/metadata";
 
+export const ensureStatic = "navigation";
+
 export async function generateMetadata({ params }: PageProps<"/[lang]/locations">): Promise<Metadata> {
   const { lang: raw } = await params;
   const lang: Locale = hasLocale(raw) ? raw : "en";

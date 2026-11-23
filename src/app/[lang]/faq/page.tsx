@@ -13,6 +13,8 @@ import { buildMetadata } from "@/lib/seo/metadata";
 
 const groups = ["Buying", "Payments", "Visits", "Diaspora"] as const;
 
+export const ensureStatic = "navigation";
+
 export async function generateMetadata({ params }: PageProps<"/[lang]/faq">): Promise<Metadata> {
   const { lang } = await params;
   const l: Locale = hasLocale(lang) ? lang : "en";
