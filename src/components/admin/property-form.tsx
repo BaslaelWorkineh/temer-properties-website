@@ -56,7 +56,6 @@ export function PropertyForm({
   siteUrl: string;
 }) {
   const { state, pending, onSubmit, errors } = useAdminForm(savePropertyAction);
-  const isNew = !property;
   const formRef = useRef<HTMLFormElement>(null);
   const [draftId, setDraftId] = useState<number | null>(property?.id ?? null);
   const [missing, setMissing] = useState<PublishBlocker[]>([]);
@@ -97,10 +96,10 @@ export function PropertyForm({
       if (res?.status === "success" && res.data) {
         if (snapshot === read().snapshot) dirty = false;
         setAutosave("saved");
-        setDraftId((current) => {
-          if (!current) window.history.replaceState(null, "", `/admin/properties/${res.data!.id}`);
-          return res.data!.id;
-        });
+        setDraftId(res.data.id);
+        // First save of a new listing: show its own address, so a reload opens the draft. Not inside a state
+        // updater: Next.js turns replaceState into a router update, which React forbids during render.
+        if (window.location.pathname === "/admin/properties/new") window.history.replaceState(null, "", `/admin/properties/${res.data.id}`);
       } else {
         setAutosave("idle");
       }
@@ -131,7 +130,8 @@ export function PropertyForm({
         setMissing(
           publishBlockers({
             title: String(fd.get("title") ?? ""),
-            locationId: area === "__new__" ? String(fd.get("newLocationName") ?? "").trim() : area,
+            // Same rule as the server: a new area name needs at least 2 characters.
+            locationId: area === "__new__" ? (String(fd.get("newLocationName") ?? "").trim().length >= 2 ? "new" : "") : area,
             areaSqm: String(fd.get("areaSqm") ?? ""),
             summary: String(fd.get("summary") ?? ""),
             description: String(fd.get("description") ?? ""),
@@ -209,6 +209,8 @@ export function PropertyForm({
       {draftId ? <input type="hidden" name="id" value={draftId} /> : null}
 
       <div className="grid min-w-0 gap-6">
+      {/* Pinned under the mobile admin header (h-16); at lg there is no header. */}
+      <div className="sticky top-16 z-20 -mx-4 bg-soft/95 px-4 pb-3 pt-3 backdrop-blur sm:-mx-6 sm:px-6 lg:top-0 lg:mx-0 lg:px-0">
       <ol className="grid grid-cols-4 gap-2" aria-label="Steps">
         {STEPS.map((st, i) => (
           <li key={st.title}>
@@ -225,6 +227,28 @@ export function PropertyForm({
           </li>
         ))}
       </ol>
+      <div className="mt-3 flex items-center justify-between gap-3">
+        <button
+          type="button"
+          onClick={() => goto(step - 1)}
+          className={buttonStyles({ variant: "outline" })}
+          style={{ visibility: step === 0 ? "hidden" : "visible" }}
+        >
+          <ArrowLeft className="size-4" aria-hidden="true" /> Back
+        </button>
+        <span className="text-center text-sm text-muted" aria-live="polite">
+          {canAutosave && !last ? (autosave === "saving" ? "Saving draft…" : autosave === "saved" ? "Draft saved automatically." : "Saved as a draft if you leave.") : null}
+        </span>
+        <button
+          type="button"
+          onClick={() => goto(step + 1)}
+          className={buttonStyles()}
+          style={{ visibility: last ? "hidden" : "visible" }}
+        >
+          Next <ArrowRight className="size-4" aria-hidden="true" />
+        </button>
+      </div>
+      </div>
 
       <div hidden={step !== 0} className="grid gap-6">
         <FormSection title="What are you selling?" description="Step 1 of 4">
@@ -422,7 +446,7 @@ export function PropertyForm({
               <span className="ml-0.5 text-red-600" aria-hidden="true">
                 *
               </span>
-              <span className="ml-2 text-xs font-normal text-muted">At least 3 needed to publish.</span>
+              <span className="ml-2 text-xs font-normal text-muted">At least one needed to publish; more photos help buyers.</span>
             </p>
             <ImageManager name="images" initial={property?.images ?? []} defaultAlt={property?.title ?? ""} errors={errors.images} />
           </div>
@@ -433,7 +457,7 @@ export function PropertyForm({
             <Checkbox
               name="isPublished"
               label="Publish now"
-              hint="Untick to keep it as a draft that only admins can see. A listing needs a title, area, size, summary, description and 3 photos to go live."
+              hint="Untick to keep it as a draft that only admins can see. A listing needs a title, area, size, summary, description and a photo to go live."
               defaultChecked={property?.isPublished ?? true}
             />
             <Checkbox name="isFeatured" label="Show on the home page" hint="Appears first in “Latest properties for sale”." defaultChecked={property?.isFeatured ?? false} />
@@ -441,7 +465,14 @@ export function PropertyForm({
           <details className="rounded-xl ring-1 ring-line">
             <summary className="cursor-pointer px-4 py-3 text-sm font-semibold">Advanced: web address, Google text, sort order</summary>
             <div className="grid gap-5 border-t border-line p-4">
-              <SlugField initial={property?.slug ?? ""} isNew={isNew} isPublished={property?.isPublished ?? false} pathPrefix="/properties/" errors={errors.slug} />
+              {/* Drafts behave as new: a blank URL is generated from the title when it is saved (see resolveSlug in the action). */}
+              <SlugField
+                initial={property?.isPublished ? property.slug : ""}
+                isNew={!property?.isPublished}
+                isPublished={property?.isPublished ?? false}
+                pathPrefix="/properties/"
+                errors={errors.slug}
+              />
               <SeoFields
                 seoTitle={property?.seoTitle}
                 seoDescription={property?.seoDescription}
@@ -464,11 +495,6 @@ export function PropertyForm({
           pending={pending}
           disabled={blocked}
           label={property?.isPublished ? "Save changes" : wantsPublish ? "Publish listing" : "Save as draft"}
-          secondary={
-            <button type="button" onClick={() => goto(step - 1)} className={buttonStyles({ variant: "outline", size: "lg" })}>
-              <ArrowLeft className="size-4" aria-hidden="true" /> Back
-            </button>
-          }
           note={
             blocked ? (
               <span className="text-amber-800">
@@ -492,26 +518,7 @@ export function PropertyForm({
             ) : null
           }
         />
-      ) : (
-        <div className="sticky bottom-0 z-20 -mx-4 border-t border-line bg-white/95 px-4 py-4 backdrop-blur sm:-mx-6 sm:px-6 lg:mx-0 lg:rounded-2xl lg:border lg:px-6">
-          <div className="flex items-center justify-between gap-3">
-            <button
-              type="button"
-              onClick={() => goto(step - 1)}
-              className={buttonStyles({ variant: "outline", size: "lg" })}
-              style={{ visibility: step === 0 ? "hidden" : "visible" }}
-            >
-              <ArrowLeft className="size-4" aria-hidden="true" /> Back
-            </button>
-            <span className="text-sm text-muted" aria-live="polite">
-              {canAutosave ? (autosave === "saving" ? "Saving draft…" : autosave === "saved" ? "Draft saved automatically." : "Saved as a draft if you leave.") : null}
-            </span>
-            <button type="button" onClick={() => goto(step + 1)} className={buttonStyles({ size: "lg" })}>
-              Next <ArrowRight className="size-4" aria-hidden="true" />
-            </button>
-          </div>
-        </div>
-      )}
+      ) : null}
       </div>
 
       <aside className="hidden lg:sticky lg:top-6 lg:block" aria-label="Preview">

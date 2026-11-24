@@ -64,7 +64,11 @@ export default async function EditPropertyPage({ params, searchParams }: PagePro
           </>
         }
       />
-      {firstParam(sp.saved) ? <Notice>Property created. You can keep editing or view it on the website.</Notice> : null}
+      {firstParam(sp.published) && property.isPublished ? (
+        <Notice>Published. The listing is live on the website; use “View page” to see it.</Notice>
+      ) : firstParam(sp.saved) ? (
+        <Notice>{property.isPublished ? "Property created. You can keep editing or view it on the website." : "Saved as a draft. Only admins can see it."}</Notice>
+      ) : null}
       <FreshOnNavigate>
         <PropertyForm property={property} locations={locationOptions} projects={projectOptions} siteUrl={siteUrl} />
       </FreshOnNavigate>

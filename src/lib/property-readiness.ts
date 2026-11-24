@@ -11,7 +11,7 @@ export type PublishCheckInput = {
   imageCount: number;
 };
 
-export const MIN_PUBLISH_PHOTOS = 3;
+export const MIN_PUBLISH_PHOTOS = 1;
 
 /** `field` is the form field name, so the admin form can jump straight to it. */
 export type PublishBlocker = { field: "title" | "locationId" | "areaSqm" | "summary" | "description" | "images"; label: string };
@@ -24,6 +24,8 @@ export function publishBlockers(input: PublishCheckInput): PublishBlocker[] {
   if (!Number(input.areaSqm)) missing.push({ field: "areaSqm", label: "the size (m²)" });
   if (input.summary.trim().length < 30) missing.push({ field: "summary", label: "a summary (at least 30 characters)" });
   if (input.description.trim().length < 100) missing.push({ field: "description", label: "a description (at least 100 characters)" });
-  if (input.imageCount < MIN_PUBLISH_PHOTOS) missing.push({ field: "images", label: `at least ${MIN_PUBLISH_PHOTOS} photos` });
+  if (input.imageCount < MIN_PUBLISH_PHOTOS) {
+    missing.push({ field: "images", label: MIN_PUBLISH_PHOTOS === 1 ? "a photo" : `at least ${MIN_PUBLISH_PHOTOS} photos` });
+  }
   return missing;
 }
