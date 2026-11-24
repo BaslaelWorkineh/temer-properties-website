@@ -17,7 +17,7 @@ const roleHint = {
   admin: "Can do everything, including adding and removing people.",
 };
 
-/** Shown once after adding someone or resetting a password: the owner passes it on (e.g. via Telegram or WhatsApp). */
+/** Shown once after adding someone or resetting a password: the owner passes it on (e.g. via WhatsApp). */
 function Credentials({ name, email, password }: { name: string; email: string; password: string }) {
   const [copied, setCopied] = useState(false);
   const text = `Temer Properties admin\nEmail: ${email}\nPassword: ${password}`;

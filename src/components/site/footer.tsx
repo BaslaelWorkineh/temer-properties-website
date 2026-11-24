@@ -2,7 +2,7 @@ import { Clock, Mail, MapPin, Phone } from "lucide-react";
 import { cacheLife } from "next/cache";
 import NextLink from "next/link";
 import Link from "@/components/site/link";
-import { FacebookIcon, InstagramIcon, TelegramIcon, TikTokIcon, WhatsAppIcon, XIcon, YouTubeIcon } from "@/components/site/brand-icons";
+import { FacebookIcon, InstagramIcon, TikTokIcon, WhatsAppIcon, XIcon, YouTubeIcon } from "@/components/site/brand-icons";
 import { Logo } from "@/components/site/logo";
 import { PROPERTY_TYPES, propertyTypes } from "@/lib/config/property-types";
 import { site, whatsappLink } from "@/lib/config/site";
@@ -17,7 +17,6 @@ const amharicSocial: Record<string, string> = {
   TikTok: "ቲክቶክ",
   YouTube: "ዩቲዩብ",
   "X (Twitter)": "ኤክስ (ትዊተር)",
-  Telegram: "ቴሌግራም",
   WhatsApp: "ዋትስአፕ",
 };
 
@@ -27,7 +26,6 @@ const socials = [
   { href: site.social.tiktok, label: "TikTok", Icon: TikTokIcon },
   { href: site.social.youtube, label: "YouTube", Icon: YouTubeIcon },
   { href: site.social.x, label: "X (Twitter)", Icon: XIcon },
-  { href: site.contact.telegram, label: "Telegram", Icon: TelegramIcon },
   { href: whatsappLink(), label: "WhatsApp", Icon: WhatsAppIcon },
 ];
 

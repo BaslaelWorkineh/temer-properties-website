@@ -4,12 +4,11 @@ import { WhatsAppIcon } from "@/components/site/brand-icons";
 import { FloatingContact } from "@/components/site/floating-contact";
 import { site, whatsappLink } from "@/lib/config/site";
 import type { Locale } from "@/lib/i18n/config";
-import { getPropertiesDict } from "@/lib/i18n/dict/properties";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 
 /**
  * Thumb-reachable contact actions on mobile (pure links, no JS); on desktop, a floating button that expands
- * into phone, WhatsApp and Telegram.
+ * into phone and WhatsApp.
  */
 export function ContactBar({ lang = "en" }: { lang?: Locale }) {
   const dict = getDictionary(lang);
@@ -42,11 +41,9 @@ export function ContactBar({ lang = "en" }: { lang?: Locale }) {
         phone={site.contact.phone}
         phoneDisplay={site.contact.phoneDisplay}
         whatsappHref={whatsappLink(waMessage)}
-        telegramHref={site.contact.telegram}
         labels={{
           call: dict.common.call,
           whatsapp: dict.common.whatsapp,
-          telegram: getPropertiesDict(lang).contact.telegram,
           open: dict.common.contactOptions,
           close: dict.common.closeContactOptions,
         }}

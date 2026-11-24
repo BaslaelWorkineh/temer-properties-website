@@ -87,7 +87,6 @@ export type PropertiesDict = {
     about: (subject: string) => string;
     call: string;
     whatsappUs: string;
-    telegram: string;
     email: string;
     message: (subject: string) => string;
   };
@@ -188,7 +187,6 @@ const en: PropertiesDict = {
     about: (subject) => `Contact us about ${subject}`,
     call: "Call",
     whatsappUs: "WhatsApp us",
-    telegram: "Telegram",
     email: "Email",
     message: (subject) => `Hello Temer Properties, I'm interested in: ${subject}`,
   },
@@ -285,7 +283,6 @@ const am: PropertiesDict = {
     about: (subject) => `ስለ ${subject} ያግኙን`,
     call: "ይደውሉ",
     whatsappUs: "በዋትስአፕ ያግኙን",
-    telegram: "ቴሌግራም",
     email: "ኢሜይል",
     message: (subject) => `ሰላም ቴምር ፕሮፐርቲስ፣ ይህን ንብረት ለመግዛት ፍላጎት አለኝ፦ ${subject}`,
   },

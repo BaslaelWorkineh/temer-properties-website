@@ -38,11 +38,8 @@ export type PagesDict = {
     h1: string;
     intro: string;
     callSales: string;
-    salesLine2: string;
     whatsapp: string;
     chat: string;
-    telegram: string;
-    messageUs: string;
     email: string;
     waMessage: string;
     office: string;
@@ -157,16 +154,13 @@ const en: PagesDict = {
   contact: {
     metaTitle: "Contact Temer Properties: Phone, WhatsApp & Office",
     metaDescription: (phone, street, hours) =>
-      `Call ${phone}, message us on WhatsApp or Telegram, or visit our office at ${street}, Addis Ababa. Open ${hours}.`,
+      `Call ${phone}, message us on WhatsApp, or visit our office at ${street}, Addis Ababa. Open ${hours}.`,
     breadcrumb: "Contact",
     h1: "Contact Temer Properties",
     intro: "Have a question? Let's find the right place for you. Our sales team replies quickly during office hours.",
     callSales: "Call sales",
-    salesLine2: "Sales line 2",
     whatsapp: "WhatsApp",
     chat: "Chat with us",
-    telegram: "Telegram",
-    messageUs: "Message us",
     email: "Email",
     waMessage: "Hello Temer Properties, I have a question.",
     office: "Office",
@@ -296,16 +290,13 @@ const am: PagesDict = {
   contact: {
     metaTitle: "ቴምር ፕሮፐርቲስን ያግኙ፦ ስልክ፣ ዋትስአፕና ቢሮ",
     metaDescription: (phone, street, hours) =>
-      `ይደውሉ ${phone}፣ በዋትስአፕ ወይም በቴሌግራም መልዕክት ይላኩልን፣ ወይም ቢሮአችንን ${street}፣ አዲስ አበባ ይጎብኙ። የሥራ ሰዓት፦ ${hours}።`,
+      `ይደውሉ ${phone}፣ በዋትስአፕ መልዕክት ይላኩልን፣ ወይም ቢሮአችንን ${street}፣ አዲስ አበባ ይጎብኙ። የሥራ ሰዓት፦ ${hours}።`,
     breadcrumb: "አግኙን",
     h1: "ቴምር ፕሮፐርቲስን ያግኙ",
     intro: "ጥያቄ አለዎት? ለእርስዎ ተስማሚውን ቦታ አብረን እንፈልግ። የሽያጭ ቡድናችን በሥራ ሰዓት ፈጥኖ ይመልሳል።",
     callSales: "ለሽያጭ ይደውሉ",
-    salesLine2: "ሁለተኛ የሽያጭ መስመር",
     whatsapp: "ዋትስአፕ",
     chat: "ያነጋግሩን",
-    telegram: "ቴሌግራም",
-    messageUs: "መልዕክት ይላኩልን",
     email: "ኢሜይል",
     waMessage: "ሰላም ቴምር ፕሮፐርቲስ፣ ጥያቄ አለኝ።",
     office: "ቢሮ",

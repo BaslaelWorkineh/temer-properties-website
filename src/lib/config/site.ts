@@ -41,15 +41,11 @@ export const site = {
   themeColor: "#3a7d44",
 
   contact: {
-    /** Primary number, used in structured data. E.164 format. */
-    phone: "+251904192923",
-    phoneDisplay: "0904 192 923",
-    /** Secondary sales line from temerpropertiessales.com. Remove if not official. */
-    salesPhone: "+251913455624",
-    salesPhoneDisplay: "0913 455 624",
+    /** The sales number (calls and WhatsApp), used in structured data. E.164 format. */
+    phone: "+251911986550",
+    phoneDisplay: "0911 986 550",
     email: "info@temerpropertiesapartment.com",
-    whatsapp: "251904192923",
-    telegram: "https://t.me/+251904192923",
+    whatsapp: "251911986550",
   },
 
   address: {

@@ -2,14 +2,14 @@
 
 import { Phone, X } from "lucide-react";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { TelegramIcon, WhatsAppIcon } from "@/components/site/brand-icons";
+import { WhatsAppIcon } from "@/components/site/brand-icons";
 import { cn } from "@/lib/utils";
 
 type Action = { href: string; label: string; detail?: string; icon: ReactNode; iconClass: string; external?: boolean };
 
 /**
  * Desktop floating contact button. Closed, it is the round gold phone button; a click expands it upward into
- * three labelled pills (phone number, WhatsApp, Telegram) and turns it into a close button. Escape or a click
+ * two labelled pills (phone number, WhatsApp) and turns it into a close button. Escape or a click
  * anywhere else closes it. The links stay in the HTML while closed (`inert` only takes them out of the tab
  * order), and nothing moves for people who prefer reduced motion.
  */
@@ -17,14 +17,12 @@ export function FloatingContact({
   phone,
   phoneDisplay,
   whatsappHref,
-  telegramHref,
   labels,
 }: {
   phone: string;
   phoneDisplay: string;
   whatsappHref: string;
-  telegramHref: string;
-  labels: { call: string; whatsapp: string; telegram: string; open: string; close: string };
+  labels: { call: string; whatsapp: string; open: string; close: string };
 }) {
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
@@ -53,7 +51,6 @@ export function FloatingContact({
   const actions: Action[] = [
     { href: `tel:${phone}`, label: labels.call, detail: phoneDisplay, icon: <Phone className="size-5" aria-hidden="true" />, iconClass: "bg-brand-500 text-white" },
     { href: whatsappHref, label: labels.whatsapp, icon: <WhatsAppIcon className="size-5" />, iconClass: "bg-[#25D366] text-white", external: true },
-    { href: telegramHref, label: labels.telegram, icon: <TelegramIcon className="size-5" />, iconClass: "bg-[#229ED9] text-white", external: true },
   ];
 
   return (

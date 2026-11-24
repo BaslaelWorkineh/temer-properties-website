@@ -1,5 +1,5 @@
 import { Mail, Phone } from "lucide-react";
-import { TelegramIcon, WhatsAppIcon } from "@/components/site/brand-icons";
+import { WhatsAppIcon } from "@/components/site/brand-icons";
 import { site, whatsappLink } from "@/lib/config/site";
 import type { Locale } from "@/lib/i18n/config";
 import { getPropertiesDict } from "@/lib/i18n/dict/properties";
@@ -9,7 +9,7 @@ const base =
   "flex h-12 items-center justify-center gap-2.5 px-4 text-[0.95rem] font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600";
 
 /**
- * Four full-width contact buttons for the side column of a detail page, stacked: call, WhatsApp, Telegram, email.
+ * Three full-width contact buttons for the side column of a detail page, stacked: call, WhatsApp, email.
  * Contact details come from src/lib/config/site.ts.
  */
 export function ContactPanel({ subject, className, lang = "en" }: { subject: string; className?: string; lang?: Locale }) {
@@ -29,9 +29,6 @@ export function ContactPanel({ subject, className, lang = "en" }: { subject: str
         className={cn(base, "bg-[#17a34a] text-white hover:bg-[#13893e]")}
       >
         <WhatsAppIcon className="size-[1.1rem]" /> {pd.contact.whatsappUs}
-      </a>
-      <a href={contact.telegram} target="_blank" rel="noopener noreferrer" className={outline}>
-        <TelegramIcon className="size-[1.1rem]" /> {pd.contact.telegram}
       </a>
       <a href={`mailto:${contact.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`} className={outline}>
         <Mail className="size-[1.1rem]" aria-hidden="true" /> {pd.contact.email}
