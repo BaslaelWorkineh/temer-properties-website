@@ -9,6 +9,44 @@ import { cn } from "@/lib/utils";
 type Upload = { id: number; fileName: string; error?: string };
 
 /**
+ * Vercel rejects request bodies over 4.5 MB before they reach /api/admin/upload
+ * (a bare 413), so large files are shrunk here first. Same cap the server
+ * applies in src/lib/storage.ts, so nothing is lost: it re-encodes everything anyway.
+ */
+const MAX_REQUEST_BYTES = 4 * 1024 * 1024;
+const MAX_DIMENSION = 2400;
+
+async function shrinkForUpload(file: File): Promise<File> {
+  if (file.size <= MAX_REQUEST_BYTES) return file;
+  let bitmap: ImageBitmap;
+  try {
+    bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+  } catch {
+    return file; // The browser can't decode it; let the server answer.
+  }
+  try {
+    const scale = Math.min(1, MAX_DIMENSION / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return file;
+    ctx.fillStyle = "#ffffff"; // Transparent PNGs get a white background, like on the server.
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    for (const quality of [0.92, 0.85, 0.75]) {
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
+      if (blob && blob.size <= MAX_REQUEST_BYTES) {
+        return new File([blob], `${file.name.replace(/\.[^.]+$/, "")}.jpg`, { type: "image/jpeg" });
+      }
+    }
+    return file;
+  } finally {
+    bitmap.close();
+  }
+}
+
+/**
  * Uploads images to /api/admin/upload and keeps them (with alt text and order)
  * in a hidden JSON input named `name`. Array value, or a single object/null
  * when `single` is set.
@@ -46,9 +84,10 @@ export function ImageManager({
       setUploads((u) => [...u, { id, fileName: file.name }]);
       try {
         const body = new FormData();
-        body.append("file", file);
+        body.append("file", await shrinkForUpload(file));
         const res = await fetch("/api/admin/upload", { method: "POST", body });
         const data = (await res.json().catch(() => ({}))) as { url?: string; width?: number; height?: number; error?: string };
+        if (res.status === 413) throw new Error("This image is too large. Save it as a smaller JPEG and try again.");
         if (!res.ok || !data.url) throw new Error(data.error || `Upload failed (${res.status})`);
         const item: ImageItem = { url: data.url, alt: defaultAlt, width: data.width, height: data.height };
         setImages((current) => (single ? [item] : [...current, item].slice(0, limit)));
@@ -154,7 +193,7 @@ export function ImageManager({
             </button>
           </p>
           <p className="mt-1 text-xs text-muted">
-            JPEG, PNG, WebP or AVIF, up to 10 MB each.{" "}
+            JPEG, PNG, WebP or AVIF. Large photos are resized automatically.{" "}
             {single ? "One image." : `Up to ${limit} images. The first one is the cover photo.`}
           </p>
           <ul className="mt-3 space-y-0.5 text-xs text-muted">
