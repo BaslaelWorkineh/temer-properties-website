@@ -101,7 +101,13 @@ async function persistProperty(formData: FormData, mode: "save" | "draft"): Prom
       description: data.description ?? "",
       imageCount: data.images.length,
     });
-    if (missing.length) return errorState(`To publish, add: ${missing.join(", ")}. Untick “Published” to save it as a draft.`);
+    if (missing.length) {
+      return errorState(
+        `To publish, add: ${missing.map((m) => m.label).join(", ")}. Untick “Publish now” to save it as a draft.`,
+        // Field errors make the form open the step that needs fixing.
+        Object.fromEntries(missing.map((m) => [m.field, [`Add ${m.label}.`]])),
+      );
+    }
   }
 
   const imageError = invalidImageMessage(data.images);

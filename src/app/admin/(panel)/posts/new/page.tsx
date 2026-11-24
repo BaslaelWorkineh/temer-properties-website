@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { PostForm } from "@/components/admin/post-form";
+import { FreshOnNavigate } from "@/components/admin/fresh-on-navigate";
 import { PageHeader } from "@/components/admin/ui";
 import { requireAdmin } from "@/lib/auth/session";
 import { siteUrl } from "@/lib/config/site";
@@ -14,7 +15,9 @@ export default async function NewPostPage() {
   return (
     <>
       <PageHeader title="New guide" back={{ href: "/admin/posts", label: "Guides" }} />
-      <PostForm post={null} siteUrl={siteUrl} />
+      <FreshOnNavigate>
+        <PostForm post={null} siteUrl={siteUrl} />
+      </FreshOnNavigate>
     </>
   );
 }

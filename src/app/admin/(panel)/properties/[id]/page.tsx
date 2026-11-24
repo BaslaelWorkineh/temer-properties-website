@@ -8,6 +8,7 @@ import { DeleteButton } from "@/components/admin/form-controls";
 import { OwnerOnly } from "@/components/admin/owner-only";
 import { firstParam } from "@/components/admin/helpers";
 import { PropertyForm } from "@/components/admin/property-form";
+import { FreshOnNavigate } from "@/components/admin/fresh-on-navigate";
 import { Notice, PageHeader } from "@/components/admin/ui";
 import { Badge, propertyStatusTone } from "@/components/ui/badge";
 import { buttonStyles } from "@/components/ui/button";
@@ -64,7 +65,9 @@ export default async function EditPropertyPage({ params, searchParams }: PagePro
         }
       />
       {firstParam(sp.saved) ? <Notice>Property created. You can keep editing or view it on the website.</Notice> : null}
-      <PropertyForm property={property} locations={locationOptions} projects={projectOptions} siteUrl={siteUrl} />
+      <FreshOnNavigate>
+        <PropertyForm property={property} locations={locationOptions} projects={projectOptions} siteUrl={siteUrl} />
+      </FreshOnNavigate>
     </>
   );
 }

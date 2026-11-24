@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { autosavePropertyDraftAction, savePropertyAction } from "@/app/admin/(panel)/properties/actions";
 import { AmharicFields } from "@/components/admin/amharic-fields";
 import { FeaturePicker } from "@/components/admin/feature-picker";
@@ -16,7 +16,7 @@ import { buttonStyles } from "@/components/ui/button";
 import { Field, inputStyles } from "@/components/ui/form";
 import type { Property } from "@/db/schema";
 import { PROPERTY_STATUSES, PROPERTY_TYPES, propertyStatusLabels, propertyTypes } from "@/lib/config/property-types";
-import { publishBlockers } from "@/lib/property-readiness";
+import { publishBlockers, type PublishBlocker } from "@/lib/property-readiness";
 
 type Option = { id: number; name: string };
 
@@ -59,7 +59,7 @@ export function PropertyForm({
   const isNew = !property;
   const formRef = useRef<HTMLFormElement>(null);
   const [draftId, setDraftId] = useState<number | null>(property?.id ?? null);
-  const [missing, setMissing] = useState<string[]>([]);
+  const [missing, setMissing] = useState<PublishBlocker[]>([]);
   const [wantsPublish, setWantsPublish] = useState(property?.isPublished ?? true);
   const [autosave, setAutosave] = useState<"idle" | "saving" | "saved">("idle");
   const [step, setStep] = useState(0);
@@ -183,6 +183,17 @@ export function PropertyForm({
     setStep(Math.max(0, Math.min(STEPS.length - 1, n)));
     window.scrollTo({ top: 0 });
   };
+  /** Opens the step that holds `field` and puts the cursor in it (used by the "To publish, add: …" links). */
+  const fix = (field: PublishBlocker["field"]) => {
+    const target = field === "locationId" && areaChoice === "__new__" ? "newLocationName" : field;
+    setStep(Math.max(0, STEPS.findIndex((st) => st.fields.includes(field))));
+    // Next frame: the step is visible by then, so the field can take focus.
+    requestAnimationFrame(() => {
+      const el = document.getElementById(target);
+      el?.scrollIntoView({ block: "center" });
+      el?.focus({ preventScroll: true });
+    });
+  };
 
   return (
     <form
@@ -205,7 +216,7 @@ export function PropertyForm({
               type="button"
               onClick={() => goto(i)}
               aria-current={i === step ? "step" : undefined}
-              className={`w-full border-t-4 pt-2 text-left text-sm font-semibold ${i <= step ? "border-brand-500" : "border-line"} ${
+              className={`w-full cursor-pointer border-t-4 pt-2 text-left text-sm font-semibold hover:text-brand-700 ${i <= step ? "border-brand-500" : "border-line"} ${
                 i === step ? "text-brand-700" : i < step ? "text-ink" : "text-muted"
               }`}
             >
@@ -222,7 +233,7 @@ export function PropertyForm({
             label="Title"
             required
             errors={errors.title}
-            hint='Say what it is and where, e.g. "3-Bedroom Apartment at Sarbet City Plus". This becomes the page heading.'
+            hint='Say what it is and where, e.g. "3-Bedroom Apartment at Sarbet City Plus" (at least 10 characters to publish). This becomes the page heading.'
           >
             {(p) => <input {...p} defaultValue={property?.title} maxLength={140} className={inputStyles} />}
           </Field>
@@ -264,7 +275,7 @@ export function PropertyForm({
               )}
             </Field>
             <div>
-              <Field id="locationId" label="Area" errors={errors.locationId} hint="Links the listing to its area page.">
+              <Field id="locationId" label="Area" required errors={errors.locationId} hint="Links the listing to its area page. Needed to publish.">
                 {(p) => (
                   <select {...p} value={areaChoice} onChange={(e) => setAreaChoice(e.target.value)} className={inputStyles}>
                     <option value="">— Not set —</option>
@@ -347,7 +358,7 @@ export function PropertyForm({
             <Field id="bathrooms" label="Toilets / bathrooms" errors={errors.bathrooms}>
               {(p) => <input {...p} type="number" min={0} max={50} defaultValue={property?.bathrooms ?? ""} className={inputStyles} />}
             </Field>
-            <Field id="areaSqm" label="Size (m²)" errors={errors.areaSqm}>
+            <Field id="areaSqm" label="Size (m²)" required errors={errors.areaSqm} hint="Needed to publish.">
               {(p) => <input {...p} type="number" min={1} step="0.1" defaultValue={property?.areaSqm ?? ""} className={inputStyles} />}
             </Field>
             <Field id="floor" label="Floor" errors={errors.floor} hint="0 = ground floor.">
@@ -358,7 +369,13 @@ export function PropertyForm({
             {(p) => <input {...p} defaultValue={property?.completion ?? ""} maxLength={60} placeholder="e.g. Ready to move in, or December 2027" className={inputStyles} />}
           </Field>
           <FeaturePicker name="features" initial={property?.features ?? []} errors={errors.features} />
-          <Field id="summary" label="One-sentence summary" errors={errors.summary} hint="1–2 sentences for listing cards and Google (max 300).">
+          <Field
+            id="summary"
+            label="One-sentence summary"
+            required
+            errors={errors.summary}
+            hint="1–2 sentences for listing cards and Google. Needed to publish: 30 to 300 characters."
+          >
             {(p) => (
               <textarea
                 {...p}
@@ -373,8 +390,9 @@ export function PropertyForm({
           <Field
             id="description"
             label="Describe the home"
+            required
             errors={errors.description}
-            hint="Layout, views, finishes, nearby schools and transport. Markdown supported: ## Heading, **bold**, - bullet lists."
+            hint="Needed to publish: at least 100 characters. Layout, views, finishes, nearby schools and transport. Markdown supported: ## Heading, **bold**, - bullet lists."
           >
             {(p) => <textarea {...p} rows={10} defaultValue={property?.description ?? ""} placeholder={DESCRIPTION_PLACEHOLDER} className={`${inputStyles} font-mono text-sm`} />}
           </Field>
@@ -398,7 +416,16 @@ export function PropertyForm({
           title="Photos and publish"
           description="Step 4 of 4. The first photo is the cover on cards and link previews. Landscape photos at least 1600 px wide look best."
         >
-          <ImageManager name="images" initial={property?.images ?? []} defaultAlt={property?.title ?? ""} errors={errors.images} />
+          <div id="images">
+            <p className="mb-1.5 text-sm font-medium text-ink">
+              Photos
+              <span className="ml-0.5 text-red-600" aria-hidden="true">
+                *
+              </span>
+              <span className="ml-2 text-xs font-normal text-muted">At least 3 needed to publish.</span>
+            </p>
+            <ImageManager name="images" initial={property?.images ?? []} defaultAlt={property?.title ?? ""} errors={errors.images} />
+          </div>
           <Field id="videoUrl" label="Video link" errors={errors.videoUrl} hint="Optional YouTube or Facebook video URL.">
             {(p) => <input {...p} type="url" defaultValue={property?.videoUrl ?? ""} placeholder="https://www.youtube.com/watch?v=…" className={inputStyles} />}
           </Field>
@@ -437,9 +464,29 @@ export function PropertyForm({
           pending={pending}
           disabled={blocked}
           label={property?.isPublished ? "Save changes" : wantsPublish ? "Publish listing" : "Save as draft"}
+          secondary={
+            <button type="button" onClick={() => goto(step - 1)} className={buttonStyles({ variant: "outline", size: "lg" })}>
+              <ArrowLeft className="size-4" aria-hidden="true" /> Back
+            </button>
+          }
           note={
             blocked ? (
-              <span className="text-amber-800">To publish, add: {missing.join(", ")}. Or untick “Publish now” to keep it as a draft.</span>
+              <span className="text-amber-800">
+                To publish, add:{" "}
+                {missing.map((m, i) => (
+                  <Fragment key={m.field}>
+                    {i > 0 ? ", " : null}
+                    <button
+                      type="button"
+                      onClick={() => fix(m.field)}
+                      className="font-semibold underline underline-offset-2 hover:text-amber-950"
+                    >
+                      {m.label}
+                    </button>
+                  </Fragment>
+                ))}
+                . Or untick “Publish now” to keep it as a draft.
+              </span>
             ) : canAutosave ? (
               <span>{autosave === "saving" ? "Saving draft…" : autosave === "saved" ? "Draft saved automatically." : "Your progress is saved as a draft automatically."}</span>
             ) : null

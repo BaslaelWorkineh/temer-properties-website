@@ -8,6 +8,7 @@ import { DeleteButton } from "@/components/admin/form-controls";
 import { OwnerOnly } from "@/components/admin/owner-only";
 import { firstParam } from "@/components/admin/helpers";
 import { ProjectForm } from "@/components/admin/project-form";
+import { FreshOnNavigate } from "@/components/admin/fresh-on-navigate";
 import { Notice, PageHeader } from "@/components/admin/ui";
 import { Badge, projectStatusTone } from "@/components/ui/badge";
 import { buttonStyles } from "@/components/ui/button";
@@ -63,7 +64,9 @@ export default async function EditProjectPage({ params, searchParams }: PageProp
         }
       />
       {firstParam(sp.saved) ? <Notice>Project created.</Notice> : null}
-      <ProjectForm project={project} locations={locationOptions} siteUrl={siteUrl} />
+      <FreshOnNavigate>
+        <ProjectForm project={project} locations={locationOptions} siteUrl={siteUrl} />
+      </FreshOnNavigate>
     </>
   );
 }

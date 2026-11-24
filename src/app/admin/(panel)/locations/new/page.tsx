@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LocationForm } from "@/components/admin/location-form";
+import { FreshOnNavigate } from "@/components/admin/fresh-on-navigate";
 import { PageHeader } from "@/components/admin/ui";
 import { requireAdmin } from "@/lib/auth/session";
 import { siteUrl } from "@/lib/config/site";
@@ -14,7 +15,9 @@ export default async function NewLocationPage() {
   return (
     <>
       <PageHeader title="New location" back={{ href: "/admin/locations", label: "Locations" }} />
-      <LocationForm location={null} siteUrl={siteUrl} />
+      <FreshOnNavigate>
+        <LocationForm location={null} siteUrl={siteUrl} />
+      </FreshOnNavigate>
     </>
   );
 }

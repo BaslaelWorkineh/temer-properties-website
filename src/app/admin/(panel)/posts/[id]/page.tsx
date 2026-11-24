@@ -8,6 +8,7 @@ import { DeleteButton } from "@/components/admin/form-controls";
 import { OwnerOnly } from "@/components/admin/owner-only";
 import { firstParam } from "@/components/admin/helpers";
 import { PostForm } from "@/components/admin/post-form";
+import { FreshOnNavigate } from "@/components/admin/fresh-on-navigate";
 import { Notice, PageHeader } from "@/components/admin/ui";
 import { Badge } from "@/components/ui/badge";
 import { buttonStyles } from "@/components/ui/button";
@@ -53,7 +54,9 @@ export default async function EditPostPage({ params, searchParams }: PageProps<"
         }
       />
       {firstParam(sp.saved) ? <Notice>Guide created.</Notice> : null}
-      <PostForm post={post} siteUrl={siteUrl} />
+      <FreshOnNavigate>
+        <PostForm post={post} siteUrl={siteUrl} />
+      </FreshOnNavigate>
     </>
   );
 }

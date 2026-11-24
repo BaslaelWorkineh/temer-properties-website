@@ -12,6 +12,7 @@ export function SaveBar<T>({
   label,
   disabled,
   note,
+  secondary,
 }: {
   state: FormState<T>;
   pending: boolean;
@@ -20,6 +21,8 @@ export function SaveBar<T>({
   disabled?: boolean;
   /** Small status line above the form message (autosave status, what is missing). */
   note?: React.ReactNode;
+  /** Extra button shown before the save button (e.g. "Back" in a multi-step form). */
+  secondary?: React.ReactNode;
 }) {
   return (
     <div className="sticky bottom-0 z-20 -mx-4 border-t border-line bg-white/95 px-4 py-4 backdrop-blur sm:-mx-6 sm:px-6 lg:mx-0 lg:rounded-2xl lg:border lg:px-6">
@@ -28,10 +31,13 @@ export function SaveBar<T>({
           {note ? <div className="mb-2 text-sm text-muted">{note}</div> : null}
           <FormMessage state={state} />
         </div>
-        <PendingButton pending={pending} disabled={disabled} size="lg">
-          <Save className="size-4" aria-hidden="true" />
-          {label}
-        </PendingButton>
+        <div className="flex items-center gap-3">
+          {secondary}
+          <PendingButton pending={pending} disabled={disabled} size="lg">
+            <Save className="size-4" aria-hidden="true" />
+            {label}
+          </PendingButton>
+        </div>
       </div>
     </div>
   );

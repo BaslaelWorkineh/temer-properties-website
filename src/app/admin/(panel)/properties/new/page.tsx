@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getLocationOptions, getProjectOptions } from "@/app/admin/_lib/server";
 import { PropertyForm } from "@/components/admin/property-form";
+import { FreshOnNavigate } from "@/components/admin/fresh-on-navigate";
 import { PageHeader } from "@/components/admin/ui";
 import { requireAdmin } from "@/lib/auth/session";
 import { siteUrl } from "@/lib/config/site";
@@ -17,7 +18,9 @@ export default async function NewPropertyPage() {
   return (
     <>
       <PageHeader title="New property" back={{ href: "/admin/properties", label: "Properties" }} />
-      <PropertyForm property={null} locations={locationOptions} projects={projectOptions} siteUrl={siteUrl} />
+      <FreshOnNavigate>
+        <PropertyForm property={null} locations={locationOptions} projects={projectOptions} siteUrl={siteUrl} />
+      </FreshOnNavigate>
     </>
   );
 }

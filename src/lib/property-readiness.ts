@@ -13,13 +13,17 @@ export type PublishCheckInput = {
 
 export const MIN_PUBLISH_PHOTOS = 3;
 
-export function publishBlockers(input: PublishCheckInput): string[] {
-  const missing: string[] = [];
-  if (input.title.trim().length < 10) missing.push("a title (at least 10 letters)");
-  if (!input.locationId) missing.push("the location");
-  if (!Number(input.areaSqm)) missing.push("the area (m²)");
-  if (input.summary.trim().length < 30) missing.push("a summary (at least 30 letters)");
-  if (input.description.trim().length < 100) missing.push("a full description (at least 100 letters)");
-  if (input.imageCount < MIN_PUBLISH_PHOTOS) missing.push(`at least ${MIN_PUBLISH_PHOTOS} photos`);
+/** `field` is the form field name, so the admin form can jump straight to it. */
+export type PublishBlocker = { field: "title" | "locationId" | "areaSqm" | "summary" | "description" | "images"; label: string };
+
+export function publishBlockers(input: PublishCheckInput): PublishBlocker[] {
+  const missing: PublishBlocker[] = [];
+  // Labels name the fields as the form labels them ("Area" is the neighbourhood, "Size (m²)" the floor area).
+  if (input.title.trim().length < 10) missing.push({ field: "title", label: "a title (at least 10 characters)" });
+  if (!input.locationId) missing.push({ field: "locationId", label: "the area" });
+  if (!Number(input.areaSqm)) missing.push({ field: "areaSqm", label: "the size (m²)" });
+  if (input.summary.trim().length < 30) missing.push({ field: "summary", label: "a summary (at least 30 characters)" });
+  if (input.description.trim().length < 100) missing.push({ field: "description", label: "a description (at least 100 characters)" });
+  if (input.imageCount < MIN_PUBLISH_PHOTOS) missing.push({ field: "images", label: `at least ${MIN_PUBLISH_PHOTOS} photos` });
   return missing;
 }
