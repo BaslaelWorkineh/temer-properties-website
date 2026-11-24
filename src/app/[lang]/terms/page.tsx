@@ -41,7 +41,7 @@ export default async function TermsPage({ params }: PageProps<"/[lang]/terms">) 
         <h2>{dict.contactTitle}</h2>
         <p>
           {dict.contact.pre}
-          <a href={`mailto:${site.contact.email}`}>{site.contact.email}</a>
+          <a href={`tel:${site.contact.phone}`}>{site.contact.phoneDisplay}</a>
           {dict.contact.post}
         </p>
       </article>

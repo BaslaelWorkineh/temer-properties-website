@@ -50,8 +50,6 @@ export default async function PrivacyPage({ params }: PageProps<"/[lang]/privacy
         <h2>{dict.choicesTitle}</h2>
         <p>
           {dict.choices.pre}
-          <a href={`mailto:${site.contact.email}`}>{site.contact.email}</a>
-          {dict.choices.mid}
           <a href={`tel:${site.contact.phone}`}>{site.contact.phoneDisplay}</a>
           {dict.choices.post}
         </p>

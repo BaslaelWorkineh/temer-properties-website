@@ -1,4 +1,4 @@
-import { Clock, Mail, MapPin, Phone } from "lucide-react";
+import { Clock, MapPin, Phone } from "lucide-react";
 import { cacheLife } from "next/cache";
 import NextLink from "next/link";
 import Link from "@/components/site/link";
@@ -118,12 +118,6 @@ export async function Footer({ lang }: { lang: Locale }) {
               <Phone className="mt-0.5 size-4 shrink-0 text-gold-400" aria-hidden="true" />
               <a href={`tel:${site.contact.phone}`} className="hover:text-gold-300">
                 {site.contact.phoneDisplay}
-              </a>
-            </p>
-            <p className="flex gap-3">
-              <Mail className="mt-0.5 size-4 shrink-0 text-gold-400" aria-hidden="true" />
-              <a href={`mailto:${site.contact.email}`} className="break-all hover:text-gold-300">
-                {site.contact.email}
               </a>
             </p>
             <p className="flex gap-3">

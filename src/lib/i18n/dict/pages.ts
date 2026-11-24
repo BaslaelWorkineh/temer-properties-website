@@ -40,7 +40,6 @@ export type PagesDict = {
     callSales: string;
     whatsapp: string;
     chat: string;
-    email: string;
     waMessage: string;
     office: string;
     directions: string;
@@ -71,7 +70,7 @@ export type PagesDict = {
     keepTitle: string;
     keep: string;
     choicesTitle: string;
-    choices: { pre: string; mid: string; post: string };
+    choices: { pre: string; post: string };
     cookiesTitle: string;
     cookies: string;
   };
@@ -161,7 +160,6 @@ const en: PagesDict = {
     callSales: "Call sales",
     whatsapp: "WhatsApp",
     chat: "Chat with us",
-    email: "Email",
     waMessage: "Hello Temer Properties, I have a question.",
     office: "Office",
     directions: "Get directions",
@@ -200,8 +198,7 @@ const en: PagesDict = {
     keep: "We keep enquiry and booking records for as long as needed to serve you and meet legal obligations, then delete them.",
     choicesTitle: "Your choices",
     choices: {
-      pre: "You can ask us to access, correct or delete your information at any time by emailing ",
-      mid: " or calling ",
+      pre: "You can ask us to access, correct or delete your information at any time by calling or messaging us on WhatsApp at ",
       post: ".",
     },
     cookiesTitle: "Cookies",
@@ -222,7 +219,7 @@ const en: PagesDict = {
     bookings:
       "A booking made online is a request. It is confirmed when our team contacts you. We may need to reschedule visits because of weather, safety or site conditions.",
     contactTitle: "Contact",
-    contact: { pre: "Questions about these terms: ", post: "." },
+    contact: { pre: "Questions about these terms: call or message us on WhatsApp at ", post: "." },
   },
   blog: {
     metaTitle: "Property Buyer Guides for Addis Ababa",
@@ -297,7 +294,6 @@ const am: PagesDict = {
     callSales: "ለሽያጭ ይደውሉ",
     whatsapp: "ዋትስአፕ",
     chat: "ያነጋግሩን",
-    email: "ኢሜይል",
     waMessage: "ሰላም ቴምር ፕሮፐርቲስ፣ ጥያቄ አለኝ።",
     office: "ቢሮ",
     directions: "አቅጣጫ ያግኙ",
@@ -335,9 +331,8 @@ const am: PagesDict = {
     keep: "እርስዎን ለማገልገልና የሕግ ግዴታዎችን ለመወጣት እስከሚያስፈልግ ድረስ የጥያቄና የቦታ ማስያዣ መዝገቦችን እናቆያለን፤ ከዚያም እንሰርዛቸዋለን።",
     choicesTitle: "የእርስዎ ምርጫዎች",
     choices: {
-      pre: "መረጃዎን ለማየት፣ ለማረም ወይም ለመሰረዝ በማንኛውም ጊዜ በኢሜይል ",
-      mid: " በመጻፍ ወይም በስልክ ",
-      post: " በመደወል ሊጠይቁን ይችላሉ።",
+      pre: "መረጃዎን ለማየት፣ ለማረም ወይም ለመሰረዝ በማንኛውም ጊዜ በስልክ ወይም በዋትስአፕ ",
+      post: " ሊጠይቁን ይችላሉ።",
     },
     cookiesTitle: "ኩኪዎች",
     cookies:
@@ -357,7 +352,7 @@ const am: PagesDict = {
     bookings:
       "በኢንተርኔት የሚደረግ ቦታ ማስያዝ ጥያቄ ብቻ ነው። ቡድናችን ሲያነጋግርዎ ይረጋገጣል። በአየር ሁኔታ፣ በደህንነት ወይም በቦታው ሁኔታ ምክንያት ጉብኝቶችን ማዘዋወር ሊያስፈልገን ይችላል።",
     contactTitle: "አግኙን",
-    contact: { pre: "ስለ እነዚህ ደንቦች ጥያቄ ካለዎት፦ ", post: "።" },
+    contact: { pre: "ስለ እነዚህ ደንቦች ጥያቄ ካለዎት በስልክ ወይም በዋትስአፕ ይደውሉልን፦ ", post: "።" },
   },
   blog: {
     metaTitle: "ለአዲስ አበባ ንብረት ገዢዎች መመሪያዎች",

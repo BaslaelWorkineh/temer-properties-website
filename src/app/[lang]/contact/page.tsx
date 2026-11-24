@@ -1,4 +1,4 @@
-import { Clock, Mail, MapPin, Phone } from "lucide-react";
+import { Clock, MapPin, Phone } from "lucide-react";
 import type { Metadata } from "next";
 import { WhatsAppIcon } from "@/components/site/brand-icons";
 import { Breadcrumbs } from "@/components/site/breadcrumbs";
@@ -35,7 +35,6 @@ export default async function ContactPage({ params }: PageProps<"/[lang]/contact
   const channels = [
     { icon: Phone, label: dict.callSales, value: site.contact.phoneDisplay, href: `tel:${site.contact.phone}` },
     { icon: WhatsAppIcon, label: dict.whatsapp, value: dict.chat, href: whatsappLink(dict.waMessage) },
-    { icon: Mail, label: dict.email, value: site.contact.email, href: `mailto:${site.contact.email}` },
   ];
 
   return (

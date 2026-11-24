@@ -47,7 +47,6 @@ export function organizationJsonLd(): JsonLdObject {
     logo: { "@type": "ImageObject", url: absoluteUrl("/images/logo.png"), width: 512, height: 512 },
     image: absoluteUrl(DEFAULT_OG_IMAGE.url),
     telephone: site.contact.phone,
-    email: site.contact.email,
     address: {
       "@type": "PostalAddress",
       streetAddress: a.street,

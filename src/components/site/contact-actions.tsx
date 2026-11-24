@@ -1,4 +1,4 @@
-import { Mail, Phone } from "lucide-react";
+import { Phone } from "lucide-react";
 import { WhatsAppIcon } from "@/components/site/brand-icons";
 import { site, whatsappLink } from "@/lib/config/site";
 import type { Locale } from "@/lib/i18n/config";
@@ -11,7 +11,7 @@ const lightButton = `${base} border-line bg-white text-brand-700 hover:border-br
 const darkButton = `${base} border-white/30 bg-white/10 text-white backdrop-blur-sm hover:bg-white hover:text-brand-950 focus-visible:outline-white`;
 
 /**
- * Call / WhatsApp / Email buttons for a listing or project card.
+ * Call / WhatsApp buttons for a listing or project card.
  * `relative z-10` lifts them above the card's stretched link so they stay clickable.
  * All contact details come from src/lib/config/site.ts.
  */
@@ -40,14 +40,6 @@ export function ContactActions({
       <a href={whatsappLink(message)} target="_blank" rel="noopener noreferrer" className={button} title={dict.common.whatsapp}>
         <WhatsAppIcon className="size-4" />
         <span className="sr-only">{dict.common.whatsapp}</span>
-      </a>
-      <a
-        href={`mailto:${contact.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`}
-        className={button}
-        title={pd.contact.email}
-      >
-        <Mail className="size-4" aria-hidden="true" />
-        <span className="sr-only">{pd.contact.email}</span>
       </a>
     </div>
   );

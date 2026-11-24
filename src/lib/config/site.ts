@@ -44,7 +44,6 @@ export const site = {
     /** The sales number (calls and WhatsApp), used in structured data. E.164 format. */
     phone: "+251911986550",
     phoneDisplay: "0911 986 550",
-    email: "info@temerpropertiesapartment.com",
     whatsapp: "251911986550",
   },
 
