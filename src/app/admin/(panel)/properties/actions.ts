@@ -85,8 +85,10 @@ async function persistProperty(formData: FormData, mode: "save" | "draft"): Prom
   if (mode === "draft") data.isPublished = false;
 
   // "+ Add a new area": reuse the area if that name exists, otherwise create it so it is in the list from now on.
+  // Autosave runs while the name is still being typed, so only the Save/Publish button creates the area
+  // (otherwise "Bo", "Bole", "Bole Bul"… would each become an area). The draft is saved without an area until then.
   let locationId: number | null = data.locationId ?? null;
-  if (optStr(formData, "locationId") === NEW_AREA) {
+  if (optStr(formData, "locationId") === NEW_AREA && mode === "save") {
     const areaName = str(formData, "newLocationName");
     if (areaName.length < 2) return errorState("Type the new area name.", { newLocationName: ["Type the new area name."] });
     locationId = await findOrCreateLocation(areaName);
@@ -109,7 +111,13 @@ async function persistProperty(formData: FormData, mode: "save" | "draft"): Prom
       completion: data.completion,
       paymentPlan: data.paymentPlan,
     });
-    if (missing.length) return errorState(`Required before saving, add: ${missing.join(", ")}.`);
+    if (missing.length) {
+      return errorState(
+        `Required before saving, add: ${missing.map((m) => m.text).join(", ")}.`,
+        // Field errors make the form open the step that needs fixing.
+        Object.fromEntries(missing.map((m) => [m.field === "locationId" && optStr(formData, "locationId") === NEW_AREA ? "newLocationName" : m.field, [m.message]])),
+      );
+    }
   }
 
   const imageError = invalidImageMessage(data.images);
@@ -118,7 +126,9 @@ async function persistProperty(formData: FormData, mode: "save" | "draft"): Prom
   const slug = await resolveSlug("properties", {
     requested: data.slug,
     source: data.title,
-    currentSlug: existing?.slug,
+    // Until the listing is live its URL follows the title: autosave stores drafts while the title is half typed,
+    // and keeping that first slug would publish URLs like /properties/3-bedroom. Live URLs never change on their own.
+    currentSlug: existing?.isPublished ? existing.slug : undefined,
     excludeId: existing?.id,
   });
   if ("error" in slug) return errorState("Please correct the highlighted fields.", { slug: [slug.error] });
@@ -173,6 +183,9 @@ async function persistProperty(formData: FormData, mode: "save" | "draft"): Prom
   refreshPublicContent(TAGS.properties, TAGS.locations, TAGS.projects);
 
   if (!existing) redirect(`/admin/properties/${savedId}?saved=1`);
+  // Just went live: reload as a live listing's edit page. From "New property" the form would otherwise keep
+  // treating it as a new draft (Publish label, autosave note, no "View page" link).
+  if (!existing.isPublished && values.isPublished) redirect(`/admin/properties/${savedId}?published=1`);
   refresh();
   return { status: "success", message: "Saved. The public page is up to date.", data: { id: savedId, slug: values.slug } };
 }

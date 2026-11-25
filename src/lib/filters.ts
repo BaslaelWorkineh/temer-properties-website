@@ -21,8 +21,10 @@ export function parsePropertyFilters(params: RawParams): PropertyFilters {
   if (type && (PROPERTY_TYPES as readonly string[]).includes(type)) filters.type = type as PropertyType;
   if (location && /^[a-z0-9-]{1,90}$/.test(location)) filters.location = location;
   if (project && /^[a-z0-9-]{1,90}$/.test(project)) filters.project = project;
-  const bedrooms = positiveInt(first(params.bedrooms), 10);
-  if (bedrooms) filters.bedrooms = bedrooms;
+  // "studio" means exactly 0 bedrooms; a number means at least that many.
+  const rawBedrooms = first(params.bedrooms);
+  const bedrooms = rawBedrooms === "studio" ? 0 : positiveInt(rawBedrooms, 10);
+  if (bedrooms !== undefined) filters.bedrooms = bedrooms;
   const minPrice = positiveInt(first(params.minPrice), 10_000_000_000);
   if (minPrice) filters.minPrice = minPrice;
   const maxPrice = positiveInt(first(params.maxPrice), 10_000_000_000);
@@ -40,7 +42,8 @@ export function filtersToSearchParams(filters: PropertyFilters, overrides: Parti
   if (merged.type) sp.set("type", merged.type);
   if (merged.location) sp.set("location", merged.location);
   if (merged.project) sp.set("project", merged.project);
-  if (merged.bedrooms) sp.set("bedrooms", String(merged.bedrooms));
+  if (merged.bedrooms === 0) sp.set("bedrooms", "studio");
+  else if (merged.bedrooms) sp.set("bedrooms", String(merged.bedrooms));
   if (merged.minPrice) sp.set("minPrice", String(merged.minPrice));
   if (merged.maxPrice) sp.set("maxPrice", String(merged.maxPrice));
   if (merged.sort && merged.sort !== "recommended") sp.set("sort", merged.sort);

@@ -81,6 +81,8 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/project
   const t = getAreasDict(lang).projectDetail;
   const p = await getProjectBySlug(slug, lang);
   if (!p) notFound();
+  // "For sale" only when something is actually listed (published, not sold); other statuses always show.
+  const showStatus = p.status !== "selling" || p.availableUnits > 0;
 
   const units = await searchProperties({ project: p.slug, pageSize: 48 }, lang);
   const residential = p.unitTypes.some((t) => /bed|apartment|studio|home|villa/i.test(t)) || /apartment|residential/i.test(p.category ?? "");
@@ -91,7 +93,7 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/project
   const lng = p.longitude ?? p.location?.longitude;
 
   const facts = [
-    { icon: Building2, label: t.status, value: dict.projectStatus[p.status] },
+    showStatus ? { icon: Building2, label: t.status, value: dict.projectStatus[p.status] } : null,
     p.totalUnits ? { icon: Layers, label: t.units, value: String(p.totalUnits) } : null,
     p.floors ? { icon: Layers, label: t.floors, value: String(p.floors) } : null,
     p.completion ? { icon: CalendarClock, label: p.status === "delivered" ? t.delivered : t.completion, value: p.completion } : null,
@@ -125,7 +127,7 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/project
                 <ImagePlaceholder label={getAreasDict(lang).common.placeholderProject} />
               </div>
             )}
-            <div className="mt-4"><StatusLabel status={p.status} lang={lang} /></div>
+            {showStatus ? <div className="mt-4"><StatusLabel status={p.status} lang={lang} /></div> : null}
             <h1 className="mt-2 text-3xl font-bold leading-tight sm:text-4xl">{p.name}</h1>
             <p className="mt-1.5 flex items-center gap-1.5 text-sm text-muted">
               <MapPin className="size-4" aria-hidden="true" />
@@ -210,8 +212,8 @@ export default async function ProjectPage({ params }: PageProps<"/[lang]/project
 
           <aside className="flex flex-col gap-4 lg:sticky lg:top-24" aria-label={p.status === "delivered" ? t.asideDelivered : t.asideActive}>
             <div className="bg-white p-5 ring-1 ring-line">
-              <StatusLabel status={p.status} lang={lang} />
-              <ContactPanel subject={p.name} className="mt-3" lang={lang} />
+              {showStatus ? <StatusLabel status={p.status} lang={lang} /> : null}
+              <ContactPanel subject={p.name} className={showStatus ? "mt-3" : undefined} lang={lang} />
               <p className="mt-3 text-[0.8125rem] text-muted">{t.orBook}</p>
             </div>
             <div className="bg-white p-5 ring-1 ring-line">

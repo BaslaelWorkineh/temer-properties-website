@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getLocationOptions } from "@/app/admin/_lib/server";
 import { ProjectForm } from "@/components/admin/project-form";
+import { FreshOnNavigate } from "@/components/admin/fresh-on-navigate";
 import { PageHeader } from "@/components/admin/ui";
 import { requireAdmin } from "@/lib/auth/session";
 import { siteUrl } from "@/lib/config/site";
@@ -17,7 +18,9 @@ export default async function NewProjectPage() {
   return (
     <>
       <PageHeader title="New project" back={{ href: "/admin/projects", label: "Projects" }} />
-      <ProjectForm project={null} locations={locationOptions} siteUrl={siteUrl} />
+      <FreshOnNavigate>
+        <ProjectForm project={null} locations={locationOptions} siteUrl={siteUrl} />
+      </FreshOnNavigate>
     </>
   );
 }

@@ -52,14 +52,10 @@ const PROJECT_PHOTOS: Record<string, Photo[]> = {
     { file: "gallery/sarbet-city-plus-2-bedroom.jpg", alt: "Two-bedroom apartment at Sarbet City Plus (3D render)" },
     { file: "gallery/sarbet-city-plus-3-bedroom.jpg", alt: "Bedroom of a three-bedroom apartment at Sarbet City Plus (3D render)" },
   ],
-  "megenagna-diaspora-site": ["areas/megenagna.jpg", ...interiors(0)],
+  "megenagna-diaspora-site": ["areas/megenagna-tower.jpg", ...interiors(0)],
+  // Temer Legacy (see scripts/seed-temer-legacy.ts): the official render of the building.
   "aware-megenagna": [
-    { file: "gallery/aware-1.jpg", alt: "Aware Site (Sumeya) apartment tower from street level (3D render)" },
-    { file: "gallery/aware-2.jpg", alt: "Aware Site (Sumeya) apartment tower seen across the neighbourhood (3D render)" },
-    { file: "gallery/aware-sumeya.jpg", alt: "Sumeya, the 2B+G+21+T apartment tower at Aware (3D render)" },
-    { file: "gallery/aware-3.jpg", alt: "Aerial view of the Aware Site building and its roof track (3D render)" },
-    { file: "gallery/aware-sumeya-1-bedroom.jpg", alt: "One-bedroom apartment at Sumeya, Aware (3D render)" },
-    { file: "gallery/aware-sumeya-3-bedroom.jpg", alt: "Three-bedroom apartment at Sumeya, Aware (3D render)" },
+    { file: "projects/temer-legacy-aware.jpg", alt: "Temer Legacy, the B+G+16+T apartment towers of the Aware site in Megenagna, Addis Ababa (3D render)" },
   ],
   "haile-garment-apartments": [
     "sample/project-2.jpg", // "Garment site"
@@ -134,7 +130,7 @@ const PROJECT_PHOTOS: Record<string, Photo[]> = {
 /** Fallback for a property without a project: the photo of its area (see apply-area-photos.ts). */
 const AREA_PHOTO: Record<string, string> = {
   sarbet: "sample/project-3.jpg",
-  megenagna: "areas/megenagna.jpg",
+  megenagna: "areas/megenagna-tower.jpg",
   ayat: "sample/project-4.jpg",
   "haile-garment": "sample/project-2.jpg",
   lebu: "sample/site-4.jpg",

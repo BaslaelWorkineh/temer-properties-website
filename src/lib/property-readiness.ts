@@ -21,7 +21,7 @@ export type PublishCheckInput = {
 const blank = (v: string | number | null | undefined) => v === null || v === undefined || String(v).trim() === "";
 const toNumber = (v: string | number | null | undefined) => Number(String(v ?? "").replace(/[, ]/g, ""));
 
-export const MIN_PUBLISH_PHOTOS = 3;
+export const MIN_PUBLISH_PHOTOS = 4;
 
 /** Each blocker names the form step (0-based: Basics, Price, Details, Photos) it is filled in on. */
 export type Blocker = { step: number; text: string; field: string; message: string };
@@ -42,6 +42,4 @@ export function listBlockers(input: PublishCheckInput): Blocker[] {
   return missing;
 }
 
-export function publishBlockers(input: PublishCheckInput): string[] {
-  return listBlockers(input).map((b) => b.text);
-}
+export const publishBlockers = listBlockers;

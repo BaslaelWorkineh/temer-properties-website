@@ -126,6 +126,7 @@ export type PropertyFilters = {
   type?: PropertyType;
   location?: string;
   project?: string;
+  /** 0 = studios only; n = at least n bedrooms. */
   bedrooms?: number;
   minPrice?: number;
   maxPrice?: number;
@@ -147,7 +148,9 @@ export async function searchProperties(filters: PropertyFilters, lang: Locale = 
   if (filters.type) conditions.push(eq(properties.type, filters.type));
   if (filters.location) conditions.push(eq(locations.slug, filters.location));
   if (filters.project) conditions.push(eq(projects.slug, filters.project));
-  if (filters.bedrooms) conditions.push(gte(properties.bedrooms, filters.bedrooms));
+  // 0 = studios only; otherwise "at least n bedrooms".
+  if (filters.bedrooms === 0) conditions.push(eq(properties.bedrooms, 0));
+  else if (filters.bedrooms) conditions.push(gte(properties.bedrooms, filters.bedrooms));
   if (filters.minPrice) conditions.push(gte(properties.price, filters.minPrice));
   if (filters.maxPrice) conditions.push(lte(properties.price, filters.maxPrice));
   const where = and(...conditions);
@@ -178,6 +181,79 @@ export async function getFeaturedProperties(limit = 6, lang: Locale = "en") {
     .orderBy(...recommendedOrder)
     .limit(limit);
   return rows.map((r) => toCard(r, lang));
+}
+
+export type ShowcaseListing = {
+  id: number;
+  slug: string;
+  title: string;
+  summary: string | null;
+  price: number | null;
+  bedrooms: number | null;
+  areaSqm: number | null;
+};
+
+export type ProjectShowcase = {
+  project: { name: string; slug: string; image: ImageItem | null; locationName: string | null; totalUnits: number | null };
+  listings: ShowcaseListing[];
+};
+
+/**
+ * The home page's featured building, chosen in the admin: the project ticked "Featured" (lowest project sort order
+ * first) among those with something for sale. Only when no featured project has listings does it fall back to the
+ * project of the top recommended listing, so adding a listing elsewhere never swaps the block by itself. Returns that
+ * project with every listing still for sale (published, not sold), in the admin's sort order; null when no listing
+ * belongs to a project.
+ */
+export async function getProjectShowcase(lang: Locale = "en"): Promise<ProjectShowcase | null> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(TAGS.properties, TAGS.locations, TAGS.projects);
+  const forSale = and(eq(properties.isPublished, true), ne(properties.status, "sold"));
+  const [top] = await db
+    .select({
+      id: projects.id,
+      name: projects.name,
+      slug: projects.slug,
+      images: projects.images,
+      totalUnits: projects.totalUnits,
+      translations: projects.translations,
+      locationName: locations.name,
+      locationTranslations: locations.translations,
+    })
+    .from(properties)
+    .innerJoin(projects, and(eq(properties.projectId, projects.id), eq(projects.isPublished, true)))
+    .leftJoin(locations, eq(projects.locationId, locations.id))
+    .where(forSale)
+    .orderBy(desc(projects.isFeatured), asc(projects.sortOrder), ...recommendedOrder)
+    .limit(1);
+  if (!top) return null;
+
+  const rows = await db
+    .select({
+      id: properties.id,
+      slug: properties.slug,
+      title: properties.title,
+      summary: properties.summary,
+      price: properties.price,
+      bedrooms: properties.bedrooms,
+      areaSqm: properties.areaSqm,
+      translations: properties.translations,
+    })
+    .from(properties)
+    .where(and(forSale, eq(properties.projectId, top.id)))
+    .orderBy(asc(properties.sortOrder), asc(properties.price), asc(properties.id));
+
+  return {
+    project: {
+      name: localizeRow({ name: top.name }, top.translations, lang).name,
+      slug: top.slug,
+      image: top.images[0] ?? null,
+      totalUnits: top.totalUnits,
+      locationName: top.locationName ? localizeRow({ name: top.locationName }, top.locationTranslations, lang).name : null,
+    },
+    listings: rows.map(({ translations, ...r }) => ({ ...r, ...localizeRow({ title: r.title, summary: r.summary }, translations, lang) })),
+  };
 }
 
 export async function getPropertyBySlug(slug: string, lang: Locale = "en") {

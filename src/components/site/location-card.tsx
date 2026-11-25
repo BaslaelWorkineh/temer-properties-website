@@ -4,7 +4,7 @@ import Link from "@/components/site/link";
 import type { LocationSummary } from "@/lib/data/locations";
 import type { Locale } from "@/lib/i18n/config";
 import { cityName } from "@/lib/i18n/dict/areas";
-import { getDictionary, localizedAreaName } from "@/lib/i18n/dictionaries";
+import { localizedAreaName } from "@/lib/i18n/dictionaries";
 import { cn } from "@/lib/utils";
 
 /** Solid backgrounds for areas without a photo. One is picked per card so a row does not look repeated. */
@@ -27,14 +27,7 @@ export function LocationCard({
   tint?: number;
   lang?: Locale;
 }) {
-  const dict = getDictionary(lang);
   const l = location;
-  const counts = [
-    l.propertyCount ? dict.home.propertyCount(l.propertyCount) : null,
-    l.projectCount ? dict.home.projectCount(l.projectCount) : null,
-  ]
-    .filter(Boolean)
-    .join(" · ");
   return (
     <article className="group relative isolate flex aspect-[16/10] flex-col justify-end overflow-hidden rounded-none bg-brand-900 p-5 text-white">
       {l.image ? (
@@ -64,12 +57,12 @@ export function LocationCard({
       >
         <ArrowUpRight className="size-[1.1rem]" />
       </span>
-      <h3 className="text-2xl font-bold leading-tight sm:text-3xl">
+      {/* Just the area name, large: the card is a picture link, the counts live on the area page. */}
+      <h3 className="text-4xl font-bold leading-none sm:text-5xl">
         <Link href={`/locations/${l.slug}`} className="after:absolute after:inset-0 after:content-[''] focus:outline-none">
           {localizedAreaName(lang, l.name)}
         </Link>
       </h3>
-      <p className="mt-1 text-sm font-medium text-white">{counts || cityName(lang, l.city)}</p>
     </article>
   );
 }

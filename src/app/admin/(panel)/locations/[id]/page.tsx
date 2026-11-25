@@ -8,6 +8,7 @@ import { DeleteButton } from "@/components/admin/form-controls";
 import { OwnerOnly } from "@/components/admin/owner-only";
 import { firstParam } from "@/components/admin/helpers";
 import { LocationForm } from "@/components/admin/location-form";
+import { FreshOnNavigate } from "@/components/admin/fresh-on-navigate";
 import { Notice, PageHeader } from "@/components/admin/ui";
 import { Badge } from "@/components/ui/badge";
 import { buttonStyles } from "@/components/ui/button";
@@ -57,7 +58,9 @@ export default async function EditLocationPage({ params, searchParams }: PagePro
         }
       />
       {firstParam(sp.saved) ? <Notice>Location created.</Notice> : null}
-      <LocationForm location={location} siteUrl={siteUrl} />
+      <FreshOnNavigate>
+        <LocationForm location={location} siteUrl={siteUrl} />
+      </FreshOnNavigate>
     </>
   );
 }
