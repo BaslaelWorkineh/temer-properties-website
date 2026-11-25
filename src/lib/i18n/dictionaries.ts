@@ -20,6 +20,8 @@ export type Dictionary = {
     callUs: (phone: string) => string;
     call: string;
     whatsapp: string;
+    /** WhatsApp button on project cards. */
+    askUs: string;
     whatsappUs: string;
     openMenu: string;
     closeMenu: string;
@@ -87,8 +89,25 @@ export type Dictionary = {
     browse: string;
     latestTitle: string;
     latestCount: (n: number) => string;
+    /** The gold bar's button to the full /properties list. */
+    viewAvailable: string;
+    /** The featured project beside the latest listings, grouped by unit type. */
+    showcase: {
+      /** Before the featured project's name in the green bar: "For sale in Temer Legacy". */
+      forSaleIn: string;
+      typology: (bedrooms: number) => string;
+      /** Row for listings without a bedroom count (shops, offices). */
+      other: string;
+      from: string;
+      total: string;
+      advance: string;
+    };
     projectsTitle: string;
     projectsDesc: string;
+    projectsCount: (n: number) => string;
+    viewAllProjects: string;
+    projectsPrevious: string;
+    projectsNext: string;
     areaTitle: string;
     areaDesc: string;
     alsoIn: string;
@@ -127,6 +146,7 @@ const en: Dictionary = {
     callUs: (phone) => `Call us on ${phone}`,
     call: "Call",
     whatsapp: "WhatsApp",
+    askUs: "Ask us",
     whatsappUs: "WhatsApp us",
     openMenu: "Open menu",
     closeMenu: "Close menu",
@@ -200,10 +220,23 @@ const en: Dictionary = {
     h1: "Apartments, homes & shops for sale in Addis Ababa",
     lead: (name) => `Buy directly from ${name}. Compare real prices, sizes and payment plans, then book a free site visit.`,
     browse: "Browse properties",
-    latestTitle: "Latest properties for sale",
-    latestCount: (n) => `${n} ${n === 1 ? "property" : "properties"} available now.`,
+    latestTitle: "Check out our latest properties for sale",
+    latestCount: (n) => `${n} ${n === 1 ? "property" : "properties"} available`,
+    viewAvailable: "View available properties",
+    showcase: {
+      forSaleIn: "For sale in",
+      typology: (b) => (b === 0 ? "Studio" : `${b} Bedroom`),
+      other: "Other units",
+      from: "from",
+      total: "Total price",
+      advance: "20% advance",
+    },
     projectsTitle: "Our projects",
     projectsDesc: "Now selling, under construction and delivered.",
+    projectsCount: (n) => `${n} ${n === 1 ? "project" : "projects"}`,
+    viewAllProjects: "View all projects",
+    projectsPrevious: "Previous projects",
+    projectsNext: "More projects",
     areaTitle: "Property by area",
     areaDesc: "Homes and shops in every part of Addis Ababa.",
     alsoIn: "Also in:",
@@ -248,6 +281,7 @@ const am: Dictionary = {
     callUs: (phone) => `ይደውሉልን፦ ${phone}`,
     call: "ይደውሉ",
     whatsapp: "ዋትስአፕ",
+    askUs: "ይጠይቁን",
     whatsappUs: "በዋትስአፕ ያግኙን",
     openMenu: "ምናሌ ክፈት",
     closeMenu: "ምናሌ ዝጋ",
@@ -321,10 +355,23 @@ const am: Dictionary = {
     h1: "በአዲስ አበባ ለሽያጭ የቀረቡ አፓርታማዎች፣ ቤቶችና ሱቆች",
     lead: () => `በቀጥታ ከቴምር ፕሮፐርቲስ ይግዙ። ትክክለኛ ዋጋ፣ ስፋትና የክፍያ ዕቅድ ያወዳድሩ፣ ከዚያም ነፃ የቦታ ጉብኝት ይያዙ።`,
     browse: "ንብረቶችን ይመልከቱ",
-    latestTitle: "ለሽያጭ የቀረቡ አዳዲስ ንብረቶች",
-    latestCount: (n) => `${n} ንብረቶች አሁን ይገኛሉ።`,
+    latestTitle: "ለሽያጭ የቀረቡ አዳዲስ ንብረቶቻችንን ይመልከቱ",
+    latestCount: (n) => `${n} ንብረቶች ይገኛሉ`,
+    viewAvailable: "የሚገኙ ንብረቶችን ይመልከቱ",
+    showcase: {
+      forSaleIn: "ለሽያጭ የቀረበ፦",
+      typology: (b) => (b === 0 ? "ስቱዲዮ" : `ባለ ${b} መኝታ`),
+      other: "ሌሎች ቤቶች",
+      from: "ከ",
+      total: "ጠቅላላ ዋጋ",
+      advance: "20% ቅድመ ክፍያ",
+    },
     projectsTitle: "ፕሮጀክቶቻችን",
     projectsDesc: "አሁን በሽያጭ ላይ ያሉ፣ በግንባታ ላይ ያሉና የተረከቡ።",
+    projectsCount: (n) => `${n} ፕሮጀክቶች`,
+    viewAllProjects: "ሁሉንም ፕሮጀክቶች ይመልከቱ",
+    projectsPrevious: "ቀዳሚ ፕሮጀክቶች",
+    projectsNext: "ተጨማሪ ፕሮጀክቶች",
     areaTitle: "ንብረት በአካባቢ",
     areaDesc: "በሁሉም የአዲስ አበባ ክፍሎች ያሉ ቤቶችና ሱቆች።",
     alsoIn: "እንዲሁም፦",

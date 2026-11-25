@@ -1,7 +1,10 @@
-import { ArrowUpRight, MapPin } from "lucide-react";
+import { ArrowUpRight, MapPin, Phone } from "lucide-react";
 import Image from "next/image";
 import Link from "@/components/site/link";
+import { WhatsAppIcon } from "@/components/site/brand-icons";
 import { ContactActions } from "@/components/site/contact-actions";
+import { site, whatsappLink } from "@/lib/config/site";
+import { getPropertiesDict } from "@/lib/i18n/dict/properties";
 import type { Locale } from "@/lib/i18n/config";
 import { getAreasDict } from "@/lib/i18n/dict/areas";
 import { getDictionary, localizedAreaName } from "@/lib/i18n/dictionaries";
@@ -36,10 +39,14 @@ export function ProjectCard({
   const p = project;
   const t = getAreasDict(lang);
   const where = p.location?.name ? localizedAreaName(lang, p.location.name) : t.addisAbaba;
+  // "For sale" only when the project has a listing that is published and not sold; other statuses always show.
+  const showStatus = p.status !== "selling" || p.availableUnits > 0;
 
   if (variant === "banner") {
-    // Wide slide for the self-scrolling row: photo fills the card, a pill button and a one-line caption sit
-    // at the bottom, with the contact icons. The whole card links to the project through the pill.
+    // Photo fills the card; the project name (large) and the contact buttons (a round call button and an "Ask us"
+    // WhatsApp pill) sit at the bottom. The whole card links to the project through its name. `compact` (small
+    // tiles) uses a smaller name and tighter padding.
+    const dict = getDictionary(lang);
     return (
       <article className="group relative isolate flex size-full flex-col justify-end overflow-hidden bg-brand-950 text-white">
         {p.image ? (
@@ -58,28 +65,36 @@ export function ProjectCard({
         <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/85 via-black/35 via-45% to-transparent to-70%" aria-hidden="true" />
         <ImageWatermark className="left-5 top-4" />
         <div className="absolute right-5 top-5">
-          <StatusLabel status={p.status} lang={lang} />
+          {showStatus ? <StatusLabel status={p.status} lang={lang} /> : null}
         </div>
-        <div className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:gap-4">
-          <div className="flex items-center gap-3 sm:contents">
-            <Link
-              href={`/projects/${p.slug}`}
-              className={buttonStyles({ variant: "light", className: "rounded-full px-6 after:absolute after:inset-0 after:content-['']" })}
-            >
-              {getDictionary(lang).common.viewProject}
+        <div className={`flex flex-col gap-3 ${compact ? "p-4" : "p-5 sm:flex-row sm:items-end sm:gap-4"}`}>
+          {/* Just the project name, large; the details are on the project page. */}
+          <h3 className={`min-w-0 flex-1 font-bold leading-none text-white ${compact ? "text-2xl sm:text-3xl" : "text-3xl sm:text-4xl"}`}>
+            <Link href={`/projects/${p.slug}`} className="after:absolute after:inset-0 after:content-[''] hover:underline">
+              {p.name}
             </Link>
-            <div className="ml-auto sm:order-last">
-              <ContactActions subject={p.name} tone="dark" round lang={lang} />
-            </div>
+          </h3>
+          <div className="relative z-10 flex shrink-0 items-center gap-2">
+            <a
+              href={`tel:${site.contact.phone}`}
+              className="inline-flex size-10 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur-sm transition hover:bg-white hover:text-brand-950"
+              title={dict.common.call}
+            >
+              <Phone className="size-4" aria-hidden="true" />
+              <span className="sr-only">
+                {dict.common.call} {site.contact.phoneDisplay}
+              </span>
+            </a>
+            <a
+              href={whatsappLink(getPropertiesDict(lang).contact.message(p.name))}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={buttonStyles({ variant: "light", className: "h-10 gap-2 rounded-full px-5" })}
+            >
+              <WhatsAppIcon className="size-4" />
+              {dict.common.askUs}
+            </a>
           </div>
-          <p className="min-w-0 flex-1 text-sm leading-snug text-white sm:text-base">
-            <strong className="font-semibold">{p.name}</strong>
-            <span className="text-white/80">
-              {" "}
-              • {p.category ?? where}
-              {p.summary ? `. ${p.summary}` : ""}
-            </span>
-          </p>
         </div>
       </article>
     );
@@ -111,7 +126,7 @@ export function ProjectCard({
         />
         <ImageWatermark className="left-4 top-4" />
         <div className="absolute right-3 top-3">
-          <StatusLabel status={p.status} lang={lang} />
+          {showStatus ? <StatusLabel status={p.status} lang={lang} /> : null}
         </div>
         <div className={compact ? "p-4" : "p-6 sm:p-8"}>
           <h3 className={compact ? "text-lg font-bold leading-tight" : "text-3xl font-bold leading-tight sm:text-4xl"}>
@@ -155,7 +170,7 @@ export function ProjectCard({
         )}
         <ImageWatermark className="left-4 top-4" />
         <div className="absolute right-3 top-3">
-          <StatusLabel status={p.status} lang={lang} />
+          {showStatus ? <StatusLabel status={p.status} lang={lang} /> : null}
         </div>
       </div>
       <div className="flex flex-1 flex-col p-5">

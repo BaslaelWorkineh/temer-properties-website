@@ -46,3 +46,6 @@ next-env.d.ts
 # local database + uploaded media (back these up in production!)
 /data/
 /storage/
+
+# Local DB backups (never commit)
+/backups/

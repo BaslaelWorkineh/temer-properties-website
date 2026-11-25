@@ -72,7 +72,9 @@ async function Results({
 
   return (
     <>
-      <PropertyFilters filters={filters} locations={areaOptions} className="relative" lang={lang} />
+      {/* Keyed by the search: Next keeps visited pages alive and restores their form as it was, so without a new key a
+          search from the home page would show the old dropdown choices above the new results. */}
+      <PropertyFilters key={filtersToSearchParams(filters)} filters={filters} locations={areaOptions} className="relative" lang={lang} />
       <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted" aria-live="polite">
           {pd.list.found(result.total)}

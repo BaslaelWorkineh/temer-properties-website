@@ -1,5 +1,5 @@
-import { ArrowRight, ChevronDown } from "lucide-react";
-import { AutoSubmitForm as Form } from "@/components/site/auto-submit-form";
+import { ChevronDown } from "lucide-react";
+import Form from "next/form";
 import { PRICE_STEPS } from "@/components/site/property-filters";
 import { PROPERTY_TYPES } from "@/lib/config/property-types";
 import type { Locale } from "@/lib/i18n/config";
@@ -27,7 +27,8 @@ function Field({ id, label, children }: { id: string; label: string; children: R
 /**
  * Search bar for the home page's "Latest properties" section. Every field has a visible label (so a chosen value
  * still says what it is for), price is included, and Search is a quiet dark button so "View details" on the
- * tiles stays the main action. It submits to /properties (plain GET form, works without JavaScript).
+ * tiles stays the main action. It submits to /properties (plain GET form, works without JavaScript) only when Search
+ * is pressed: unlike the /properties filters, choosing a dropdown here must not leave the home page.
  */
 export function HomeSearch({
   locations,
@@ -69,6 +70,7 @@ export function HomeSearch({
       <Field id="home-bedrooms" label={dict.search.bedrooms}>
         <select id="home-bedrooms" name="bedrooms" defaultValue="" className={selectStyles}>
           <option value="">{dict.search.any}</option>
+          <option value="studio">{dict.common.studio}</option>
           {[1, 2, 3, 4].map((n) => (
             <option key={n} value={n}>
               {dict.search.nBedrooms(n)}
@@ -92,7 +94,7 @@ export function HomeSearch({
         type="submit"
         className="inline-flex h-11 items-center justify-center gap-2 bg-brand-950 px-6 text-sm font-semibold text-white transition hover:bg-brand-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 sm:col-span-2 lg:col-span-1"
       >
-        {dict.search.search} <ArrowRight className="size-4" aria-hidden="true" />
+        {dict.search.search}
       </button>
     </Form>
   );
