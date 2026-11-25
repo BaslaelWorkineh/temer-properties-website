@@ -13,6 +13,8 @@ const nextConfig: NextConfig = {
   // Prerendering reads the database (Neon). Fewer workers and pages in parallel keep the build from opening dozens of
   // connections at once (which timed out against a waking Neon database); failed pages are retried.
   experimental: {
+    // Tailwind's CSS is small, so put it in the HTML instead of a render-blocking <link> (faster first paint and LCP).
+    inlineCss: true,
     staticGenerationRetryCount: 3,
     staticGenerationMaxConcurrency: 4,
     staticGenerationMinPagesPerWorker: 60,
