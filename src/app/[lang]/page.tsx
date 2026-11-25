@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ArrowRight, CalendarCheck2, Clock, MapPin, Phone } from "lucide-react";
-import Image from "next/image";
+import Image, { getImageProps } from "next/image";
 import Link from "@/components/site/link";
 import heroTowers from "@/assets/hero/towers-dusk.jpg";
 import { WhatsAppIcon } from "@/components/site/brand-icons";
@@ -102,6 +102,10 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
   const { lang: rawLang } = await params;
   const lang: Locale = hasLocale(rawLang) ? rawLang : "en";
   const dict = getDictionary(lang);
+  const heroCommon = { src: heroTowers, alt: "", fill: true, sizes: "100vw", placeholder: "blur" as const, className: "object-cover object-[64%_top] lg:object-left-top" };
+  const { props: heroDesktop } = getImageProps({ ...heroCommon, quality: 90 });
+  const { props: heroMobile } = getImageProps({ ...heroCommon, quality: 75, fetchPriority: "high", loading: "eager" });
+
   const steps = stepMeta.map((m, i) => ({ ...m, ...dict.home.steps[i] }));
   const [featured, showcase, listingCount, projects, locations, posts] = await Promise.all([
     getFeaturedProperties(12, lang),
@@ -159,18 +163,13 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
       <section className="hero-split relative isolate flex min-h-[30rem] flex-col overflow-hidden bg-logo-green text-white sm:min-h-[36rem] lg:min-h-[max(36rem,calc(100svh-7rem-2px))]">
         {/* The photo is the background of the whole hero, towers in the centre. Desktop: the text sits in a green
             card on the left, beside the towers (.hero-split in globals.css). */}
-        <div className="absolute inset-0 -z-10">
-          <Image
-            src={heroTowers}
-            alt=""
-            fill
-            preload
-            quality={90}
-            sizes="100vw"
-            placeholder="blur"
-            className="object-cover object-[64%_top] lg:object-left-top"
-          />
-        </div>
+        {/* Art direction: desktop (lg and up) keeps the sharp quality-90 photo; phones get a lighter quality-75 copy so
+            the hero (the page's largest paint) arrives sooner on slow mobile connections. A <picture> fetches only one
+            source, and fetchPriority="high" starts that request as soon as the HTML is read. */}
+        <picture className="absolute inset-0 -z-10 block">
+          <source media="(min-width: 1024px)" srcSet={heroDesktop.srcSet} sizes="100vw" />
+          <img {...heroMobile} alt="" />
+        </picture>
         <div
           className="absolute inset-0 -z-10 bg-gradient-to-br from-logo-green/80 via-logo-green/30 to-transparent lg:hidden"
           aria-hidden="true"
