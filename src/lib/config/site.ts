@@ -12,7 +12,7 @@ const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/+$/, "");
 if (!rawSiteUrl && process.env.NODE_ENV === "production") {
   // A wrong canonical domain silently wrecks SEO, so fail loudly.
   throw new Error(
-    "NEXT_PUBLIC_SITE_URL is not set. Set it to the canonical production origin, https://buytemerproperties.com",
+    "NEXT_PUBLIC_SITE_URL is not set. Set it to the canonical production origin, https://temerpropertiesethiopia.com",
   );
 }
 

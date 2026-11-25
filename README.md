@@ -160,7 +160,7 @@ Environment variables are documented in `.env.example`.
 
 1. **One canonical domain, and the brand pointing at it.**
    - Google treats temerproperties.com (the company's WordPress site) as Temer's official website: the X account and the Betoch and GoAfrica directory listings link there. Searches for "Temer" and "Temer Properties" will keep showing it first until those links move.
-   - The new site's domain is **buytemerproperties.com**: set `NEXT_PUBLIC_SITE_URL=https://buytemerproperties.com` in production and 301 `www.buytemerproperties.com` to it. If the company ever retires temerproperties.com, 301-redirecting it here is the surest way to rank first for "Temer".
+   - The new site's domain is **temerpropertiesethiopia.com**: set `NEXT_PUBLIC_SITE_URL=https://temerpropertiesethiopia.com` in production and 301 `www.temerpropertiesethiopia.com` to it. If the company ever retires temerproperties.com, 301-redirecting it here is the surest way to rank first for "Temer".
    - 301-redirect the other domains to it, path for path. temerpropertiessales.com and temerpropertiesapartment.com both rank for "temer properties" today; `src/lib/config/legacy-redirects.ts` maps their URLs.
    - Change the website link on the Google Business Profile, Facebook, Instagram, TikTok, YouTube, X and the directory pages in `site.profiles` to the new domain.
 2. **Consistent NAP.**
