@@ -413,6 +413,8 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
         </div>
       </section>
 
+      {site.stats.length ? (
+        <>
       {/* Company track record (site.stats). */}
       <section className="bg-brand-950 py-12 text-white sm:py-16">
         <Container>
@@ -426,6 +428,8 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
           </dl>
         </Container>
       </section>
+        </>
+      ) : null}
 
       {posts.length ? (
         <section className="py-16 sm:py-20">

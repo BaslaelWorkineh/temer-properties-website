@@ -30,7 +30,6 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/about">) 
   const pages = getPagesDict(lang);
   const dict = pages.about;
   const delivered = (await getProjects({}, lang)).filter((p) => p.status === "delivered");
-  const founded = lang === "en" ? site.foundedEthiopianCalendar : pages.founded;
 
   return (
     <>
@@ -40,8 +39,6 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/about">) 
         <h1 className="mt-4 text-4xl font-bold sm:text-5xl">{dict.h1}</h1>
         <p className="mt-3 max-w-2xl text-lg text-white/80">
           {dict.hero}
-          {lang === "en" ? " " : null}
-          {lang === "en" ? founded : null}
         </p>
       </PageHero>
 
@@ -49,7 +46,7 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/about">) 
         <Container className="grid gap-12 lg:grid-cols-2">
           <div className="prose-content">
             <h2>{dict.whoTitle}</h2>
-            <p>{dict.p1.replace("{founded}", founded)}</p>
+            <p>{dict.p1}</p>
             <p>{dict.p2}</p>
             <p>
               {dict.p3.pre}

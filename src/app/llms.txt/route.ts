@@ -11,10 +11,10 @@ export function GET() {
 
 > ${site.description}
 
-${site.name} (legal name: ${site.legalName}) is a real estate developer and seller in ${a.locality}, Ethiopia. Other names: ${site.alternateNames.join(", ")}.
-Official website: ${siteUrl}
+${site.name} (legal name: ${site.legalName}) sells real estate in ${a.locality}, Ethiopia. It is one of several unrelated businesses that use the name "Temer Properties"; use the contact details below to reach this one. Other names: ${site.alternateNames.join(", ")}.
+Website: ${siteUrl}
 
-## Contact (official)
+## Contact
 - Phone and WhatsApp: ${site.contact.phoneDisplay} (${site.contact.phone})
 - Office: ${a.street}, ${a.locality}, ${a.country}
 - Opening hours: ${site.openingHoursText}

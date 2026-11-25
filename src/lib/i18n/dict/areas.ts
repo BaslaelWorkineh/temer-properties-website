@@ -162,7 +162,7 @@ const en: AreasDict = {
     askAvailability: "Ask for availability",
     listings: (n) => pluralize(n, "listing"),
     projectsCount: (n) => pluralize(n, "project"),
-    seeAllProjects: "See our projects",
+    seeAllProjects: "See the projects",
     registerInterest: "Register your interest",
     tellUsWhatYouNeed: "Tell us what you need",
   },
@@ -171,7 +171,7 @@ const en: AreasDict = {
     description:
       "Explore Temer Properties' current and completed real estate projects in Addis Ababa: apartment buildings and mixed-use developments with shops in Sarbet, Megenagna, Ayat, Haile Garment, Piassa and more.",
     breadcrumb: "Projects",
-    h1: "Our projects in Addis Ababa",
+    h1: "Projects in Addis Ababa",
     lead: "Apartment buildings and mixed-use developments, from pre-launch to handed-over. Each project page lists available units, unit types, progress and how to book a visit.",
     currentTitle: "Current projects",
     currentDesc: "Selling now, under construction or launching soon.",
@@ -188,7 +188,7 @@ const en: AreasDict = {
       "Area guides for buying property in Addis Ababa: Sarbet, Megenagna, Ayat, Haile Garment, Piassa, Bulgaria and more. See what each neighbourhood offers and the apartments and shops for sale there.",
     breadcrumb: "Locations",
     h1: "Where to buy property in Addis Ababa",
-    lead: "Every neighbourhood has its own character, commute and price level. Explore the areas where we build, with local guides and the homes and shops for sale in each.",
+    lead: "Every neighbourhood has its own character, commute and price level. Explore the areas we sell in, with local guides and the homes and shops for sale in each.",
     listName: "Areas",
     ctaTitle: "See it for yourself: book a free site visit",
     ctaText:
@@ -229,7 +229,7 @@ const en: AreasDict = {
     typeLink: (plural, name, count) => `${plural} in ${name} (${count})`,
     listingsIn: (name) => `Listings in ${name}`,
     seeAll: (total) => `See all ${total}`,
-    projectsIn: (name) => `Our projects in ${name}`,
+    projectsIn: (name) => `Projects in ${name}`,
     noListings: (name) => `We don't have listings in ${name} right now.`,
     tellUs: "Tell us what you need",
     noListingsTail: "and we'll let you know when units are released.",
@@ -255,7 +255,7 @@ const en: AreasDict = {
     otherTypes: "Other property types",
     locTitle: (plural, name, city) => `${plural} for Sale in ${name}, ${city}`,
     locDescription: (total, label, name, city, summary) =>
-      `${pluralize(total, label.toLowerCase())} for sale in ${name}, ${city}, sold directly by Temer Properties. ${summary} Compare prices and sizes, then book a free site visit.`,
+      `${pluralize(total, label.toLowerCase())} for sale in ${name}, ${city}, offered by Temer Properties. ${summary} Compare prices and sizes, then book a free site visit.`,
     locH1: (plural, name) => `${plural} for sale in ${name}`,
     locLead: (total, label, name, city, min, max, summary) =>
       `${pluralize(total, label.toLowerCase())} for sale in ${name}, ${city}${
@@ -271,7 +271,7 @@ const en: AreasDict = {
 
 const amTypeIntro: Record<PropertyType, string> = {
   apartment:
-    "በአዲስ አበባ ለሽያጭ የቀረቡ አዳዲስ ባለ አንድ፣ ባለ ሁለትና ባለ ሦስት መኝታ አፓርታማዎችን ይመልከቱ፤ ሁሉም በቴምር ፕሮፐርቲስ የተገነቡና በቀጥታ የሚሸጡ ናቸው። እያንዳንዱ ዝርዝር ስፋቱን በካሬ ሜትር፣ ወለሉን፣ የሚገኝበትን ፕሮጀክትና የክፍያ አማራጮችን ስለሚያሳይ የቦታ ጉብኝት ከመያዝዎ በፊት በሳርቤት፣ በመገናኛ፣ በአያት፣ በሃይሌ ጋርመንትና በሌሎችም አካባቢዎች ያሉ ክፍሎችን ማወዳደር ይችላሉ።",
+    "በአዲስ አበባ ለሽያጭ የቀረቡ አዳዲስ ባለ አንድ፣ ባለ ሁለትና ባለ ሦስት መኝታ አፓርታማዎችን ይመልከቱ፤ ሁሉም በቴምር ፕሮፐርቲስ የሚቀርቡ ናቸው። እያንዳንዱ ዝርዝር ስፋቱን በካሬ ሜትር፣ ወለሉን፣ የሚገኝበትን ፕሮጀክትና የክፍያ አማራጮችን ስለሚያሳይ የቦታ ጉብኝት ከመያዝዎ በፊት በሳርቤት፣ በመገናኛ፣ በአያት፣ በሃይሌ ጋርመንትና በሌሎችም አካባቢዎች ያሉ ክፍሎችን ማወዳደር ይችላሉ።",
   villa:
     "በአዲስ አበባ ለሽያጭ የቀረቡ ዘመናዊ ቪላዎችንና የቤተሰብ ቤቶችን ያግኙ። እነዚህ ነጠላ ቤቶች የግል ክፍት ቦታ፣ ለሚያድግ ቤተሰብ ሰፊ ክፍልና ጸጥ ባለ የመኖሪያ መንደር ውስጥ የረጅም ጊዜ ዋጋ ለሚፈልጉ ገዢዎች ተስማሚ ናቸው።",
   townhouse:
@@ -295,7 +295,7 @@ const am: AreasDict = {
     askAvailability: "ስለሚገኙ ክፍሎች ይጠይቁ",
     listings: (n) => `${n} ዝርዝሮች`,
     projectsCount: (n) => `${n} ፕሮጀክቶች`,
-    seeAllProjects: "ፕሮጀክቶቻችንን ይመልከቱ",
+    seeAllProjects: "ፕሮጀክቶቹን ይመልከቱ",
     registerInterest: "ፍላጎትዎን ይመዝግቡ",
     tellUsWhatYouNeed: "የሚፈልጉትን ይንገሩን",
   },
@@ -304,7 +304,7 @@ const am: AreasDict = {
     description:
       "የቴምር ፕሮፐርቲስን አሁን ያሉና የተጠናቀቁ የሪል እስቴት ፕሮጀክቶች በአዲስ አበባ ይመልከቱ፦ በሳርቤት፣ በመገናኛ፣ በአያት፣ በሃይሌ ጋርመንት፣ በፒያሳና በሌሎችም አካባቢዎች ያሉ የአፓርታማ ሕንፃዎችና ሱቆች ያሉባቸው ድብልቅ አገልግሎት ግንባታዎች።",
     breadcrumb: "ፕሮጀክቶች",
-    h1: "በአዲስ አበባ ያሉ ፕሮጀክቶቻችን",
+    h1: "በአዲስ አበባ ያሉ ፕሮጀክቶች",
     lead: "ከመጀመሪያ ዝግጅት ጀምሮ እስከ ርክክብ ድረስ ያሉ የአፓርታማ ሕንፃዎችና ድብልቅ አገልግሎት ግንባታዎች። እያንዳንዱ የፕሮጀክት ገጽ ያሉትን ክፍሎች፣ የክፍል ዓይነቶችን፣ የግንባታ ሂደትንና ጉብኝት እንዴት እንደሚያዝ ያሳያል።",
     currentTitle: "አሁን ያሉ ፕሮጀክቶች",
     currentDesc: "አሁን በሽያጭ ላይ ያሉ፣ በግንባታ ላይ ያሉ ወይም በቅርቡ የሚጀምሩ።",
@@ -321,7 +321,7 @@ const am: AreasDict = {
       "በአዲስ አበባ ንብረት ለመግዛት የአካባቢ መመሪያዎች፦ ሳርቤት፣ መገናኛ፣ አያት፣ ሃይሌ ጋርመንት፣ ፒያሳ፣ ቡልጋሪያና ሌሎችም። እያንዳንዱ መንደር የሚያቀርበውንና እዚያ ለሽያጭ የቀረቡ አፓርታማዎችንና ሱቆችን ይመልከቱ።",
     breadcrumb: "አካባቢዎች",
     h1: "በአዲስ አበባ ንብረት የት መግዛት ይችላሉ",
-    lead: "እያንዳንዱ መንደር የራሱ ባሕርይ፣ የመጓጓዣ ሁኔታና የዋጋ ደረጃ አለው። የምንገነባባቸውን አካባቢዎች ከአካባቢ መመሪያዎችና በእያንዳንዳቸው ከሚገኙ ለሽያጭ የቀረቡ ቤቶችና ሱቆች ጋር ያስሱ።",
+    lead: "እያንዳንዱ መንደር የራሱ ባሕርይ፣ የመጓጓዣ ሁኔታና የዋጋ ደረጃ አለው። የምንሸጥባቸውን አካባቢዎች ከአካባቢ መመሪያዎችና በእያንዳንዳቸው ከሚገኙ ለሽያጭ የቀረቡ ቤቶችና ሱቆች ጋር ያስሱ።",
     listName: "አካባቢዎች",
     ctaTitle: "በዓይንዎ ይመልከቱ፦ ነፃ የቦታ ጉብኝት ይያዙ",
     ctaText:
@@ -363,7 +363,7 @@ const am: AreasDict = {
     typeLink: (plural, name, count) => `${inArea(name)} ያሉ ${plural} (${count})`,
     listingsIn: (name) => `${inArea(name)} ያሉ ዝርዝሮች`,
     seeAll: (total) => `ሁሉንም ${total} ይመልከቱ`,
-    projectsIn: (name) => `${inArea(name)} ያሉ ፕሮጀክቶቻችን`,
+    projectsIn: (name) => `${inArea(name)} ያሉ ፕሮጀክቶች`,
     noListings: (name) => `በአሁኑ ጊዜ ${inArea(name)} ዝርዝር የለንም።`,
     tellUs: "የሚፈልጉትን ይንገሩን",
     noListingsTail: "ክፍሎች ሲለቀቁ እናሳውቅዎታለን።",
@@ -389,7 +389,7 @@ const am: AreasDict = {
     otherTypes: "ሌሎች የንብረት ዓይነቶች",
     locTitle: (plural, name) => `${inArea(name)} ለሽያጭ የቀረቡ ${plural}`,
     locDescription: (total, label, name, city) =>
-      `${total} ${label} ${inArea(name)}፣ ${cityName("am", city)} ለሽያጭ ቀርበዋል፤ በቀጥታ በቴምር ፕሮፐርቲስ የሚሸጡ። ዋጋዎችንና ስፋቶችን ያወዳድሩ፣ ከዚያም ነፃ የቦታ ጉብኝት ይያዙ።`,
+      `${total} ${label} ${inArea(name)}፣ ${cityName("am", city)} ለሽያጭ ቀርበዋል፤ በቴምር ፕሮፐርቲስ የሚቀርቡ። ዋጋዎችንና ስፋቶችን ያወዳድሩ፣ ከዚያም ነፃ የቦታ ጉብኝት ይያዙ።`,
     locH1: (plural, name) => `${inArea(name)} ለሽያጭ የቀረቡ ${plural}`,
     locLead: (total, label, name, city, min, max) =>
       `${total} ${label} ${inArea(name)}፣ ${cityName("am", city)} ለሽያጭ ቀርበዋል${

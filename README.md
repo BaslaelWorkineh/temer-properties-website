@@ -158,11 +158,11 @@ Environment variables are documented in `.env.example`.
 
 ## Before launch: decisions for the business
 
-1. **One canonical domain, and the brand pointing at it.**
-   - Google treats temerproperties.com (the company's WordPress site) as Temer's official website: the X account and the Betoch and GoAfrica directory listings link there. Searches for "Temer" and "Temer Properties" will keep showing it first until those links move.
-   - The new site's domain is **www.temerpropertiesethiopia.com**: set `NEXT_PUBLIC_SITE_URL=https://www.temerpropertiesethiopia.com` in production (the live site uses the www address) and keep the bare `temerpropertiesethiopia.com` redirecting to it. Add the same www address as the property in Google Search Console. If the company ever retires temerproperties.com, 301-redirecting it here is the surest way to rank first for "Temer".
-   - 301-redirect the other domains to it, path for path. temerpropertiessales.com and temerpropertiesapartment.com both rank for "temer properties" today; `src/lib/config/legacy-redirects.ts` maps their URLs.
-   - Change the website link on the Google Business Profile, Facebook, Instagram, TikTok, YouTube, X and the directory pages in `site.profiles` to the new domain.
+1. **One canonical domain, and an identity that is not confused with other sellers.**
+   - Several unrelated sales businesses use the "Temer Properties" name (for example temerproperties.com). This site is one of them and must not claim to be the "official" Temer website, so searches for the bare name are shared and cannot be won outright. Rank for specific searches instead (area, project, property type) and make this business easy to tell apart: legal name, own Google Business Profile, own reviews.
+   - The new site's domain is **www.temerpropertiesethiopia.com**: set `NEXT_PUBLIC_SITE_URL=https://www.temerpropertiesethiopia.com` in production (the live site uses the www address) and keep the bare `temerpropertiesethiopia.com` redirecting to it. Add the same www address as the property in Google Search Console.
+   - `site.profiles` (structured data sameAs) is empty until it is confirmed which directory pages belong to this business; the candidates are listed in `src/lib/config/site.ts`. Do not add another seller's page.
+   - Put the new domain as the website on this business's own Google Business Profile, Facebook, Instagram, TikTok, YouTube and X.
 2. **Consistent NAP.**
    - The old sites list different phones (0904 192 923 / 0913 455 624), emails, offices (Sarbet vs Bole Road) and founding years (2010 E.C. vs 2015).
    - Confirm the real details in `src/lib/config/site.ts` and use them identically on Google Business Profile.

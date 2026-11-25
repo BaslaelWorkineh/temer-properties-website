@@ -99,7 +99,7 @@ const en: PropertiesDict = {
     breadcrumb: "Properties",
     h1: "Properties for sale in Addis Ababa",
     intro:
-      "Every listing below is sold directly by Temer Properties: real prices in Ethiopian Birr, real floor areas and the payment options for each unit.",
+      "Every listing below shows real prices in Ethiopian Birr, real floor areas and the payment options for each unit.",
     found: (n) => `${n} ${n === 1 ? "property" : "properties"} found`,
     pageOf: (page, count) => ` · page ${page} of ${count}`,
     clear: "Clear filters",
@@ -198,7 +198,7 @@ const am: PropertiesDict = {
     breadcrumb: "ንብረቶች",
     h1: "በአዲስ አበባ ለሽያጭ የቀረቡ ንብረቶች",
     intro:
-      "ከዚህ በታች ያሉት ሁሉም ንብረቶች በቀጥታ በቴምር ፕሮፐርቲስ የሚሸጡ ናቸው፦ በኢትዮጵያ ብር ትክክለኛ ዋጋ፣ ትክክለኛ የወለል ስፋትና ለእያንዳንዱ ክፍል የሚሆኑ የክፍያ አማራጮች።",
+      "ከዚህ በታች ያሉት ሁሉም ንብረቶች በኢትዮጵያ ብር ትክክለኛ ዋጋ፣ ትክክለኛ የወለል ስፋትና ለእያንዳንዱ ክፍል የሚሆኑ የክፍያ አማራጮችን ያሳያሉ።",
     found: (n) => `${n} ንብረቶች ተገኝተዋል`,
     pageOf: (page, count) => ` · ገጽ ${page} ከ${count}`,
     clear: "ማጣሪያዎችን አጽዳ",

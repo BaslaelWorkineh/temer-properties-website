@@ -30,7 +30,7 @@ export const site = {
   alternateNames: ["Temer", "Temer Real Estate", "Temer Properties Addis Ababa", "ቴምር ፕሮፐርቲስ", "ቴምር ሪል እስቴት"],
   tagline: "Apartments, homes & shops for sale in Addis Ababa",
   description:
-    "Licensed real estate developer in Addis Ababa. Buy apartments, modern homes and commercial shops with flexible payment plans, and book a site visit online.",
+    "Apartments, modern homes and commercial shops for sale in Addis Ababa, with clear prices, flexible payment plans and online site-visit booking.",
   /** Founded in 2010 E.C. (Ethiopian calendar) per the company's own copy. Confirm before using in structured data. */
   foundedEthiopianCalendar: "2010 E.C.",
   locale: "en_US",
@@ -78,24 +78,24 @@ export const site = {
   },
 
   /**
-   * Directory and partner pages about the business (structured data sameAs), which tie this site to the
-   * "Temer" brand that Google already knows. Those that list a website link to temerproperties.com today:
-   * ask each one to switch to this site's URL at launch, and remove any entry that is not this business.
+   * Directory and partner pages about THIS business (structured data sameAs). Left empty on purpose: several unrelated
+   * sales businesses share the "Temer Properties" name, and a page that belongs to another seller must not be listed
+   * here or Google will merge the two identities. Add a URL only after confirming it is this business's own page.
+   * Candidates found while researching, NOT yet confirmed as ours:
+   *   https://www.2merkato.com/directory/41080-temer-real-estate-s
+   *   https://www.betoch.com/developers/temer-properties
+   *   https://www.goafricaonline.com/et/1197540-temer-properties-agences-immobilieres-addis-abeba-ethiopia
+   *   https://ethiopiapropertycentre.com/agents/temer-realestate-1009
+   *   https://shebamiles.ethiopianairlines.com/partners/real-estate-partners/TEMER-PROPERTIES
    */
-  profiles: [
-    "https://www.2merkato.com/directory/41080-temer-real-estate-s",
-    "https://www.betoch.com/developers/temer-properties",
-    "https://www.goafricaonline.com/et/1197540-temer-properties-agences-immobilieres-addis-abeba-ethiopia",
-    "https://ethiopiapropertycentre.com/agents/temer-realestate-1009",
-    "https://shebamiles.ethiopianairlines.com/partners/real-estate-partners/TEMER-PROPERTIES",
-  ],
+  profiles: [] as readonly string[],
 
-  /** Company claims from the current website. Keep only what can be backed up. */
-  stats: [
-    { value: "10,000+", label: "Happy customers" },
-    { value: "10+", label: "Major projects completed" },
-    { value: "400+", label: "Units delivered" },
-  ],
+  /**
+   * Track-record numbers. Empty on purpose: "10,000+ customers, 10+ projects, 400+ units delivered" are claims of the
+   * Temer developer, not of this sales business. Add figures here only if they can be backed up for this business;
+   * the home and About pages then show them again.
+   */
+  stats: [] as ReadonlyArray<{ value: string; label: string }>,
 } as const;
 
 export type SiteConfig = typeof site;

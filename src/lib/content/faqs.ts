@@ -11,13 +11,13 @@ export const generalFaqs: Array<FaqItem & { group: "Buying" | "Payments" | "Visi
     group: "Buying",
     question: "What types of property does Temer Properties sell?",
     answer:
-      "We develop and sell one-, two- and three-bedroom apartments, modern family homes and commercial shop units in mixed-use buildings across Addis Ababa, including Sarbet, Megenagna, Ayat, Haile Garment, Piassa and Bulgaria, plus Gelan.",
+      "We sell one-, two- and three-bedroom apartments, modern family homes and commercial shop units in mixed-use buildings across Addis Ababa, including Sarbet, Megenagna, Ayat, Haile Garment, Piassa and Bulgaria, plus Gelan.",
   },
   {
     group: "Buying",
-    question: "Do you sell directly, or through brokers?",
+    question: "Who will I deal with when buying?",
     answer:
-      "You buy directly from Temer Properties, the developer. Our in-house sales team handles enquiries, site visits, reservations and contracts, so you always deal with the company that builds and delivers your home.",
+      "Our sales team looks after you from the first call: enquiries, site visits, reservations and explaining the contract and payment schedule, so you always have one clear point of contact.",
   },
   {
     group: "Buying",
@@ -73,9 +73,9 @@ export const generalFaqsAm: Array<FaqItem & { group: "Buying" | "Payments" | "Vi
   },
   {
     group: "Buying",
-    question: "በቀጥታ ነው የሚሸጡት ወይስ በደላሎች በኩል?",
+    question: "ስገዛ ከማን ጋር ነው የምነጋገረው?",
     answer:
-      "በቀጥታ ከገንቢው ከቴምር ፕሮፐርቲስ ይገዛሉ። የውስጥ የሽያጭ ቡድናችን ጥያቄዎችን፣ የቦታ ጉብኝቶችን፣ ቦታ ማስያዝንና ውሎችን ይይዛል፤ ስለዚህ ቤትዎን ከሚገነባውና ከሚያስረክበው ድርጅት ጋር ብቻ ይነጋገራሉ።",
+      "የሽያጭ ቡድናችን ከመጀመሪያው ጥሪ ጀምሮ ይንከባከብዎታል፦ ጥያቄዎችን፣ የቦታ ጉብኝቶችን፣ ቦታ ማስያዝንና የውሉንና የክፍያ መርሐ ግብሩን ማብራራትን፤ ስለዚህ ሁልጊዜ አንድ ግልጽ የመገናኛ ሰው ይኖርዎታል።",
   },
   {
     group: "Buying",

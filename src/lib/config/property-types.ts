@@ -31,7 +31,7 @@ export const propertyTypes: Record<PropertyType, TypeMeta> = {
     schemaType: "Apartment",
     residential: true,
     intro:
-      "Browse new one-, two- and three-bedroom apartments for sale in Addis Ababa, built and sold directly by Temer Properties. Every listing shows the size in square metres, the floor, the project it belongs to and the payment options, so you can compare units across Sarbet, Megenagna, Ayat, Haile Garment and other neighbourhoods before you book a site visit.",
+      "Browse new one-, two- and three-bedroom apartments for sale in Addis Ababa, offered by Temer Properties. Every listing shows the size in square metres, the floor, the project it belongs to and the payment options, so you can compare units across Sarbet, Megenagna, Ayat, Haile Garment and other neighbourhoods before you book a site visit.",
   },
   villa: {
     label: "Villa",
