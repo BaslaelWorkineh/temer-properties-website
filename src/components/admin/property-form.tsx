@@ -16,7 +16,7 @@ import { buttonStyles } from "@/components/ui/button";
 import { Field, inputStyles } from "@/components/ui/form";
 import type { Property } from "@/db/schema";
 import { PROPERTY_STATUSES, PROPERTY_TYPES, propertyStatusLabels, propertyTypes } from "@/lib/config/property-types";
-import { publishBlockers } from "@/lib/property-readiness";
+import { listBlockers, type Blocker } from "@/lib/property-readiness";
 
 type Option = { id: number; name: string };
 
@@ -55,11 +55,14 @@ export function PropertyForm({
   projects: Option[];
   siteUrl: string;
 }) {
-  const { state, pending, onSubmit, errors } = useAdminForm(savePropertyAction);
+  const { state, pending, onSubmit, errors: serverErrors } = useAdminForm(savePropertyAction);
   const isNew = !property;
   const formRef = useRef<HTMLFormElement>(null);
   const [draftId, setDraftId] = useState<number | null>(property?.id ?? null);
-  const [missing, setMissing] = useState<string[]>([]);
+  const [blockers, setBlockers] = useState<Blocker[]>([]);
+  const missing = blockers.map((b) => b.text);
+  // Fields the user tried to skip past with "Next". Shown with a red border and a message; each clears itself once filled.
+  const [attempted, setAttempted] = useState<Set<string>>(new Set());
   const [wantsPublish, setWantsPublish] = useState(property?.isPublished ?? true);
   const [autosave, setAutosave] = useState<"idle" | "saving" | "saved">("idle");
   const [step, setStep] = useState(0);
@@ -69,8 +72,8 @@ export function PropertyForm({
 
   // Live listings are only saved with the button, so a half-edited price can never reach the site.
   const canAutosave = !property?.isPublished;
-  // Only a listing that is not live yet must be complete to publish (live ones can still be edited).
-  const needsComplete = wantsPublish && !property?.isPublished;
+  // Every save (draft, publish or edit of a live listing) must be complete.
+  const needsComplete = true;
 
   useEffect(() => {
     const form = formRef.current;
@@ -128,13 +131,19 @@ export function PropertyForm({
           area: String(fd.get("areaSqm") ?? ""),
           place: [projectName, areaName].filter(Boolean).join(", "),
         });
-        setMissing(
-          publishBlockers({
+        setBlockers(
+          listBlockers({
             title: String(fd.get("title") ?? ""),
             locationId: area === "__new__" ? String(fd.get("newLocationName") ?? "").trim() : area,
             areaSqm: String(fd.get("areaSqm") ?? ""),
             summary: String(fd.get("summary") ?? ""),
             description: String(fd.get("description") ?? ""),
+            price: String(fd.get("price") ?? ""),
+            residential: propertyTypes[String(fd.get("type") ?? "apartment") as keyof typeof propertyTypes]?.residential ?? true,
+            bedrooms: String(fd.get("bedrooms") ?? ""),
+            bathrooms: String(fd.get("bathrooms") ?? ""),
+            completion: String(fd.get("completion") ?? ""),
+            paymentPlan: String(fd.get("paymentPlan") ?? ""),
             imageCount: (() => {
               try {
                 return (JSON.parse(String(fd.get("images") ?? "[]")) as unknown[]).length;
@@ -165,9 +174,17 @@ export function PropertyForm({
 
   const blocked = needsComplete && missing.length > 0;
 
+  // Server errors plus the fields skipped with "Next" (they clear as soon as the field is valid).
+  const errors: Record<string, string[] | undefined> = { ...serverErrors };
+  for (const b of blockers) {
+    if (!attempted.has(b.field)) continue;
+    const key = b.field === "locationId" && areaChoice === "__new__" ? "newLocationName" : b.field;
+    errors[key] = [key === "newLocationName" ? "Type the new area name." : b.message];
+  }
+
   // After a failed save, jump to the first step that has an error so nothing stays hidden.
   const errorStep = (() => {
-    const keys = Object.keys(errors);
+    const keys = Object.keys(serverErrors);
     if (!keys.length) return null;
     const idx = STEPS.findIndex((st) => st.fields.some((f) => keys.includes(f)));
     return idx >= 0 ? idx : null;
@@ -179,11 +196,21 @@ export function PropertyForm({
   }
 
   const last = step === STEPS.length - 1;
+  // Going back is always allowed. Going forward is blocked while a required field in any step before the target is empty.
   const goto = (n: number) => {
-    setStep(Math.max(0, Math.min(STEPS.length - 1, n)));
+    const target = Math.max(0, Math.min(STEPS.length - 1, n));
+    if (target > step) {
+      const stuck = blockers.filter((b) => b.step < target);
+      if (stuck.length) {
+        setAttempted((prev) => new Set([...prev, ...stuck.map((b) => b.field)]));
+        setStep(Math.min(...stuck.map((b) => b.step)));
+        window.scrollTo({ top: 0 });
+        return;
+      }
+    }
+    setStep(target);
     window.scrollTo({ top: 0 });
   };
-
   return (
     <form
       ref={formRef}
@@ -264,7 +291,7 @@ export function PropertyForm({
               )}
             </Field>
             <div>
-              <Field id="locationId" label="Area" errors={errors.locationId} hint="Links the listing to its area page.">
+              <Field id="locationId" required label="Area" errors={errors.locationId} hint="Links the listing to its area page.">
                 {(p) => (
                   <select {...p} value={areaChoice} onChange={(e) => setAreaChoice(e.target.value)} className={inputStyles}>
                     <option value="">— Not set —</option>
@@ -310,9 +337,10 @@ export function PropertyForm({
         <FormSection title="Price" description="Step 2 of 4">
           <Field
             id="price"
+            required
             label="Price (ETB)"
             errors={errors.price}
-            hint="Full price in whole birr, before any discount. Leave blank to show “Price on request”."
+            hint="Full price in whole birr, before any discount."
           >
             {(p) => <input {...p} defaultValue={property?.price ?? ""} inputMode="numeric" placeholder="e.g. 12,500,000" className={inputStyles} />}
           </Field>
@@ -332,7 +360,7 @@ export function PropertyForm({
           <p className="rounded-xl bg-brand-50 px-4 py-3 text-sm font-semibold text-brand-800" aria-live="polite">
             {priceSentence(preview)}
           </p>
-          <Field id="paymentPlan" label="How can the buyer pay?" errors={errors.paymentPlan} hint="e.g. 30% down payment, balance in instalments until handover.">
+          <Field id="paymentPlan" required label="How can the buyer pay?" errors={errors.paymentPlan} hint="e.g. 30% down payment, balance in instalments until handover.">
             {(p) => <textarea {...p} rows={3} defaultValue={property?.paymentPlan ?? ""} className={inputStyles} />}
           </Field>
         </FormSection>
@@ -341,24 +369,24 @@ export function PropertyForm({
       <div hidden={step !== 2} className="grid gap-6">
         <FormSection title="The details" description="Step 3 of 4">
           <div className="grid gap-5 sm:grid-cols-2">
-            <Field id="bedrooms" label="Bedrooms" errors={errors.bedrooms} hint="0 = studio.">
+            <Field id="bedrooms" required label="Bedrooms" errors={errors.bedrooms} hint="0 = studio.">
               {(p) => <input {...p} type="number" min={0} max={50} defaultValue={property?.bedrooms ?? ""} className={inputStyles} />}
             </Field>
-            <Field id="bathrooms" label="Toilets / bathrooms" errors={errors.bathrooms}>
+            <Field id="bathrooms" required label="Toilets / bathrooms" errors={errors.bathrooms}>
               {(p) => <input {...p} type="number" min={0} max={50} defaultValue={property?.bathrooms ?? ""} className={inputStyles} />}
             </Field>
-            <Field id="areaSqm" label="Size (m²)" errors={errors.areaSqm}>
+            <Field id="areaSqm" required label="Size (m²)" errors={errors.areaSqm}>
               {(p) => <input {...p} type="number" min={1} step="0.1" defaultValue={property?.areaSqm ?? ""} className={inputStyles} />}
             </Field>
             <Field id="floor" label="Floor" errors={errors.floor} hint="0 = ground floor.">
               {(p) => <input {...p} type="number" min={-5} max={200} defaultValue={property?.floor ?? ""} className={inputStyles} />}
             </Field>
           </div>
-          <Field id="completion" label="When can they move in?" errors={errors.completion}>
+          <Field id="completion" required label="When can they move in?" errors={errors.completion}>
             {(p) => <input {...p} defaultValue={property?.completion ?? ""} maxLength={60} placeholder="e.g. Ready to move in, or December 2027" className={inputStyles} />}
           </Field>
           <FeaturePicker name="features" initial={property?.features ?? []} errors={errors.features} />
-          <Field id="summary" label="One-sentence summary" errors={errors.summary} hint="1–2 sentences for listing cards and Google (max 300).">
+          <Field id="summary" required label="One-sentence summary" errors={errors.summary} hint="1–2 sentences for listing cards and Google (max 300).">
             {(p) => (
               <textarea
                 {...p}
@@ -372,6 +400,7 @@ export function PropertyForm({
           </Field>
           <Field
             id="description"
+            required
             label="Describe the home"
             errors={errors.description}
             hint="Layout, views, finishes, nearby schools and transport. Markdown supported: ## Heading, **bold**, - bullet lists."
@@ -406,7 +435,7 @@ export function PropertyForm({
             <Checkbox
               name="isPublished"
               label="Publish now"
-              hint="Untick to keep it as a draft that only admins can see. A listing needs a title, area, size, summary, description and 3 photos to go live."
+              hint="Untick to keep it as a draft that only admins can see. A listing always needs a title, area, price, payment plan, size, summary, description, move-in date and 3 photos (and bedrooms and bathrooms for homes) before it can be saved."
               defaultChecked={property?.isPublished ?? true}
             />
             <Checkbox name="isFeatured" label="Show on the home page" hint="Appears first in “Latest properties for sale”." defaultChecked={property?.isFeatured ?? false} />
@@ -439,7 +468,7 @@ export function PropertyForm({
           label={property?.isPublished ? "Save changes" : wantsPublish ? "Publish listing" : "Save as draft"}
           note={
             blocked ? (
-              <span className="text-amber-800">To publish, add: {missing.join(", ")}. Or untick “Publish now” to keep it as a draft.</span>
+              <span className="text-amber-800">Required before saving, add: {missing.join(", ")}.</span>
             ) : canAutosave ? (
               <span>{autosave === "saving" ? "Saving draft…" : autosave === "saved" ? "Draft saved automatically." : "Your progress is saved as a draft automatically."}</span>
             ) : null

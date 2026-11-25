@@ -41,7 +41,7 @@ export function ProjectForm({ project, locations, siteUrl }: { project: Project 
               </select>
             )}
           </Field>
-          <Field id="locationId" label="Location" errors={errors.locationId}>
+          <Field id="locationId" required label="Location" errors={errors.locationId}>
             {(p) => (
               <select {...p} defaultValue={project?.locationId ?? ""} className={inputStyles}>
                 <option value="">— Not set —</option>
@@ -56,7 +56,7 @@ export function ProjectForm({ project, locations, siteUrl }: { project: Project 
           <Field id="category" label="Category" errors={errors.category} hint="Type of property shown on the card, e.g. Apartments & shops, Villas, Commercial. Optional.">
             {(p) => <input {...p} defaultValue={project?.category ?? ""} maxLength={100} className={inputStyles} />}
           </Field>
-          <Field id="completion" label="Completion" errors={errors.completion} hint="e.g. Q4 2027, or Delivered 2015 E.C.">
+          <Field id="completion" required label="Completion" errors={errors.completion} hint="e.g. Q4 2027, or Delivered 2015 E.C.">
             {(p) => <input {...p} defaultValue={project?.completion ?? ""} maxLength={60} className={inputStyles} />}
           </Field>
           <Field id="totalUnits" label="Total units" errors={errors.totalUnits}>
@@ -69,10 +69,10 @@ export function ProjectForm({ project, locations, siteUrl }: { project: Project 
       </FormSection>
 
       <FormSection title="Description">
-        <Field id="summary" label="Summary" errors={errors.summary} hint="1–2 sentences for cards and the search description fallback (max 300).">
+        <Field id="summary" required label="Summary" errors={errors.summary} hint="1–2 sentences for cards and the search description fallback (max 300).">
           {(p) => <textarea {...p} rows={2} maxLength={300} defaultValue={project?.summary ?? ""} placeholder="e.g. Modern apartments and shops in the heart of Sarbet, now selling with flexible payment." className={inputStyles} />}
         </Field>
-        <Field id="description" label="Full description" errors={errors.description} hint="Markdown supported. Cover the location, building, finishes, amenities and progress.">
+        <Field id="description" required label="Full description" errors={errors.description} hint="Markdown supported. Cover the location, building, finishes, amenities and progress.">
           {(p) => <textarea {...p} rows={12} defaultValue={project?.description ?? ""} placeholder={"## About the project\nWhat is being built, who it is for and why the location is special.\n\n## Unit types\n- 1, 2 and 3-bedroom apartments\n- Ground-floor shops\n\n## Progress\nCurrent construction stage and expected handover."} className={`${inputStyles} font-mono text-sm`} />}
         </Field>
         <div className="grid gap-5 sm:grid-cols-2">
@@ -83,7 +83,7 @@ export function ProjectForm({ project, locations, siteUrl }: { project: Project 
             {(p) => <textarea {...p} rows={4} defaultValue={project?.amenities.join("\n") ?? ""} className={inputStyles} />}
           </Field>
         </div>
-        <Field id="paymentPlan" label="Payment plan" errors={errors.paymentPlan}>
+        <Field id="paymentPlan" required label="Payment plan" errors={errors.paymentPlan}>
           {(p) => <textarea {...p} rows={3} defaultValue={project?.paymentPlan ?? ""} className={inputStyles} />}
         </Field>
       </FormSection>

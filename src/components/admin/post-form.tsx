@@ -25,7 +25,7 @@ export function PostForm({ post, siteUrl }: { post: Post | null; siteUrl: string
           {(p) => <input {...p} defaultValue={post?.title} maxLength={160} className={inputStyles} />}
         </Field>
         <SlugField initial={post?.slug ?? ""} isNew={isNew} isPublished={post?.isPublished ?? false} pathPrefix="/blog/" errors={errors.slug} />
-        <Field id="excerpt" label="Excerpt" errors={errors.excerpt} hint="1–2 sentence teaser for the guides page and link previews (max 300).">
+        <Field id="excerpt" required label="Excerpt" errors={errors.excerpt} hint="1–2 sentence teaser for the guides page and link previews (max 300).">
           {(p) => <textarea {...p} rows={2} maxLength={300} defaultValue={post?.excerpt ?? ""} className={inputStyles} />}
         </Field>
         <Field

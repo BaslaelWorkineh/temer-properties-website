@@ -9,7 +9,7 @@ import { locations, projects, properties, type FaqItem, type ImageItem } from "@
 import { requireAdmin, requireOwner } from "@/lib/auth/session";
 import { TAGS } from "@/lib/cache-tags";
 import { refreshPublicContent } from "@/lib/revalidate";
-import { bool, errorState, json, lines, locationInputSchema, optStr, readAm, str, validationError, type FormState } from "@/lib/validation";
+import { bool, errorState, json, lines, locationInputSchema, optStr, readAm, requireFilled, str, validationError, type FormState } from "@/lib/validation";
 
 type Saved = { id: number; slug: string };
 
@@ -38,6 +38,13 @@ export async function saveLocationAction(_prev: FormState<Saved>, formData: Form
   });
   if (!parsed.success) return validationError(parsed.error);
   const data = parsed.data;
+
+  const missing = requireFilled([
+    ["summary", (data.summary ?? "").trim().length >= 30, "Write a summary of at least 30 letters."],
+    ["description", (data.description ?? "").trim().length >= 100, "Write an area guide of at least 100 letters."],
+    ["image", !!data.image, "Add a photo of the area."],
+  ]);
+  if (missing) return missing;
 
   const imageError = invalidImageMessage([data.image]);
   if (imageError) return errorState(imageError, { image: [imageError] });

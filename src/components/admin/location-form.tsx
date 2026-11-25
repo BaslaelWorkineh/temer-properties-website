@@ -34,10 +34,10 @@ export function LocationForm({ location, siteUrl }: { location: Location | null;
       </FormSection>
 
       <FormSection title="Area guide" description="Original, local detail is what makes an area page rank: roads, landmarks, schools, transport, what it is like to live there.">
-        <Field id="summary" label="Summary" errors={errors.summary} hint="1–2 sentences (max 300). Also the fallback search description.">
+        <Field id="summary" required label="Summary" errors={errors.summary} hint="1–2 sentences (max 300). Also the fallback search description.">
           {(p) => <textarea {...p} rows={2} maxLength={300} defaultValue={location?.summary ?? ""} className={inputStyles} />}
         </Field>
-        <Field id="description" label="Area guide" errors={errors.description} hint="Markdown supported: ## Heading, **bold**, - bullet lists.">
+        <Field id="description" required label="Area guide" errors={errors.description} hint="Markdown supported: ## Heading, **bold**, - bullet lists.">
           {(p) => <textarea {...p} rows={12} defaultValue={location?.description ?? ""} className={`${inputStyles} font-mono text-sm`} />}
         </Field>
         <Field id="highlights" label="Highlights" errors={errors.highlights} hint="One per line, e.g. 10 minutes to Bole International Airport.">

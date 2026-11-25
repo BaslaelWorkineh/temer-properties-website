@@ -9,7 +9,7 @@ import { posts, type ImageItem } from "@/db/schema";
 import { requireAdmin, requireOwner } from "@/lib/auth/session";
 import { TAGS } from "@/lib/cache-tags";
 import { refreshPublicContent } from "@/lib/revalidate";
-import { bool, errorState, json, optStr, postInputSchema, readAm, validationError, type FormState } from "@/lib/validation";
+import { bool, errorState, json, optStr, postInputSchema, readAm, requireFilled, validationError, type FormState } from "@/lib/validation";
 
 type Saved = { id: number; slug: string };
 
@@ -37,9 +37,12 @@ export async function savePostAction(_prev: FormState<Saved>, formData: FormData
   if (!parsed.success) return validationError(parsed.error);
   const data = parsed.data;
 
-  if (data.isPublished && data.content.length < 200) {
-    return errorState("Please correct the highlighted fields.", { content: ["Write at least a few paragraphs before publishing (200+ characters)."] });
-  }
+  const missing = requireFilled([
+    ["excerpt", (data.excerpt ?? "").trim().length >= 30, "Write a teaser of at least 30 letters."],
+    ["content", data.content.length >= 200, "Write at least a few paragraphs (200+ characters)."],
+    ["coverImage", !!data.coverImage, "Add a cover image."],
+  ]);
+  if (missing) return missing;
 
   const imageError = invalidImageMessage([data.coverImage]);
   if (imageError) return errorState(imageError, { coverImage: [imageError] });

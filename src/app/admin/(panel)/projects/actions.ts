@@ -9,7 +9,7 @@ import { bookings, inquiries, projects, properties, type FaqItem, type ImageItem
 import { requireAdmin, requireOwner } from "@/lib/auth/session";
 import { TAGS } from "@/lib/cache-tags";
 import { refreshPublicContent } from "@/lib/revalidate";
-import { bool, errorState, json, lines, optStr, projectInputSchema, readAm, str, validationError, type FormState } from "@/lib/validation";
+import { bool, errorState, json, lines, optStr, projectInputSchema, readAm, requireFilled, str, validationError, type FormState } from "@/lib/validation";
 
 type Saved = { id: number; slug: string };
 
@@ -48,6 +48,16 @@ export async function saveProjectAction(_prev: FormState<Saved>, formData: FormD
   });
   if (!parsed.success) return validationError(parsed.error);
   const data = parsed.data;
+
+  const missing = requireFilled([
+    ["locationId", data.locationId != null, "Choose the area this project is in."],
+    ["completion", !!data.completion?.trim(), "Say when the project is or will be completed."],
+    ["summary", (data.summary ?? "").trim().length >= 30, "Write a summary of at least 30 letters."],
+    ["description", (data.description ?? "").trim().length >= 100, "Write a description of at least 100 letters."],
+    ["paymentPlan", !!data.paymentPlan?.trim(), "Explain how the buyer can pay."],
+    ["images", data.images.length >= 3, "Add at least 3 photos."],
+  ]);
+  if (missing) return missing;
 
   const imageError = invalidImageMessage(data.images);
   if (imageError) return errorState(imageError, { images: [imageError] });

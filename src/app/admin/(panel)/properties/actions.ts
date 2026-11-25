@@ -8,6 +8,7 @@ import { db } from "@/db";
 import { bookings, inquiries, locations, properties, type ImageItem } from "@/db/schema";
 import { requireAdmin, requireOwner } from "@/lib/auth/session";
 import { TAGS } from "@/lib/cache-tags";
+import { propertyTypes } from "@/lib/config/property-types";
 import { publishBlockers } from "@/lib/property-readiness";
 import { refreshPublicContent } from "@/lib/revalidate";
 import { slugify } from "@/lib/utils";
@@ -91,8 +92,9 @@ async function persistProperty(formData: FormData, mode: "save" | "draft"): Prom
     locationId = await findOrCreateLocation(areaName);
   }
 
-  // A listing may only go live when it is complete (drafts and already-live listings are not held to this).
-  if (data.isPublished && !existing?.isPublished) {
+  // Every explicit save (new, draft or live) must be complete. Only the hidden background autosave is exempt,
+  // and it never publishes.
+  if (mode === "save") {
     const missing = publishBlockers({
       title: data.title,
       locationId,
@@ -100,8 +102,14 @@ async function persistProperty(formData: FormData, mode: "save" | "draft"): Prom
       summary: data.summary ?? "",
       description: data.description ?? "",
       imageCount: data.images.length,
+      price: data.price,
+      residential: propertyTypes[data.type].residential,
+      bedrooms: data.bedrooms,
+      bathrooms: data.bathrooms,
+      completion: data.completion,
+      paymentPlan: data.paymentPlan,
     });
-    if (missing.length) return errorState(`To publish, add: ${missing.join(", ")}. Untick “Published” to save it as a draft.`);
+    if (missing.length) return errorState(`Required before saving, add: ${missing.join(", ")}.`);
   }
 
   const imageError = invalidImageMessage(data.images);

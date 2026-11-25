@@ -20,6 +20,16 @@ export function errorState(message: string, fieldErrors?: FieldErrors) {
   return { status: "error", message, fieldErrors } as const;
 }
 
+/**
+ * Required-for-the-buyer checks. Each rule is [field, isFilled, message]. Returns an error state naming every
+ * empty field (shown as a red border plus text under the box), or null when all are filled.
+ */
+export function requireFilled(rules: ReadonlyArray<readonly [field: string, filled: boolean, message: string]>) {
+  const fieldErrors: FieldErrors = {};
+  for (const [field, filled, message] of rules) if (!filled) fieldErrors[field] = [message];
+  return Object.keys(fieldErrors).length ? errorState("Please fill in the required fields.", fieldErrors) : null;
+}
+
 export function validationError(error: z.ZodError, message = "Please correct the highlighted fields.") {
   return errorState(message, z.flattenError(error).fieldErrors as FieldErrors);
 }
