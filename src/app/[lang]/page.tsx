@@ -18,8 +18,9 @@ import { site, whatsappLink } from "@/lib/config/site";
 import { getLocations, isLocationIndexable } from "@/lib/data/locations";
 import { getPublishedPosts } from "@/lib/data/posts";
 import { getProjects } from "@/lib/data/projects";
-import { getFeaturedProperties, getProjectShowcase, searchProperties, type ShowcaseListing } from "@/lib/data/properties";
-import { ProjectShowcase, type ShowcaseRow } from "@/components/site/project-showcase";
+import { getFeaturedProperties, getProjectShowcases, searchProperties, type ShowcaseListing } from "@/lib/data/properties";
+import type { ShowcaseRow } from "@/components/site/project-showcase";
+import { ProjectList, type ListedProject, type ShopsBlock } from "@/components/site/project-list";
 import { formatDate, formatPrice, formatPriceCompact } from "@/lib/format";
 import { hasLocale, locales, type Locale } from "@/lib/i18n/config";
 import { getDictionary, localizedAreaName, type Dictionary } from "@/lib/i18n/dictionaries";
@@ -27,6 +28,12 @@ import { buildMetadata } from "@/lib/seo/metadata";
 import { organizationJsonLd, websiteJsonLd } from "@/lib/seo/jsonld";
 
 export const ensureStatic = "navigation";
+
+/** The photo beside the shop offers on the home page: a Temer commercial building, glass-fronted shops on every floor. */
+const SHOPS_IMAGE = {
+  url: "/images/projects/commercial-center-shops.jpg",
+  alt: "A Temer commercial building with glass-fronted shops on every floor and a large screen on its corner (3D render)",
+};
 
 export async function generateMetadata({ params }: PageProps<"/[lang]">): Promise<Metadata> {
   const { lang } = await params;
@@ -43,15 +50,19 @@ const stepMeta = [
   { href: "/projects", image: { src: "/images/sample/site-3.jpg", alt: "A finished Temer Properties apartment tower at sunset" } },
 ];
 
-/** Groups the showcase listings into one row per unit type (studio first), with prices formatted for the client. */
+/** Row order: studios and bedroom counts ascending, then shops, then anything else. */
+const SHOP_ROW = 1000;
+const OTHER_ROW = 1001;
+
+/** Groups the showcase listings into one row per unit type (studio first, shops last), with prices formatted for the client. */
 function toShowcaseRows(listings: ShowcaseListing[], t: Dictionary["home"]["showcase"], lang: Locale): ShowcaseRow[] {
   const groups = new Map<number, ShowcaseListing[]>();
   for (const l of listings) {
-    const key = l.bedrooms ?? -1;
+    const key = l.type === "shop" ? SHOP_ROW : (l.bedrooms ?? OTHER_ROW);
     groups.set(key, [...(groups.get(key) ?? []), l]);
   }
   return [...groups.entries()]
-    .sort(([a], [b]) => (a < 0 ? 1 : b < 0 ? -1 : a - b))
+    .sort(([a], [b]) => a - b)
     .map(([bedrooms, items]) => {
       const areas = items.map((l) => l.areaSqm).filter((a): a is number => a != null);
       const prices = items.map((l) => l.price).filter((p): p is number => p != null && p > 0);
@@ -63,7 +74,7 @@ function toShowcaseRows(listings: ShowcaseListing[], t: Dictionary["home"]["show
       ];
       return {
         key: String(bedrooms),
-        label: bedrooms < 0 ? t.other : t.typology(bedrooms),
+        label: bedrooms === SHOP_ROW ? t.shops : bedrooms === OTHER_ROW ? t.other : t.typology(bedrooms),
         meta: meta.filter(Boolean).join(" · "),
         units: groupByUnit(items).map(({ name, listings: same }) => ({
           key: String(same[0].id),
@@ -72,9 +83,12 @@ function toShowcaseRows(listings: ShowcaseListing[], t: Dictionary["home"]["show
           options: same.map((l) => ({
             id: l.id,
             href: `/properties/${l.slug}`,
-            floors: floorsOf(l.title),
+            caption: floorsOf(l.title) ?? (l.type === "shop" ? t.startingPrice : null),
             total: formatPrice(l.price, lang),
-            advance: l.price ? formatPrice(Math.round(l.price * 0.2), lang) : "—",
+            advance:
+              l.price && l.advancePercent
+                ? `${t.advance(l.advancePercent)}: ${formatPrice(Math.round((l.price * l.advancePercent) / 100), lang)}`
+                : null,
           })),
         })),
       };
@@ -107,20 +121,21 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
   const { props: heroMobile } = getImageProps({ ...heroCommon, quality: 75, fetchPriority: "high", loading: "eager" });
 
   const steps = stepMeta.map((m, i) => ({ ...m, ...dict.home.steps[i] }));
-  const [featured, showcase, listingCount, projects, locations, posts] = await Promise.all([
+  const [featured, showcases, listingCount, projects, locations, posts] = await Promise.all([
     getFeaturedProperties(12, lang),
-    getProjectShowcase(lang),
+    getProjectShowcases(lang),
     searchProperties({ pageSize: 1 }, lang),
     getProjects({}, lang),
     getLocations(lang),
     getPublishedPosts(3, lang),
   ]);
-  // Our projects: every project over two sliding rows (the top row larger). The project featured above leads, then the
-  // admin's featured ones, then projects still selling or being built, then delivered ones.
+  // Our projects: every project over two sliding rows (the top row larger). The first project listed above
+  // leads, then the admin's featured ones, then projects still selling or being built, then delivered ones.
+  const firstSlug = showcases[0]?.project.slug;
   const homeProjects = [...projects]
     .sort(
       (a, b) =>
-        Number(b.slug === showcase?.project.slug) - Number(a.slug === showcase?.project.slug) ||
+        Number(b.slug === firstSlug) - Number(a.slug === firstSlug) ||
         Number(b.isFeatured) - Number(a.isFeatured) ||
         Number(a.status === "delivered") - Number(b.status === "delivered"),
     );
@@ -128,11 +143,53 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
   const bottomProjects = homeProjects.slice(topProjects.length);
   // Fallback grid (no listing belongs to a project): an even count so every row of two is full.
   const latest = featured.slice(0, featured.length - (featured.length % 2));
-  const showcaseRows = showcase ? toShowcaseRows(showcase.listings, dict.home.showcase, lang) : [];
-  // A listing can stand for several homes (one plan on a band of floors), so when every listing belongs to the featured
-  // project and it gives its unit count, the bar counts those homes rather than the listings.
+  const locationOf = (s: (typeof showcases)[number]) => (s.project.locationName ? `${s.project.locationName}, ${site.address.locality}` : null);
+  // Shops are shown together in one block (one card per site, cheapest first); the project blocks list the homes.
+  const listedProjects: ListedProject[] = showcases
+    .map((s) => ({
+      slug: s.project.slug,
+      name: s.project.name,
+      location: locationOf(s),
+      images: s.project.images,
+      rows: toShowcaseRows(
+        s.listings.filter((l) => l.type !== "shop"),
+        dict.home.showcase,
+        lang,
+      ),
+    }))
+    .filter((p) => p.rows.length);
+  const shopListings = showcases
+    .flatMap((s) => s.listings.filter((l) => l.type === "shop").map((l) => ({ l, s })))
+    .sort((a, b) => (a.l.price ?? Infinity) - (b.l.price ?? Infinity));
+  const shopPrices = shopListings.map(({ l }) => l.price).filter((p): p is number => p != null && p > 0);
+  const shops: ShopsBlock | null = shopListings.length
+    ? {
+        title: dict.home.showcase.shopsTitle,
+        intro: dict.home.showcase.shopsIntro(
+          shopListings.length,
+          shopPrices.length ? formatPriceCompact(Math.min(...shopPrices), lang) : null,
+        ),
+        image: SHOPS_IMAGE,
+        offers: shopListings.map(({ l, s }) => ({
+          id: l.id,
+          href: `/properties/${l.slug}`,
+          project: s.project.name,
+          location: locationOf(s),
+          summary: l.summary,
+          caption: dict.home.showcase.startingPrice,
+          total: formatPrice(l.price, lang),
+          advance:
+            l.price && l.advancePercent
+              ? `${dict.home.showcase.advance(l.advancePercent)}: ${formatPrice(Math.round((l.price * l.advancePercent) / 100), lang)}`
+              : null,
+        })),
+      }
+    : null;
+  // A listing can stand for several homes (one plan on a band of floors), so a project that gives its unit count counts
+  // as that many homes (never fewer than its listings); listings outside a project count one each.
   const availableCount =
-    showcase?.project.totalUnits && showcase.listings.length === listingCount.total ? showcase.project.totalUnits : listingCount.total;
+    listingCount.total +
+    showcases.reduce((sum, s) => sum + Math.max(0, (s.project.totalUnits ?? 0) - s.listings.length), 0);
   const areas = locations.filter(isLocationIndexable).slice(0, 8);
   // "Property by area": the six areas with the most listings get a card (real counts, ranked); the rest become links.
   const rankedAreas = locations
@@ -210,10 +267,10 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
 
       {/*
         Latest listings, three flush bands: the gold title bar (how many properties are available, and a button to the
-        full list), the search filter (it submits to /properties), then (when the top listings belong to a project) the
-        featured building: a green bar with its name, then two flush halves that read as one band, the full building
-        render on the left and its unit types on the right, each type a row that opens to list every unit with its
-        total price and the 20% advance. Without such a project it falls back to a two-column grid of photo cards.
+        full list), the search filter (it submits to /properties), then (when listings belong to projects) every
+        project with something for sale, one after the other (see ProjectList): a title bar with its name, then two flush halves,
+        the building render beside its unit types (sides alternate), each type a row that opens to list every
+        unit with its total price and the advance. Without such a project it falls back to a two-column grid of photo cards.
       */}
       <section className="pb-12 sm:pb-14">
         {/* Gold title bar, flush with the hero so it reads as this section's nav bar. */}
@@ -229,45 +286,16 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
           </div>
         </div>
         <HomeSearch locations={areas} lang={lang} className="ring-0" />
-        {showcase && showcaseRows.length ? (
-          <>
-            {/* Green project bar: twice the gold bar's height, the name in large capitals. */}
-            <div className="bg-brand-800 text-white">
-              <div className="flex min-h-28 flex-col justify-center px-3 py-4">
-                <h3 className="text-3xl font-extrabold uppercase leading-none tracking-wide sm:text-5xl">
-                  <span className="text-gold-300">{dict.home.showcase.forSaleIn}</span> {showcase.project.name}
-                </h3>
-                {showcase.project.locationName ? (
-                  <p className="mt-2 flex items-center gap-1.5 text-sm font-medium text-white/80">
-                    <MapPin className="size-4 shrink-0 text-gold-300" aria-hidden="true" />
-                    {showcase.project.locationName}, {site.address.locality}
-                  </p>
-                ) : null}
-              </div>
-            </div>
-            {/* Fixed height on large screens; the one row track is capped (minmax 0) so an open list scrolls inside the
-                typology column instead of stretching the block over what follows. */}
-            <div className="grid lg:h-[calc(100svh-3.5rem)] lg:max-h-[56rem] lg:min-h-[40rem] lg:grid-cols-2 lg:grid-rows-[minmax(0,1fr)]">
-              {showcase.project.image ? (
-                <div className="relative aspect-[16/10] border-8 border-r-0 border-gold-500 bg-brand-950 lg:aspect-auto">
-                  <Image
-                    src={showcase.project.image.url}
-                    alt={showcase.project.image.alt}
-                    fill
-                    sizes="(min-width: 1024px) 50vw, 100vw"
-                    className="object-cover object-[46%_center]"
-                  />
-                </div>
-              ) : null}
-              <div className={showcase.project.image ? "min-h-0" : "min-h-0 lg:col-span-2"}>
-                <ProjectShowcase
-                  image={showcase.project.image}
-                  rows={showcaseRows}
-                  labels={{ total: dict.home.showcase.total, advance: dict.home.showcase.advance }}
-                />
-              </div>
-            </div>
-          </>
+        {listedProjects.length || shops ? (
+          <ProjectList
+            projects={listedProjects}
+            shops={shops}
+            labels={{
+              forSaleIn: dict.home.showcase.forSaleIn,
+              viewProject: dict.home.showcase.viewProject,
+              total: dict.home.showcase.total,
+            }}
+          />
         ) : latest.length ? (
           <ul className="grid gap-3 p-3 sm:grid-cols-2">
             {latest.map((p, i) => (

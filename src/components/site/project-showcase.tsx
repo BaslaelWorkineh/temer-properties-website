@@ -16,7 +16,8 @@ export type ShowcaseRow = {
     key: string;
     name: string;
     summary: string | null;
-    options: { id: number; href: string; floors: string | null; total: string; advance: string }[];
+    /** caption: "Floors 2–6", or "Starting price" for a shop; advance: "20% advance: ETB 2,418,000", when known. */
+    options: { id: number; href: string; caption: string | null; total: string; advance: string | null }[];
   }[];
 };
 
@@ -76,7 +77,7 @@ export function ProjectShowcase({
 }: {
   image: { url: string; alt: string } | null;
   rows: ShowcaseRow[];
-  labels: { total: string; advance: string };
+  labels: { total: string };
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [box, setBox] = useState<number | null>(null);
@@ -194,14 +195,16 @@ export function ProjectShowcase({
                     {u.options.map((o) => (
                       <li key={o.id} className="bg-white text-brand-950 shadow-[0.5rem_0.5rem_0_0_var(--color-logo-green)]">
                         <Link href={o.href} className="group block px-3 py-2 transition-colors hover:bg-brand-700 hover:text-white">
-                          {o.floors ? <span className="block text-xs font-semibold uppercase tracking-wide text-gold-600 transition-colors group-hover:text-gold-300">{o.floors}</span> : null}
+                          {o.caption ? <span className="block text-xs font-semibold uppercase tracking-wide text-gold-600 transition-colors group-hover:text-gold-300">{o.caption}</span> : null}
                           <span className="block font-bold tabular-nums">
                             <span className="sr-only">{labels.total}: </span>
                             {o.total}
                           </span>
-                          <span className="block text-xs tabular-nums text-brand-950/70 transition-colors group-hover:text-white/85">
-                            {labels.advance}: {o.advance}
-                          </span>
+                          {o.advance ? (
+                            <span className="block text-xs tabular-nums text-brand-950/70 transition-colors group-hover:text-white/85">
+                              {o.advance}
+                            </span>
+                          ) : null}
                         </Link>
                       </li>
                     ))}

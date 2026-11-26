@@ -96,11 +96,21 @@ export type Dictionary = {
       /** Before the featured project's name in the green bar: "For sale in Temer Legacy". */
       forSaleIn: string;
       typology: (bedrooms: number) => string;
-      /** Row for listings without a bedroom count (shops, offices). */
+      /** Row for commercial shops. */
+      shops: string;
+      /** Row for other listings without a bedroom count (offices). */
       other: string;
       from: string;
       total: string;
-      advance: string;
+      /** "20% advance": the advance a listing's payment plan starts with. */
+      advance: (percent: number) => string;
+      /** The home page block with every shop offer: its title and "4 sites, from ETB 2.5M". */
+      shopsTitle: string;
+      shopsIntro: (sites: number, from: string | null) => string;
+      /** Above a shop's price, which is where its prices start. */
+      startingPrice: string;
+      /** The link from a project on the home page to its page. */
+      viewProject: string;
     };
     projectsTitle: string;
     projectsDesc: string;
@@ -226,10 +236,15 @@ const en: Dictionary = {
     showcase: {
       forSaleIn: "For sale in",
       typology: (b) => (b === 0 ? "Studio" : `${b} Bedroom`),
+      shops: "Shops",
       other: "Other units",
       from: "from",
       total: "Total price",
-      advance: "20% advance",
+      advance: (p) => `${p}% advance`,
+      shopsTitle: "Commercial shops for sale",
+      shopsIntro: (n, from) => `${n} ${n === 1 ? "site" : "sites"}${from ? `, from ${from}` : ""}`,
+      startingPrice: "Starting price",
+      viewProject: "View project",
     },
     projectsTitle: "Projects",
     projectsDesc: "Now selling, under construction and delivered.",
@@ -361,10 +376,15 @@ const am: Dictionary = {
     showcase: {
       forSaleIn: "ለሽያጭ የቀረበ፦",
       typology: (b) => (b === 0 ? "ስቱዲዮ" : `ባለ ${b} መኝታ`),
+      shops: "ሱቆች",
       other: "ሌሎች ቤቶች",
       from: "ከ",
       total: "ጠቅላላ ዋጋ",
-      advance: "20% ቅድመ ክፍያ",
+      advance: (p) => `${p}% ቅድመ ክፍያ`,
+      shopsTitle: "ለሽያጭ የቀረቡ የንግድ ሱቆች",
+      shopsIntro: (n, from) => `በ${n} ሳይቶች${from ? `፣ ከ${from} ጀምሮ` : ""}`,
+      startingPrice: "መነሻ ዋጋ",
+      viewProject: "ፕሮጀክቱን ይመልከቱ",
     },
     projectsTitle: "ፕሮጀክቶች",
     projectsDesc: "አሁን በሽያጭ ላይ ያሉ፣ በግንባታ ላይ ያሉና የተረከቡ።",

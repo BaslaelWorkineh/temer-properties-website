@@ -188,72 +188,95 @@ export type ShowcaseListing = {
   slug: string;
   title: string;
   summary: string | null;
+  type: PropertyType;
   price: number | null;
   bedrooms: number | null;
   areaSqm: number | null;
+  /** The advance or down payment (% of the price) its payment plan starts with ("20% advance…"); null when it has none. */
+  advancePercent: number | null;
 };
 
 export type ProjectShowcase = {
-  project: { name: string; slug: string; image: ImageItem | null; locationName: string | null; totalUnits: number | null };
+  /** images: the first two project photos (the main one first). */
+  project: { name: string; slug: string; images: ImageItem[]; locationName: string | null; totalUnits: number | null };
   listings: ShowcaseListing[];
 };
 
+/** "- 20% advance when…", "- 25% down payment…" -> 20, 25. */
+const ADVANCE = /(\d+(?:\.\d+)?)\s*%\s*(?:advance|down\s*payment)/i;
+const advancePercentOf = (plan: string | null) => {
+  const match = plan ? ADVANCE.exec(plan) : null;
+  return match ? Number(match[1]) : null;
+};
+
 /**
- * The home page's featured building, chosen in the admin: the project ticked "Featured" (lowest project sort order
- * first) among those with something for sale. Only when no featured project has listings does it fall back to the
- * project of the top recommended listing, so adding a listing elsewhere never swaps the block by itself. Returns that
- * project with every listing still for sale (published, not sold), in the admin's sort order; null when no listing
- * belongs to a project.
+ * The home page's projects for sale: every published project with something for sale (published, not sold), each with
+ * those listings in the admin's sort order. Projects ticked "Featured" come first, then by project sort order, so the
+ * admin decides which building the home page opens on. Empty when no listing belongs to a project.
  */
-export async function getProjectShowcase(lang: Locale = "en"): Promise<ProjectShowcase | null> {
+export async function getProjectShowcases(lang: Locale = "en"): Promise<ProjectShowcase[]> {
   "use cache";
   cacheLife("hours");
   cacheTag(TAGS.properties, TAGS.locations, TAGS.projects);
-  const forSale = and(eq(properties.isPublished, true), ne(properties.status, "sold"));
-  const [top] = await db
-    .select({
-      id: projects.id,
-      name: projects.name,
-      slug: projects.slug,
-      images: projects.images,
-      totalUnits: projects.totalUnits,
-      translations: projects.translations,
-      locationName: locations.name,
-      locationTranslations: locations.translations,
-    })
-    .from(properties)
-    .innerJoin(projects, and(eq(properties.projectId, projects.id), eq(projects.isPublished, true)))
-    .leftJoin(locations, eq(projects.locationId, locations.id))
-    .where(forSale)
-    .orderBy(desc(projects.isFeatured), asc(projects.sortOrder), ...recommendedOrder)
-    .limit(1);
-  if (!top) return null;
-
   const rows = await db
     .select({
       id: properties.id,
       slug: properties.slug,
       title: properties.title,
       summary: properties.summary,
+      type: properties.type,
       price: properties.price,
       bedrooms: properties.bedrooms,
       areaSqm: properties.areaSqm,
+      paymentPlan: properties.paymentPlan,
       translations: properties.translations,
+      project: {
+        id: projects.id,
+        name: projects.name,
+        slug: projects.slug,
+        images: projects.images,
+        totalUnits: projects.totalUnits,
+        translations: projects.translations,
+      },
+      locationName: locations.name,
+      locationTranslations: locations.translations,
     })
     .from(properties)
-    .where(and(forSale, eq(properties.projectId, top.id)))
-    .orderBy(asc(properties.sortOrder), asc(properties.price), asc(properties.id));
+    .innerJoin(projects, and(eq(properties.projectId, projects.id), eq(projects.isPublished, true)))
+    .leftJoin(locations, eq(projects.locationId, locations.id))
+    .where(and(eq(properties.isPublished, true), ne(properties.status, "sold")))
+    .orderBy(
+      desc(projects.isFeatured),
+      asc(projects.sortOrder),
+      asc(projects.id),
+      asc(properties.sortOrder),
+      asc(properties.price),
+      asc(properties.id),
+    );
 
-  return {
-    project: {
-      name: localizeRow({ name: top.name }, top.translations, lang).name,
-      slug: top.slug,
-      image: top.images[0] ?? null,
-      totalUnits: top.totalUnits,
-      locationName: top.locationName ? localizeRow({ name: top.locationName }, top.locationTranslations, lang).name : null,
-    },
-    listings: rows.map(({ translations, ...r }) => ({ ...r, ...localizeRow({ title: r.title, summary: r.summary }, translations, lang) })),
-  };
+  const showcases = new Map<number, ProjectShowcase>();
+  for (const { project, locationName, locationTranslations, translations, paymentPlan, ...r } of rows) {
+    let showcase = showcases.get(project.id);
+    if (!showcase) {
+      showcase = {
+        project: {
+          name: localizeRow({ name: project.name }, project.translations, lang).name,
+          slug: project.slug,
+          images: project.images.slice(0, 2),
+          totalUnits: project.totalUnits,
+          locationName: locationName ? localizeRow({ name: locationName }, locationTranslations, lang).name : null,
+        },
+        listings: [],
+      };
+      showcases.set(project.id, showcase);
+    }
+    showcase.listings.push({
+      ...r,
+      ...localizeRow({ title: r.title, summary: r.summary }, translations, lang),
+      advancePercent: advancePercentOf(paymentPlan),
+    });
+  }
+  return [...showcases.values()];
 }
 
 export async function getPropertyBySlug(slug: string, lang: Locale = "en") {
