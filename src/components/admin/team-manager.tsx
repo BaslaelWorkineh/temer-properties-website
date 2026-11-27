@@ -62,10 +62,10 @@ function AddForm({ onDone }: { onDone: () => void }) {
       <h2 className="text-lg font-semibold">Add a team member</h2>
       <div className="grid gap-5 sm:grid-cols-2">
         <Field id="name" label="Name" required errors={errors.name}>
-          {(p) => <input {...p} autoComplete="off" className={inputStyles} placeholder="e.g. Selam Tadesse" />}
+          {(p) => <input {...p} autoComplete="off" className={inputStyles} />}
         </Field>
         <Field id="email" label="Email" required errors={errors.email} hint="They log in with this email.">
-          {(p) => <input {...p} type="email" autoComplete="off" className={inputStyles} placeholder="selam@gmail.com" />}
+          {(p) => <input {...p} type="email" autoComplete="off" className={inputStyles} />}
         </Field>
       </div>
       <fieldset>
