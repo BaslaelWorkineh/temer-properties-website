@@ -116,7 +116,7 @@ const seoFields = {
 
 /**
  * Normalizes phone numbers to +<country><number>.
- * "0904192923" + "+251" -> "+251904192923"
+ * "0911234567" + "+251" -> "+251911234567"
  */
 export function normalizePhone(countryCode: string, number: string) {
   const digits = number.replace(/[^\d+]/g, "");
