@@ -207,7 +207,7 @@ const en: Dictionary = {
     privacy: "Privacy policy",
     terms: "Terms of use",
     staffLogin: "Staff login",
-    rights: (year) => `© ${year} Eyerus Temer Properties. All rights reserved.`,
+    rights: (year) => `© ${year} Temer Properties. All rights reserved.`,
     address: "Ethiopia",
   },
   search: {
@@ -347,7 +347,7 @@ const am: Dictionary = {
     privacy: "የግላዊነት መመሪያ",
     terms: "የአጠቃቀም ደንቦች",
     staffLogin: "የሠራተኞች መግቢያ",
-    rights: (year) => `© ${year} እየሩስ ቴምር ፕሮፐርቲስ። መብቱ በሕግ የተጠበቀ ነው።`,
+    rights: (year) => `© ${year} ቴምር ፕሮፐርቲስ። መብቱ በሕግ የተጠበቀ ነው።`,
     address: "ኢትዮጵያ",
   },
   search: {

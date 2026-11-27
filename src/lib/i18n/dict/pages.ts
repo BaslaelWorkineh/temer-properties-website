@@ -8,7 +8,6 @@ import type { Locale } from "@/lib/i18n/config";
  */
 export type PagesDict = {
   brand: string;
-  legalName: string;
   founded: string;
   hours: string;
   ethiopia: string;
@@ -61,7 +60,7 @@ export type PagesDict = {
     metaDescription: (name: string) => string;
     breadcrumb: string;
     h1: string;
-    intro: (legalName: string, name: string) => string;
+    intro: (name: string) => string;
     collectTitle: string;
     collect: string;
     useTitle: string;
@@ -104,7 +103,6 @@ export type PagesDict = {
 
 const en: PagesDict = {
   brand: "Temer Properties",
-  legalName: "Eyerus Temer Properties",
   founded: "2010 E.C.",
   hours: "Monday – Saturday, 6:00 AM – 8:00 PM",
   ethiopia: "Ethiopia",
@@ -182,8 +180,8 @@ const en: PagesDict = {
     metaDescription: (name) => `How ${name} collects, uses and protects the personal information you share through this website.`,
     breadcrumb: "Privacy policy",
     h1: "Privacy policy",
-    intro: (legalName, name) =>
-      `This policy explains how ${legalName} ("${name}", "we") handles personal information collected through this website.`,
+    intro: (name) =>
+      `This policy explains how ${name} ("we") handles personal information collected through this website.`,
     collectTitle: "What we collect",
     collect:
       "When you book a site visit or send an enquiry, we collect the details you enter: your name, phone number, email address (optional), preferred visit date and time, and your message. We also keep the page you sent it from.",
@@ -238,7 +236,6 @@ const en: PagesDict = {
 
 const am: PagesDict = {
   brand: "ቴምር ፕሮፐርቲስ",
-  legalName: "እየሩስ ቴምር ፕሮፐርቲስ",
   founded: "2010 ዓ.ም",
   hours: "ሰኞ – ቅዳሜ፣ ከጠዋቱ 6:00 እስከ ምሽቱ 8:00",
   ethiopia: "ኢትዮጵያ",
@@ -316,7 +313,7 @@ const am: PagesDict = {
     metaDescription: (name) => `${name} በዚህ ድር ጣቢያ በኩል የሚያጋሩትን የግል መረጃ እንዴት እንደሚሰበስብ፣ እንደሚጠቀምና እንደሚጠብቅ።`,
     breadcrumb: "የግላዊነት መመሪያ",
     h1: "የግላዊነት መመሪያ",
-    intro: (legalName, name) => `ይህ መመሪያ ${legalName} («${name}»፣ «እኛ») በዚህ ድር ጣቢያ በኩል የሚሰበሰበውን የግል መረጃ እንዴት እንደሚይዝ ያብራራል።`,
+    intro: (name) => `ይህ መመሪያ ${name} («እኛ») በዚህ ድር ጣቢያ በኩል የሚሰበሰበውን የግል መረጃ እንዴት እንደሚይዝ ያብራራል።`,
     collectTitle: "ምን እንሰበስባለን",
     collect:
       "የቦታ ጉብኝት ሲይዙ ወይም ጥያቄ ሲልኩ የሚያስገቡትን መረጃ እንሰበስባለን፦ ስምዎን፣ ስልክ ቁጥርዎን፣ የኢሜይል አድራሻዎን (አማራጭ)፣ የሚፈልጉትን የጉብኝት ቀንና ሰዓት እንዲሁም መልዕክትዎን። የላኩበትን ገጽም እናስቀምጣለን።",

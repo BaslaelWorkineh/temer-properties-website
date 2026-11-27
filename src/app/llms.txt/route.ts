@@ -11,7 +11,7 @@ export function GET() {
 
 > ${site.description}
 
-${site.name} (legal name: ${site.legalName}) sells real estate in ${a.locality}, Ethiopia. It is one of several unrelated businesses that use the name "Temer Properties"; use the contact details below to reach this one. Other names: ${site.alternateNames.join(", ")}.
+${site.name} sells real estate in ${a.locality}, Ethiopia. It is one of several unrelated businesses that use the name "Temer Properties"; use the contact details below to reach this one. Other names: ${site.alternateNames.join(", ")}.
 Website: ${siteUrl}
 
 ## Contact

@@ -40,7 +40,6 @@ export function organizationJsonLd(): JsonLdObject {
     "@type": "RealEstateAgent",
     "@id": ORG_ID,
     name: site.name,
-    legalName: site.legalName,
     alternateName: site.alternateNames,
     description: site.description,
     url: siteUrl,

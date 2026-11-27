@@ -27,7 +27,6 @@ export default async function PrivacyPage({ params }: PageProps<"/[lang]/privacy
   const lang: Locale = hasLocale(rawLang) ? rawLang : "en";
   const pages = getPagesDict(lang);
   const dict = pages.privacy;
-  const legalName = lang === "en" ? site.legalName : pages.legalName;
   const name = lang === "en" ? site.name : pages.brand;
 
   return (
@@ -35,7 +34,7 @@ export default async function PrivacyPage({ params }: PageProps<"/[lang]/privacy
       <Breadcrumbs items={[{ name: dict.breadcrumb, path: "/privacy-policy" }]} lang={lang} />
       <article className="prose-content mt-8">
         <h1 className="text-4xl font-bold">{dict.h1}</h1>
-        <p>{dict.intro(legalName, name)}</p>
+        <p>{dict.intro(name)}</p>
         <h2>{dict.collectTitle}</h2>
         <p>{dict.collect}</p>
         <h2>{dict.useTitle}</h2>

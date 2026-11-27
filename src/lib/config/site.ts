@@ -22,7 +22,6 @@ export const site = {
   name: "Temer Properties",
   /** The one-word name people search for. Short title suffix when the full name doesn't fit (see buildMetadata). */
   shortName: "Temer",
-  legalName: "Eyerus Temer Properties",
   /**
    * Other names people search for, most common first (structured data alternateName). The YouTube and X
    * accounts are called "Temer Real Estate", and Amharic listing sites write ቴምር ሪል እስቴት.
