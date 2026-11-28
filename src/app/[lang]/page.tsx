@@ -227,14 +227,11 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
           <source media="(min-width: 1024px)" srcSet={heroDesktop.srcSet} sizes="100vw" />
           <img {...heroMobile} alt="" />
         </picture>
+        {/* Phones: the photo keeps its true colours (no green tint, like desktop). Only a soft neutral dark fade sits
+            behind the bottom copy so the white text stays readable. Desktop has no overlay: the text sits in its own
+            card instead. */}
         <div
-          className="absolute inset-0 -z-10 bg-gradient-to-br from-logo-green/80 via-logo-green/30 to-transparent lg:hidden"
-          aria-hidden="true"
-        />
-        {/* Phones: green fade behind the bottom copy. Desktop has no tint: the photo shows in full colour and the
-            text sits in its own green card instead. */}
-        <div
-          className="absolute inset-x-0 bottom-0 -z-10 h-2/3 bg-gradient-to-t from-logo-green via-logo-green/75 to-transparent lg:hidden"
+          className="absolute inset-x-0 bottom-0 -z-10 h-3/5 bg-gradient-to-t from-black/70 via-black/35 to-transparent lg:hidden"
           aria-hidden="true"
         />
         <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 pb-14 pt-12 sm:px-6 sm:pb-16 sm:pt-14 lg:max-w-none">
